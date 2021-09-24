@@ -1,0 +1,12 @@
+{{#each schemas}}
+{{#if (isEnum)}}
+{{>frag/enum}}
+{{else if (isInterface)}}
+{{>interfaceNested}}
+{{else if (isObject)}}
+{{>frag/pojo}}
+{{else if (isWrapper)}}
+{{>wrapperNested}}
+{{/if}}
+
+{{/each}}

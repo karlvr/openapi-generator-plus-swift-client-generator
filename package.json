@@ -1,0 +1,60 @@
+{
+  "name": "@openapi-generator-plus/swift-client-generator",
+  "version": "0.0.1",
+  "description": "An OpenAPI Generator+ module for a Swift API client",
+  "keywords": [
+    "openapi-generator-plus",
+    "openapi-generator-plus-generator",
+    "openapi",
+    "openapi-generator",
+    "swift",
+    "client"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "link-openapi-generator-plus": "pnpm link --global openapi-generator-plus $(cd node_modules && find @openapi-generator-plus -depth 1 -prune)",
+    "release": "pnpm clean && pnpm build && pnpm test && pnpx changeset publish && pnpm install",
+    "release:version": "pnpm changeset version && pnpm install",
+    "test": "jest",
+    "watch": "tsc --watch"
+  },
+  "author": "Karl von Randow, Tom Carey",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/karlvr/openapi-generator-plus-swift-client-generator/issues"
+  },
+  "homepage": "https://github.com/karlvr/openapi-generator-plus-swift-client-generator#readme",
+  "dependencies": {
+    "@openapi-generator-plus/core": "^0.37.0",
+    "@openapi-generator-plus/generator-common": "^0.21.0",
+    "@openapi-generator-plus/handlebars-templates": "^0.22.0",
+    "@openapi-generator-plus/java-like-generator-helper": "^0.15.6",
+    "@openapi-generator-plus/testing": "^0.31.7",
+    "@openapi-generator-plus/types": "^0.36.0",
+    "openapi-generator-plus": "^0.34.4"
+  },
+  "peerDependencies": {
+    "@openapi-generator-plus/core": "^0.37.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.17.0",
+    "@types/jest": "^27.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "eslint": "^7.32.0",
+    "eslint-plugin-jest": "^24.4.2",
+    "jest": "^27.2.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karlvr/openapi-generator-plus-swift-client-generator.git"
+  }
+}

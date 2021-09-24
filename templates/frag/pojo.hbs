@@ -1,0 +1,37 @@
+public struct {{{name}}}: Codable, Hashable {
+{{#each properties}}
+	public var {{{name}}}: {{{nativeType}}}
+{{/each}}
+
+{{#join '_params' ', '}}
+{{#each properties}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue}}}{{else}}nil{{/if}}{{/unless}}
+{{/each}}
+{{/join}}
+	public init({{{_params}}}) {
+{{#each properties}}
+		self.{{{name}}} = {{{name}}}
+{{/each}}
+	}
+
+	public enum CodingKeys: String, CodingKey, CaseIterable {
+{{#each properties}}
+		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
+{{/each}}
+	}
+
+	// Encodable protocol methods
+
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.container(keyedBy: CodingKeys.self)
+{{#each properties}}
+{{#if required}}
+		try container.encode({{{name}}}, forKey: .{{{name}}})
+{{else}}
+		try container.encodeIfPresent({{{name}}}, forKey: .{{{name}}})
+{{/if}}
+{{/each}}
+	}
+
+	{{>frag/nestedSchemas}}
+}

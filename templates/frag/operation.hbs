@@ -1,0 +1,54 @@
+{{#join '_params' ', '}}
+{{#each parameters}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue}}}{{else}}nil{{/if}}{{/unless}}
+{{/each}}
+{{#with requestBody}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue}}}{{else}}nil{{/if}}{{/unless}}
+{{/with}}
+{{/join}}
+public enum {{className name}}Result {
+{{#each responses}}
+	{{#if description}}
+	/**
+	 * {{#indent '	 * '}}{{{md description}}}{{/indent}}
+	 */
+	{{/if}}
+	case _{{{code}}}(value: {{{defaultContent.nativeType}}})
+{{/each}}
+	/** An unexpected response */
+	case unexpected(response: HTTPURLResponse, data: Data)
+	/** An error occurred in processing */
+	case error(error: Error)
+}
+
+{{>frag/operationDocumentation}}
+open class func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue = OpenAPIClient.apiResponseQueue, completion: @escaping ((_ data: CreditCard?, _ error: Error?) -> Void)) {
+	addTaxiChargeCardWithRequestBuilder(inlineObject1: inlineObject1).execute(responseQueue) { result -> Void in
+		switch result {
+		case let .success(response):
+			completion(response.body, nil)
+		case let .failure(error):
+			completion(nil, error)
+		}
+	}
+}
+
+{{>frag/operationDocumentation}}
+open class func {{{name}}}({{{_params}}}) -> RequestBuilder<CreditCard> {
+	let localVariablePath = {{{stringLiteral path}}}
+	let localVariableURLString = OpenAPIClient.basePath + localVariablePath
+	let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: inlineObject1)
+
+	let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+	let localVariableNillableHeaders: [String: Any?] = [
+		:
+	]
+
+	let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+	let localVariableRequestBuilder: RequestBuilder<CreditCard>.Type = OpenAPIClient.requestBuilderFactory.getBuilder()
+
+	return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+}
+
