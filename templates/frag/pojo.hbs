@@ -34,6 +34,21 @@ public struct {{{name}}}: Codable, Hashable {
 {{/each}}
 	}
 
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+{{#each properties}}
+{{#if (isDate)}}
+		{{{name}}} = DateFormatter.apiDate(from: try container.decode(String.self, forKey: .{{{name}}}))
+{{else if (isTime)}}
+		{{{name}}} = DateFormatter.apiTime(from: try container.decode(String.self, forKey: .{{{name}}}))
+{{else if (isDateTime)}}
+		{{{name}}} = DateFormatter.apiDateTime(from: try container.decode(String.self, forKey: .{{{name}}}))
+{{else}}
+		{{{name}}} = try container.decode({{{nativeType.concreteType}}}.self, forKey: .{{{name}}})
+{{/if}}
+{{/each}}
+	}
+
 {{/if}}
 	{{>frag/nestedSchemas}}
 }
