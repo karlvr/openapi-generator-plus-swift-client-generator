@@ -3,7 +3,7 @@ import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
-import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
+import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions, identifierCamelCase } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
@@ -266,6 +266,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 			return name
 		},
+		toEnumMemberName: (name) => identifierCamelCase(name),
 		defaultValue: (options) => {
 			const { schemaType, required } = options
 
