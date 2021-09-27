@@ -1,7 +1,7 @@
 public enum {{{name}}} : Codable, Hashable, CaseIterable, Equatable {
     case unknown(value: String)
 {{#each enumValues}}
-    case {{{name}}} = {{{literalValue}}}
+    case {{{name}}}
 {{/each}}
 
     init(rawValue: String) {
@@ -29,12 +29,14 @@ public enum {{{name}}} : Codable, Hashable, CaseIterable, Equatable {
     }
 
     public func encode(to encoder: Encoder) throws {
-        var container = try encoder.singleValueContainer()
+        var container = encoder.singleValueContainer()
         try container.encode(value)
     }
 
 {{#join '_cases' ', '}}
-{{#each enumValues}}.{{{name}}}{{/each}}
+{{#each enumValues}}
+.{{{name}}}
+{{/each}}
 {{/join}}
     public static var allCases: [{{{name}}}] {
         return [{{{_cases}}}]
