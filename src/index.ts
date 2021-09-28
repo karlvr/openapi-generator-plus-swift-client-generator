@@ -4,7 +4,7 @@ import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
-import { commonGenerator } from '@openapi-generator-plus/generator-common'
+import { commonGenerator, configBoolean, configObject, configString } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
@@ -89,16 +89,18 @@ const RESERVED_WORDS = [
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {
-	const packageName = (typeof config.package === 'object' && config.package.name) || 'Api'
+	const pkg = configObject(config, 'package', {})
+	const packageName = configString(pkg, 'name', 'Api', 'package.')
 	const defaultRelativeSourceOutputPath = `Sources/${packageName}`
 	
-	const relativeSourceOutputPath: string = config.relativeSourceOutputPath !== undefined ? config.relativeSourceOutputPath : defaultRelativeSourceOutputPath
+	const relativeSourceOutputPath = configString(config, 'relativeSourceOutputPath', defaultRelativeSourceOutputPath)
+	const customTemplates = configString(config, 'customTemplates', undefined)
 
 	const options: CodegenOptionsSwift = {
 		...javaLikeOptions(config, createJavaLikeContext(context)),
 		relativeSourceOutputPath,
-		customTemplatesPath: config.customTemplates && computeCustomTemplatesPath(config.configPath, config.customTemplates),
-		hideGenerationTimestamp: config.hideGenerationTimestamp !== undefined ? config.hideGenerationTimestamp : false,
+		customTemplatesPath: customTemplates ? computeCustomTemplatesPath(config.configPath, customTemplates) : null,
+		hideGenerationTimestamp: configBoolean(config, 'hideGenerationTimestamp', false),
 		package: {
 			name: packageName,
 		},
@@ -127,7 +129,11 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		...javaLikeGenerator(config, createJavaLikeContext(context)),
 		toLiteral: (value, options) => {
 			if (value === undefined) {
-				return context.generator().defaultValue(options).literalValue
+				const defaultValue = context.generator().defaultValue(options)
+				if (defaultValue === null) {
+					return null
+				}
+				return defaultValue.literalValue
 			}
 			if (value === null) {
 				return 'nil'
@@ -136,7 +142,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			const { type, format, schemaType } = options
 
 			if (schemaType === CodegenSchemaType.ENUM) {
-				return `${options.nativeType.toString()}.${context.generator().toEnumMemberName(value)}`
+				return `${options.nativeType.toString()}.${context.generator().toEnumMemberName(String(value))}`
 			}
 
 			switch (type) {
@@ -154,7 +160,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					} else if (format === 'date-time') {
 						return `DateFormatter.ISO8601DATETIME.date(from: "${value}")`
 					} else {
-						return `"${escapeString(value)}"`
+						return `"${escapeString(String(value))}"`
 					}
 				}
 				case 'boolean':
@@ -272,22 +278,32 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			const { schemaType, required } = options
 
 			if (!required) {
-				return { value: null, literalValue: 'undefined' }
+				return { value: null, literalValue: 'nil' }
 			}
 
 			switch (schemaType) {
-				case CodegenSchemaType.NUMBER:
-					return { value: 0.0, literalValue: context.generator().toLiteral(0.0, options) }
-				case CodegenSchemaType.INTEGER:
-					return { value: 0, literalValue: context.generator().toLiteral(0, options) }
+				case CodegenSchemaType.NUMBER: {
+					const literalValue = context.generator().toLiteral(0.0, options)
+					if (literalValue === null) {
+						return null
+					}
+					return { value: 0.0, literalValue }
+				}
+				case CodegenSchemaType.INTEGER: {
+					const literalValue = context.generator().toLiteral(0, options)
+					if (literalValue === null) {
+						return null
+					}
+					return { value: 0, literalValue }
+				}
 				case CodegenSchemaType.BOOLEAN:
 					return { value: false, literalValue: 'false' }
 				case CodegenSchemaType.ARRAY:
 					return { value: [], literalValue: '[]' }
 				case CodegenSchemaType.MAP:
-					return { value: {}, literalValue: '{}' }
+					return { value: {}, literalValue: '[:]' }
 				default:
-					return { value: null, literalValue: 'undefined' }
+					return null
 			}
 		},
 		initialValue: (options) => {
@@ -298,18 +314,28 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 
 			switch (schemaType) {
-				case CodegenSchemaType.NUMBER:
-					return { value: 0.0, literalValue: context.generator().toLiteral(0.0, options) }
-				case CodegenSchemaType.INTEGER:
-					return { value: 0, literalValue: context.generator().toLiteral(0, options) }
+				case CodegenSchemaType.NUMBER: {
+					const literalValue = context.generator().toLiteral(0.0, options)
+					if (literalValue === null) {
+						return null
+					}
+					return { value: 0.0, literalValue }
+				}
+				case CodegenSchemaType.INTEGER: {
+					const literalValue = context.generator().toLiteral(0, options)
+					if (literalValue === null) {
+						return null
+					}
+					return { value: 0, literalValue }
+				}
 				case CodegenSchemaType.BOOLEAN:
 					return { value: false, literalValue: 'false' }
 				case CodegenSchemaType.ARRAY:
 					return { value: [], literalValue: '[]' }
 				case CodegenSchemaType.MAP:
-					return { value: {}, literalValue: '{}' }
+					return { value: {}, literalValue: '[:]' }
 				default:
-					return { value: null, literalValue: 'undefined' }
+					return null
 			}
 		},
 		operationGroupingStrategy: () => {
@@ -329,8 +355,8 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			if (context.additionalWatchPaths) {
 				result.push(...context.additionalWatchPaths())
 			}
-			if (config.customTemplates) {
-				result.push(computeCustomTemplatesPath(config.configPath, config.customTemplates))
+			if (generatorOptions.customTemplatesPath) {
+				result.push(generatorOptions.customTemplatesPath)
 			}
 			return result
 		},
