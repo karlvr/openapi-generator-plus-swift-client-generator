@@ -113,7 +113,7 @@ function createJavaLikeContext(context: SwiftGeneratorContext): JavaLikeContext 
 	const javaLikeContext: JavaLikeContext = {
 		...context,
 		reservedWords: () => RESERVED_WORDS,
-		defaultConstantStyle: ConstantStyle.pascalCase,
+		defaultConstantStyle: ConstantStyle.camelCase,
 	}
 	return javaLikeContext
 }
@@ -276,7 +276,6 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 			return name
 		},
-		toEnumMemberName: (name) => context.generator().toIdentifier(name),
 		defaultValue: (options) => {
 			const { schemaType, required } = options
 
