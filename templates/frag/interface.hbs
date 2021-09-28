@@ -1,0 +1,7 @@
+public protocol {{{name}}} {
+{{#each properties}}
+	var {{{name}}}: {{{nativeType}}} { {{#if readOnly}}get{{else}}get set{{/if}} }
+{{/each}}
+
+	{{>frag/nestedSchemas}}
+}
