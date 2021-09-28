@@ -25,7 +25,9 @@ if let {{property.name}} = {{../../name}}.{{property.name}} {
 {{/each}}
 localVarRequest.httpBody = localVarFormData.data
 localVarHeaderParameter.set("Content-Type", localVarFormData.contentType)
+{{else if (isString)}}
+localVarRequest.httpBody = {{{../name}}}.data(using: .utf8)!
 {{else}}
-localVarRequest.httpBody = {{identifier ../name}};
+localVarRequest.httpBody = {{{../name}}}
 {{/ifeq}}
 {{/with}}
