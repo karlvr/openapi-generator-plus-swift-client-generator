@@ -1,0 +1,17 @@
+{{#join '_description' '
+'}}
+{{{md description}}}
+{{#if (isNumeric schema)}}
+{{#if schema.minimum}}
+Minimum: {{schema.minimum}}
+{{/if}}
+{{#if schema.maximum}}
+Maximum: {{schema.maximum}}
+{{/if}}
+{{/if}}
+{{/join}}
+{{#if _description}}
+/**
+ * {{#indent ' * '}}{{{_description}}}{{/indent}}
+ */
+{{/if}}

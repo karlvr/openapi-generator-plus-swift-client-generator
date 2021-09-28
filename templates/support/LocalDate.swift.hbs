@@ -1,6 +1,10 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
 import Foundation
 
-struct LocalDate: Codable {
+public struct LocalDate: Codable, Hashable, LosslessStringConvertible {
     
     private static let regex = try! NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$", options: [])
 
@@ -8,35 +12,49 @@ struct LocalDate: Codable {
         case invalidMatch(value: String)
     }
     
-    var year: Int
-    var month: Int
-    var day: Int
+    public var year: Int
+    public var month: Int
+    public var day: Int
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dateString = try container.decode(String.self)
-        guard let matches = LocalDate.regex.matches(in: dateString, options: [], range: NSRange(dateString.startIndex..<dateString.endIndex, in: dateString)).first else {
+        if let initialized = Self(dateString) {
+            self = initialized
+        } else {
             throw DecoderError.invalidMatch(value: dateString)
         }
-        year = try matches.namedInt("year", in: dateString)
-        month = try matches.namedInt("month", in: dateString)
-        day = try matches.namedInt("day", in: dateString)
+    }
+
+    public init?(_ description: String) {
+        guard let matches = LocalDate.regex.matches(in: description, options: [], range: NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+            return nil
+        }
+        do {
+            self.year = try matches.namedInt("year", in: description)
+            self.month = try matches.namedInt("month", in: description)
+            self.day = try matches.namedInt("day", in: description)
+        } catch {
+            return nil
+        }
     }
     
     var dateComponents: DateComponents {
         return DateComponents(year: year, month: month, day: day)
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
+
+    public var description: String {
         var timeStringComponents = [String]()
         
         timeStringComponents.append(String(format: "%04d", year))
         timeStringComponents.append(String(format: "%02d", month))
         timeStringComponents.append(String(format: "%02d", day))
         
-        let timeString = timeStringComponents.joined(separator: "-")
-        
-        try container.encode(timeString)
+        return timeStringComponents.joined(separator: "-")
     }
 }

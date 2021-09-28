@@ -1,3 +1,4 @@
+{{>frag/schemaDocumentation}}
 {{#join '_parents' ', '}}
 Codable
 Hashable
@@ -7,6 +8,7 @@ Hashable
 {{/join}}
 public struct {{{name}}}: {{{_parents}}} {
 {{#each properties}}
+	{{>frag/propertyDocumentation}}
 	public var {{{name}}}: {{{nativeType}}}
 {{/each}}
 

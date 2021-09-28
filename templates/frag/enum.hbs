@@ -1,10 +1,11 @@
-public enum {{{name}}} : Codable, Hashable, CaseIterable, Equatable {
+{{>frag/schemaDocumentation}}
+public enum {{{name}}} : Codable, Hashable, CaseIterable, Equatable, LosslessStringConvertible {
     case unknown(value: String)
 {{#each enumValues}}
     case {{{name}}}
 {{/each}}
 
-    init(rawValue: String) {
+    public init(_ rawValue: String) {
         switch rawValue {
 {{#each enumValues}}
         case {{{literalValue}}}: self = .{{{name}}}
@@ -25,13 +26,15 @@ public enum {{{name}}} : Codable, Hashable, CaseIterable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawString = try container.decode(String.self)
-        self = .init(rawValue: rawString)
+        self = .init(rawString)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(value)
     }
+
+    public var description: String { return value }
 
 {{#join '_cases' ', '}}
 {{#each enumValues}}

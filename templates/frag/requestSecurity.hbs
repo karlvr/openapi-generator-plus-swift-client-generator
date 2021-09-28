@@ -1,0 +1,45 @@
+{{#if securityRequirements}}
+{{#each securityRequirements.requirements}}
+{{#each schemes}}
+// authentication {{scheme.name}} required
+{{#if scheme.isApiKey}}
+{{#if scheme.isInHeader}}
+if let localVarApiKeyBlock = self.configuration.apiKeyBlock {
+	if let localVarApiKeyValue = localVarApiKeyBlock({{{stringLiteral scheme.name}}}) {
+		localVarHeaderParameter.set({{{stringLiteral scheme.paramName}}}, localVarApiKeyValue)
+	}
+}
+{{/if}}
+{{#if scheme.isInQuery}}
+if let localVarApiKeyBlock = self.configuration.apiKeyBlock {
+	if let localVarApiKeyValue = localVarApiKeyBlock({{{stringLiteral scheme.name}}}) {
+		localVarQueryParameter.set({{{stringLiteral scheme.paramName}}}, localVarApiKeyValue)
+	}
+}
+{{/if}}
+{{/if}}
+{{#if scheme.isBasic}}
+// http basic authentication required
+if let localVarUsername = self.configuration.username, let localVarPassword = self.configuration.password {
+	localVarHeaderParameter.set("Authorization", "Basic \("\(localVarUsername):\(localVarPassword)".data(using: .utf8)!.base64EncodedString())")
+}
+{{/if}}
+{{#or scheme.isOAuth scheme.isOpenIdConnect}}
+// oauth or openIdConnect required
+if let authorizationBlock = self.configuration.authorizationBlock {
+	if let localVarAuthorizationValue = authorizationBlock({{{stringLiteral scheme.name}}}, [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}]) {
+		localVarHeaderParameter.set("Authorization", "Bearer \(localVarAuthorizationValue)")
+	}
+}
+{{/or}}
+{{#if scheme.isHttp}}
+// http authorization required
+if let authorizationBlock = self.configuration.authorizationBlock {
+	if let localVarAuthorizationValue = authorizationBlock({{{stringLiteral scheme.name}}}, nil) {
+		localVarHeaderParameter.set("Authorization", "{{capitalize scheme.scheme}} \(localVarAuthorizationValue)")
+	}
+}
+{{/if}}
+{{/each}}
+{{/each}}
+{{/if}}

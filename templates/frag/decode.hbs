@@ -2,11 +2,11 @@
 @param keyed {bool}
 --}}
 {{#if (isDate)}}
-{{{name}}} = DateFormatter.apiDate(from: try container.decode(String.self{{#if keyed}}, forKey: .{{{name}}}{{/if}}))
+{{{name}}} = try container.decode(LocalDate.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
 {{else if (isTime)}}
-{{{name}}} = DateFormatter.apiTime(from: try container.decode(String.self{{#if keyed}}, forKey: .{{{name}}}{{/if}}))
+{{{name}}} = try container.decode(LocalTime.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
 {{else if (isDateTime)}}
-{{{name}}} = DateFormatter.apiDateTime(from: try container.decode(String.self{{#if keyed}}, forKey: .{{{name}}}{{/if}}))
+{{{name}}} = try container.decode(OffsetDateTime.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
 {{else}}
 {{{name}}} = try container.decode({{{nativeType.concreteType}}}.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
 {{/if}}

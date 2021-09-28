@@ -1,3 +1,4 @@
+{{>frag/schemaDocumentation}}
 public enum {{{name}}}: Codable, Hashable {
 {{#each composes}}
 	case {{{camelCase name}}}(value: {{{nativeType}}})
@@ -25,10 +26,19 @@ public enum {{{name}}}: Codable, Hashable {
 	public init(from decoder: Decoder) throws {
 {{#if discriminator}}
 		let container = try decoder.container(keyedBy: CodingKeys.self)
+		let discriminator = try container.decode({{{discriminator.nativeType.concreteType}}}.self, forKey: .{{{name}}})
+		switch discriminator {
+{{#each discriminator.references}}
+			case {{{literalValue}}}:
+				self = .{{{camelCase schema.name}}}(value: try {{{schema.nativeType.concreteType}}}(from: decoder))
+{{/each}}
+			default:
+				// TODO throw
+		}
 {{else}}
 {{#each composes}}
 		do {
-			self = .{{{camelCase name}}}(value: try {{{nativeType}}}(from: decoder))
+			self = .{{{camelCase name}}}(value: try {{{nativeType.concreteType}}}(from: decoder))
 			return
 		} catch {}
 {{/each}}

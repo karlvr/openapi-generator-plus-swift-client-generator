@@ -1,0 +1,40 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public struct Configuration {
+	/**
+	 * Return the API key if using apiKey authentication.
+	 */
+	var apiKeyBlock: ((_ name: String) -> String?)?
+
+	/**
+	 * The username if using basic authentication.
+	 */
+	var username: String?
+
+	/**
+	 * The password if using basic authentication.
+	 */
+	var password: String?
+
+	/**
+	 * Return the authorization value to use for the named security scheme and scopes.
+	 */
+	var authorizationBlock: ((_ name: String, _ scopes: [String]?) -> String?)?
+
+	/**
+	 * Override the default base path.
+	 */
+	var basePath: String?
+
+	var cachePolicy: URLRequest.CachePolicy?
+
+	var timeoutInterval: TimeInterval
+
+	var responseQueue: DispatchQueue?
+
+	var prepareRequestBlock: ((_ request: inout URLRequest) -> Void)?
+}

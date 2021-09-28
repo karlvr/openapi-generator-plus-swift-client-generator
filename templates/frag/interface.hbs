@@ -1,5 +1,7 @@
+{{>frag/schemaDocumentation}}
 public protocol {{{name}}} {
 {{#each properties}}
+	{{>frag/propertyDocumentation}}
 	var {{{name}}}: {{{nativeType}}} { {{#if readOnly}}get{{else}}get set{{/if}} }
 {{/each}}
 

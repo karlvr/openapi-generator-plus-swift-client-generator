@@ -6,6 +6,14 @@
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue}}}{{else}}nil{{/if}}{{/unless}}
 {{/with}}
 {{/join}}
+{{#join '_callParams' ', '}}
+{{#each parameters}}
+{{{name}}}: {{{name}}}
+{{/each}}
+{{#with requestBody}}
+{{{name}}}: {{{name}}}
+{{/with}}
+{{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
 	{{#if description}}
@@ -13,42 +21,111 @@ public enum {{className name}}Result {
 	 * {{#indent '	 * '}}{{{md description}}}{{/indent}}
 	 */
 	{{/if}}
-	case _{{{code}}}(value: {{{defaultContent.nativeType}}})
+	case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
 {{/each}}
 	/** An unexpected response */
-	case unexpected(response: HTTPURLResponse, data: Data)
+	case unexpected(response: HTTPURLResponse, data: Data?)
 	/** An error occurred in processing */
-	case error(error: Error)
+	case error(_ error: Error)
 }
 
 {{>frag/operationDocumentation}}
-open class func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue = OpenAPIClient.apiResponseQueue, completion: @escaping ((_ data: CreditCard?, _ error: Error?) -> Void)) {
-	addTaxiChargeCardWithRequestBuilder(inlineObject1: inlineObject1).execute(responseQueue) { result -> Void in
-		switch result {
-		case let .success(response):
-			completion(response.body, nil)
-		case let .failure(error):
-			completion(nil, error)
+open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+	do {
+		let __request = try {{{name}}}Request({{{_callParams}}})
+		URLSession.handleApiRequest(__request) { response, data, error in
+			if let error = error {
+				completion(.error(error))
+				return
+			}
+
+			switch response!.statusCode {
+{{#each responses}}
+				case {{{code}}}:
+					{{#if defaultContent.nativeType}}
+					if let data = data {
+						do {
+							completion(._{{{code}}}(try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)))
+						} catch let decodingError {
+							completion(.error(decodingError))
+						}
+					} else {
+						completion(.unexpected(response: response!, data: data))
+					}
+					{{else}}
+					completion(._{{{code}}})
+					{{/if}}
+{{/each}}
+				default:
+					completion(.unexpected(response: response!, data: data))
+			}
 		}
+	} catch let error {
+		completion(.error(error))
 	}
 }
 
 {{>frag/operationDocumentation}}
-open class func {{{name}}}({{{_params}}}) -> RequestBuilder<CreditCard> {
-	let localVariablePath = {{{stringLiteral path}}}
-	let localVariableURLString = OpenAPIClient.basePath + localVariablePath
-	let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: inlineObject1)
+open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
+	let localVarPath = "{{{../path}}}{{{path}}}"
+	{{#each pathParams}}
+		.replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
+	{{/each}}
 
-	let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+	var localVarHeaderParameter = [NameValuePair]()
+	{{!-- Avoid Swift complaining that localVarHeaderParameter should be a let --}}
+	localVarHeaderParameter.removeAll()
 
-	let localVariableNillableHeaders: [String: Any?] = [
-		:
-	]
+	{{>frag/requestSecurity}}
 
-	let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+	var localVarUrlComponents = URLComponents(string: "\(self.basePath)\(localVarPath)")!
 
-	let localVariableRequestBuilder: RequestBuilder<CreditCard>.Type = OpenAPIClient.requestBuilderFactory.getBuilder()
+{{#if queryParams}}
+	var localVarQueryParameter = [NameValuePair]()
+	if let localVarExistingQueryItems = localVarUrlComponents.queryItems {
+		localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
+	}
+{{#each queryParams}}
+	{{>frag/requestParameterWrapper dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
+{{/each}}
+	localVarUrlComponents.queryItems = localVarQueryParameter.toURLQueryItems()
 
-	return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+{{else}}
+	{{!-- Avoid Swift complaining that localVarUrlComponents should be a let --}}
+	localVarUrlComponents.queryItems = localVarUrlComponents.queryItems
+
+{{/if}}
+	var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
+	localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
+
+{{#each headerParams}}
+	{{>frag/requestParameterWrapper dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
+
+{{/each}}
+{{#if cookieParams}}
+	var localVarCookieParams = [NameValuePair]()
+{{#each cookieParams}}
+	{{>frag/requestParameter dest='localVarCookieParams' var=(identifier name) encoding=encoding}}
+
+{{/each}}
+	localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
+
+{{/if}}
+{{#with requestBody}}
+	{{#if required}}
+	{{>frag/requestBody}}
+	{{else}}
+	if let {{{name}}} = {{{name}}} {
+		{{>frag/requestBody}}
+	}
+	{{/if}}
+	
+{{/with}}
+	localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
+
+	if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
+		localVarPrepareRequestBlock(&localVarRequest)
+	}
+	return localVarRequest
 }
 

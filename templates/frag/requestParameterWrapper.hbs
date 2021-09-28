@@ -1,0 +1,15 @@
+{{!--
+Handle parameters when building an API request
+
+@param this a CodegenSchemaUsage
+@param dest the name of the URLSearchParams to use
+@param encoding the CodegenParameterEncoding (or compatible) to use
+@param var the name of the variable containing the property
+--}}
+{{#if required}}
+	{{>frag/requestParameter}}
+{{else}}
+if let {{{var}}} = {{{var}}} {
+	{{>frag/requestParameter}}
+}
+{{/if}}

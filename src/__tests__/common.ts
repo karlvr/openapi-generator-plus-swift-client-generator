@@ -5,7 +5,9 @@ import { CodegenResult, createCodegenResult } from '@openapi-generator-plus/test
 import createGenerator from '..'
 
 export const DEFAULT_CONFIG: CodegenConfig = {
-	
+	package: {
+		name: 'TestModule',
+	},
 }
 
 export async function prepare(spec: string, config?: CodegenConfig): Promise<CodegenResult> {
@@ -14,19 +16,18 @@ export async function prepare(spec: string, config?: CodegenConfig): Promise<Cod
 
 export async function build(basePath: string): Promise<void> {
 	return new Promise(function(resolve, reject) {
-		// exec(
-		// 	'npm install 2>&1',
-		// 	{
-		// 		cwd: basePath,
-		// 	},
-		// 	function(error, stdout, stderr) {
-		// 		if (error) {
-		// 			reject(new Error(`${error.cmd || '<unknown>'} exited with code ${error.code || 'unknown'}:\n ${stdout || stderr}`))
-		// 		} else {
-		// 			resolve()
-		// 		}
-		// 	}
-		// )
-		resolve()
+		exec(
+			'swift build',
+			{
+				cwd: basePath,
+			},
+			function(error, stdout, stderr) {
+				if (error) {
+					reject(new Error(`${error.cmd || '<unknown>'} exited with code ${error.code || 'unknown'}:\n ${stdout || stderr}`))
+				} else {
+					resolve()
+				}
+			}
+		)
 	})
 }

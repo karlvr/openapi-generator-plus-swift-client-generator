@@ -1,0 +1,30 @@
+{{#with defaultContent}}
+localVarHeaderParameter.set("Content-Type", {{{stringLiteral mediaType.mediaType}}})
+{{#ifeq mediaType.mimeType 'application/x-www-form-urlencoded'}}
+let localVarFormParams = [NameValuePair]()
+{{#each (allProperties schema)}}
+{{>frag/requestParameter dest='localVarFormParams' var=(concat (identifier ../../name) '["' serializedName '"]') encoding=(lookup ../encoding.properties name)}}
+{{/each}}
+localVarRequest.httpBody = localVarFormParams.toString(separator: "&").data(using: .utf8)!
+{{else ifeq mediaType.mimeType 'application/json'}}
+localVarRequest.httpBody = try JSONEncoder().encode({{identifier ../name}})
+{{else ifeq mediaType.mimeType 'text/json'}}
+localVarRequest.httpBody = try JSONEncoder().encode({{identifier ../name}})
+{{else ifmatch mediaType.mimeType 'multipart/.*'}}
+const localVarFormData = new FormData();
+{{#each encoding.properties}}
+if ({{identifier ../../name}}.{{identifier property.name}} !== undefined) {
+{{#if (isArray property)}}
+	for (const __anObject of {{identifier ../../name}}.{{identifier property.name}}{{#if property.nullable}} || []{{/if}}) {
+		{{>frag/multipartProperty . propertyVar='__anObject' bodyPartsVar='localVarFormData'}}
+	}
+{{else}}
+	{{>frag/multipartProperty . propertyVar=(concat (identifier ../../name) '.' (identifier property.name)) bodyPartsVar='localVarFormData'}}
+{{/if}}
+}
+{{/each}}
+localVarRequest.body = localVarFormData
+{{else}}
+localVarRequest.body = {{identifier ../name}};
+{{/ifeq}}
+{{/with}}

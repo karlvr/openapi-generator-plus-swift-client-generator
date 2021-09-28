@@ -3,7 +3,7 @@ import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
-import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions, identifierCamelCase } from '@openapi-generator-plus/java-like-generator-helper'
+import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
@@ -85,10 +85,12 @@ const RESERVED_WORDS = [
 	'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'nil', 'none', 'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
 	'protocol', 'public', 'repeat', 'required', 'rethrows', 'return', 'right', 'self', 'set', 'static', 'struct', 'subscript', 'super', 'switch', 'throw', 'throws', 'true',
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
+	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'unknown',
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {
-	const defaultRelativeSourceOutputPath = 'Classes'
+	const packageName = (typeof config.package === 'object' && config.package.name) || 'Api'
+	const defaultRelativeSourceOutputPath = `Sources/${packageName}`
 	
 	const relativeSourceOutputPath: string = config.relativeSourceOutputPath !== undefined ? config.relativeSourceOutputPath : defaultRelativeSourceOutputPath
 
@@ -98,7 +100,7 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 		customTemplatesPath: config.customTemplates && computeCustomTemplatesPath(config.configPath, config.customTemplates),
 		hideGenerationTimestamp: config.hideGenerationTimestamp !== undefined ? config.hideGenerationTimestamp : false,
 		package: {
-			name: '',
+			name: packageName,
 		},
 	}
 
@@ -204,11 +206,11 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					}
 				}
 				case CodegenSchemaType.DATE:
-					return new context.NativeType('Date')
+					return new context.NativeType('LocalDate')
 				case CodegenSchemaType.TIME:
-					return new context.NativeType('Date')
+					return new context.NativeType('LocalTime')
 				case CodegenSchemaType.DATETIME:
-					return new context.NativeType('Date')
+					return new context.NativeType('OffsetDateTime')
 				case CodegenSchemaType.STRING:
 					return new context.NativeType('String')
 				case CodegenSchemaType.BOOLEAN:
@@ -221,11 +223,11 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		},
 		toNativeObjectType: function(options) {
 			const { scopedName } = options
-			let modelName = ''
+			let modelName = generatorOptions.package.name
 			for (const name of scopedName) {
 				modelName += `.${context.generator().toClassName(name)}`
 			}
-			return new context.NativeType(modelName.substring(1))
+			return new context.NativeType(modelName)
 		},
 		toNativeArrayType: (options) => {
 			const { componentNativeType } = options
@@ -243,8 +245,11 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		},
 		nativeTypeUsageTransformer: ({ nullable, required }) => ({
 			default: function(nativeType, nativeTypeString) {
-				if (nullable || !required) {
-					return `${toSafeTypeForComposing(nativeTypeString)}?`
+				if (nullable) {
+					nativeTypeString = `${toSafeTypeForComposing(nativeTypeString)}?`
+				}
+				if (!required) {
+					nativeTypeString = `${toSafeTypeForComposing(nativeTypeString)}?`
 				}
 
 				return nativeTypeString
@@ -262,7 +267,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 			return name
 		},
-		toEnumMemberName: (name) => identifierCamelCase(name),
+		toEnumMemberName: (name) => context.generator().toIdentifier(name),
 		defaultValue: (options) => {
 			const { schemaType, required } = options
 
@@ -379,7 +384,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				}
 	
 				await emit('api', path.join(outputPath, relativeSourceOutputPath, 'APIs', `${context.generator().toClassName(group.name)}Api.swift`), 
-					{ ...rootContext, ...group, operations }, true, hbs)
+					{ ...rootContext, ...group, operations, servers: doc.servers }, true, hbs)
 			}
 
 			for (const schema of context.utils.values(doc.schemas)) {
