@@ -8,7 +8,7 @@ extension URLSession {
 
 	static var apiSession = URLSession(configuration: .default)
     
-    static func handleApiRequest(request: URLRequest, completion: @escaping ((_ response: HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
+    static func handleApiRequest(_ request: URLRequest, completion: @escaping ((_ response: HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
 
         apiSession.dataTask(with: request) { data, response, error in
             completion(response as? HTTPURLResponse, data, error)
