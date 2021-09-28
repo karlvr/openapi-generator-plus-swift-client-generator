@@ -5,9 +5,9 @@ Add a multipart property to the body
 @param bodyPartsVar the variable name containing the list of body parts
 --}}
 {{#ifeq contentType 'application/json'}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}));
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}, {{{stringLiteral contentType}}}));
 {{else ifeq contentType 'application/octet-stream'}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}{{#if filenameProperty}}, {{{propertyVar}}}.{{identifier filenameProperty.name}}{{/if}});
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}, {{{stringLiteral contentType}}}{{#if filenameProperty}}, {{{propertyVar}}}.{{identifier filenameProperty.name}}{{/if}});
 {{else}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}} || ''));
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}} || ''), {{{stringLiteral contentType}}});
 {{/ifeq}}

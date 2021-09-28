@@ -6,16 +6,58 @@ import Foundation
 
 struct FormData {
     
-    mutating func append(_ name: String, _ value: String, _ filename: String?) {
-
+    private enum Part {
+        case string(name: String, value: String, contentType: String?)
+        case data(name: String, data: Data, contentType: String?, filename: String?)
+    }
+    
+    private var parts = [Part]()
+    let boundary = UUID().uuidString
+    
+    mutating func append(_ name: String, _ value: String, _ contentType: String?) {
+        self.parts.append(.string(name: name, value: value, contentType: contentType))
 	}
     
-    mutating func append(_ name: String, _ value: Data, _ filename: String?) {
-		
+    mutating func append(_ name: String, _ value: Data, _ contentType: String?, _ filename: String?) {
+        self.parts.append(.data(name: name, data: value, contentType: contentType, filename: filename))
 	}
 
 	var data: Data {
-		return Data()
+		var result = Data()
+        
+        parts.forEach { part in
+            result.append("--\(boundary)\r\n".data(using: .utf8)!)
+            switch part {
+            case .string(let name, let value, let contentType):
+                result.append("Content-Disposition: form-data; name=\"\(name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)\"\r\n".data(using: .utf8)!)
+                if let contentType = contentType {
+                    result.append("Content-Type: \(contentType)\r\n".data(using: .utf8)!)
+                }
+                result.append("\r\n".data(using: .utf8)!)
+                result.append(value.data(using: .utf8)!)
+                result.append("\r\n".data(using: .utf8)!)
+            case .data(let name, let data, let contentType, let filename):
+                if let filename = filename {
+                    result.append("Content-Disposition: form-data; name=\"\(name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+                } else {
+                    result.append("Content-Disposition: form-data; name=\"\(name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)\"\r\n".data(using: .utf8)!)
+                }
+                if let contentType = contentType {
+                    result.append("Content-Type: \(contentType)\r\n".data(using: .utf8)!)
+                }
+                result.append("\r\n".data(using: .utf8)!)
+                result.append(data)
+                result.append("\r\n".data(using: .utf8)!)
+            }
+            
+        }
+        
+        result.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return result
 	}
+    
+    var contentType: String {
+        return "multipart/form-data; boundary=\(boundary)"
+    }
     
 }

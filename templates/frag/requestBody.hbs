@@ -24,6 +24,7 @@ if let {{property.name}} = {{../../name}}.{{property.name}} {
 }
 {{/each}}
 localVarRequest.httpBody = localVarFormData.data
+localVarHeaderParameter.set("Content-Type", localVarFormData.contentType)
 {{else}}
 localVarRequest.httpBody = {{identifier ../name}};
 {{/ifeq}}
