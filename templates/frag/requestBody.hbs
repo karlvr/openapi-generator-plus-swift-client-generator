@@ -11,20 +11,20 @@ localVarRequest.httpBody = try JSONEncoder().encode({{identifier ../name}})
 {{else ifeq mediaType.mimeType 'text/json'}}
 localVarRequest.httpBody = try JSONEncoder().encode({{identifier ../name}})
 {{else ifmatch mediaType.mimeType 'multipart/.*'}}
-const localVarFormData = new FormData();
+var localVarFormData = FormData()
 {{#each encoding.properties}}
-if ({{identifier ../../name}}.{{identifier property.name}} !== undefined) {
+if let {{property.name}} = {{../../name}}.{{property.name}} {
 {{#if (isArray property)}}
-	for (const __anObject of {{identifier ../../name}}.{{identifier property.name}}{{#if property.nullable}} || []{{/if}}) {
+	for (const __anObject of {{property.name}}{{#if property.nullable}} || []{{/if}}) {
 		{{>frag/multipartProperty . propertyVar='__anObject' bodyPartsVar='localVarFormData'}}
 	}
 {{else}}
-	{{>frag/multipartProperty . propertyVar=(concat (identifier ../../name) '.' (identifier property.name)) bodyPartsVar='localVarFormData'}}
+	{{>frag/multipartProperty . propertyVar=property.name bodyPartsVar='localVarFormData'}}
 {{/if}}
 }
 {{/each}}
-localVarRequest.body = localVarFormData
+localVarRequest.httpBody = localVarFormData.data
 {{else}}
-localVarRequest.body = {{identifier ../name}};
+localVarRequest.httpBody = {{identifier ../name}};
 {{/ifeq}}
 {{/with}}
