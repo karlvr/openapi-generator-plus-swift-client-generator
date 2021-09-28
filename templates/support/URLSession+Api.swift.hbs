@@ -4,14 +4,14 @@
 
 import Foundation
 
-extension URLSession {
+extension Foundation.URLSession {
 
-	static var apiSession = URLSession(configuration: .default)
+	static var apiSession = Foundation.URLSession(configuration: .default)
     
-    static func handleApiRequest(_ request: URLRequest, completion: @escaping ((_ response: HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
+    static func handleApiRequest(_ request: Foundation.URLRequest, completion: @escaping ((_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
 
         apiSession.dataTask(with: request) { data, response, error in
-            completion(response as? HTTPURLResponse, data, error)
+            completion(response as? Foundation.HTTPURLResponse, data, error)
         }.resume()
         
 	}

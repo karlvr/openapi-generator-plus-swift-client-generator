@@ -4,8 +4,8 @@
 
 import Foundation
 
-public struct OffsetDateTime: Codable, Hashable, LosslessStringConvertible {
-    private static let regex = try! NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})T(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)(?:(?<timezone>Z)|(?<timezoneOffset>[+-]\\d{2}:\\d{2}))?$", options: [])
+public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})T(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)(?:(?<timezone>Z)|(?<timezoneOffset>[+-]\\d{2}:\\d{2}))?$", options: [])
     
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -17,9 +17,9 @@ public struct OffsetDateTime: Codable, Hashable, LosslessStringConvertible {
     public var hour: Int
     public var minute: Int
     public var seconds: Double
-    public var timezone: TimeZone?
+    public var timezone: Foundation.TimeZone?
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dateString = try container.decode(String.self)
         if let initialized = Self(dateString) {
@@ -30,7 +30,7 @@ public struct OffsetDateTime: Codable, Hashable, LosslessStringConvertible {
     }
 
     public init?(_ description: String) {
-        guard let matches = OffsetDateTime.regex.matches(in: description, options: [], range: NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+        guard let matches = OffsetDateTime.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
             return nil
         }
         
@@ -47,9 +47,9 @@ public struct OffsetDateTime: Codable, Hashable, LosslessStringConvertible {
                 let components = timezoneString.components(separatedBy: ":")
                 let time = (Int(components[0])!*60 + Int(components[1])!) * 60
                 if ordinal == "-" {
-                    timezone = TimeZone(secondsFromGMT: time * -1)!
+                    timezone = Foundation.TimeZone(secondsFromGMT: time * -1)!
                 } else {
-                    timezone = TimeZone(secondsFromGMT: time)!
+                    timezone = Foundation.TimeZone(secondsFromGMT: time)!
                 }
             } else {
                 timezone = nil
@@ -67,11 +67,11 @@ public struct OffsetDateTime: Codable, Hashable, LosslessStringConvertible {
         Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
     }
     
-    var dateComponents: DateComponents {
-        return DateComponents(timeZone: timezone, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(timeZone: timezone, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Swift.Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.description)
     }

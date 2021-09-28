@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension TimeZone {
+extension Foundation.TimeZone {
     var apiTimeZoneString: String {
         var seconds = secondsFromGMT()
         let prefix = seconds < 0 ? "-" : "+"

@@ -4,9 +4,9 @@
 
 import Foundation
 
-public struct LocalTime: Codable, Hashable, LosslessStringConvertible {
+public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
     
-    private static let regex = try! NSRegularExpression(pattern: "^(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)$", options: [])
     
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -27,7 +27,7 @@ public struct LocalTime: Codable, Hashable, LosslessStringConvertible {
     }
 
     public init?(_ description: String) {
-        guard let matches = LocalTime.regex.matches(in: description, options: [], range: NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+        guard let matches = LocalTime.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
             return nil
         }
         do {

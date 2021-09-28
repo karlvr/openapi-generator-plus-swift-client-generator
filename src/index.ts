@@ -85,7 +85,8 @@ const RESERVED_WORDS = [
 	'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'nil', 'none', 'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
 	'protocol', 'public', 'repeat', 'required', 'rethrows', 'return', 'right', 'self', 'set', 'static', 'struct', 'subscript', 'super', 'switch', 'throw', 'throws', 'true',
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
-	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'unknown',
+	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void',
+	'unknown', // for our enum cases
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {

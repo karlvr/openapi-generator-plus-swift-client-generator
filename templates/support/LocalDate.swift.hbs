@@ -4,9 +4,9 @@
 
 import Foundation
 
-public struct LocalDate: Codable, Hashable, LosslessStringConvertible {
+public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
     
-    private static let regex = try! NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$", options: [])
 
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -16,7 +16,7 @@ public struct LocalDate: Codable, Hashable, LosslessStringConvertible {
     public var month: Int
     public var day: Int
     
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dateString = try container.decode(String.self)
         if let initialized = Self(dateString) {
@@ -27,7 +27,7 @@ public struct LocalDate: Codable, Hashable, LosslessStringConvertible {
     }
 
     public init?(_ description: String) {
-        guard let matches = LocalDate.regex.matches(in: description, options: [], range: NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+        guard let matches = LocalDate.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
             return nil
         }
         do {
@@ -39,11 +39,11 @@ public struct LocalDate: Codable, Hashable, LosslessStringConvertible {
         }
     }
     
-    var dateComponents: DateComponents {
-        return DateComponents(year: year, month: month, day: day)
+    var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(year: year, month: month, day: day)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Swift.Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.description)
     }

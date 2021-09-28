@@ -1,11 +1,11 @@
 {{>frag/schemaDocumentation}}
-public enum {{{name}}}: Codable, Hashable {
+public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{#each composes}}
 	case {{{camelCase name}}}(value: {{{nativeType}}})
 {{/each}}
 	case unknown
         
-	public func encode(to encoder: Encoder) throws {
+	public func encode(to encoder: Swift.Encoder) throws {
 		switch self {
 {{#each composes}}
 		case let .{{{camelCase name}}}(value):
@@ -17,13 +17,13 @@ public enum {{{name}}}: Codable, Hashable {
 	}
 
 {{#if discriminator}}
-	enum CodingKeys: String, CodingKey, CaseIterable {
+	enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
 {{#with discriminator}}
 		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
 {{/with}}
 
 {{/if}}
-	public init(from decoder: Decoder) throws {
+	public init(from decoder: Swift.Decoder) throws {
 {{#if discriminator}}
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 		let discriminator = try container.decode({{{discriminator.nativeType.concreteType}}}.self, forKey: .{{{name}}})

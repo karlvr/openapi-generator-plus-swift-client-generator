@@ -1,7 +1,7 @@
 {{>frag/schemaDocumentation}}
 {{#join '_parents' ', '}}
-Codable
-Hashable
+Swift.Codable
+Swift.Hashable
 {{#each implements}}
 {{{nativeType.parentType}}}
 {{/each}}
@@ -25,14 +25,14 @@ public struct {{{name}}}: {{{_parents}}} {
 
 	// Encodable protocol methods
 
-	public init(from decoder: Decoder) throws {
+	public init(from decoder: Swift.Decoder) throws {
 		let container = try decoder.singleValueContainer()
 {{#with property}}
 		{{>frag/decode keyed=false}}
 {{/with}}
 	}
 
-	public func encode(to encoder: Encoder) throws {
+	public func encode(to encoder: Swift.Encoder) throws {
 		var container = encoder.singleValueContainer()
 {{#with property}}
 		{{>frag/encode keyed=false}}

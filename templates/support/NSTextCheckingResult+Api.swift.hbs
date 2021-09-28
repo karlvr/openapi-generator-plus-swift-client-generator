@@ -4,27 +4,27 @@
 
 import Foundation
 
-extension NSTextCheckingResult {
+extension Foundation.NSTextCheckingResult {
     enum RegexError : Error {
         case noValueFound
     }
     
     func namedInt(_ name: String, in str: String) throws -> Int {
-        if let range = Range(range(withName: name), in: str), let val = Int(str[range]) {
+        if let range = Swift.Range(range(withName: name), in: str), let val = Int(str[range]) {
             return val
         }
         throw RegexError.noValueFound
     }
     
     func namedDouble(_ name: String, in str: String) throws -> Double {
-        if let range = Range(range(withName: name), in: str), let val = Double(str[range]) {
+        if let range = Swift.Range(range(withName: name), in: str), let val = Double(str[range]) {
             return val
         }
         throw RegexError.noValueFound
     }
     
     func namedString(_ name: String, in str: String) throws -> String {
-        if let range = Range(range(withName: name), in: str) {
+        if let range = Swift.Range(range(withName: name), in: str) {
             return String(str[range])
         }
         throw RegexError.noValueFound
