@@ -1,6 +1,6 @@
 import Foundation
 
-struct LocalDateTime: Codable {
+struct OffsetDateTime: Codable {
     private static let regex = try! NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})T(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)(?:(?<timezone>Z)|(?<timezoneOffset>[+-]\\d{2}:\\d{2}))?$", options: [])
     
     enum DecoderError: Error {

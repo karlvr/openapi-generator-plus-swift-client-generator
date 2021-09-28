@@ -23,8 +23,6 @@ struct LocalDate: Codable {
         day = try matches.namedInt("day", in: dateString)
     }
     
-    
-    
     var dateComponents: DateComponents {
         return DateComponents(year: year, month: month, day: day)
     }
