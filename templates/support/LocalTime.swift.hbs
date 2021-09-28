@@ -1,0 +1,72 @@
+import Foundation
+
+struct LocalTime: Codable {
+    
+    private static let regex = try! NSRegularExpression(pattern: "^(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)(?:(?<timezone>Z)|(?<timezoneOffset>[+-]\\d{2}:\\d{2}))?$", options: [])
+    
+    enum DecoderError: Error {
+        case invalidMatch(value: String)
+    }
+    
+    var hour: Int?
+    var minute: Int
+    var seconds: Double
+    var timezone: TimeZone?
+        
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let dateString = try container.decode(String.self)
+        guard let matches = LocalTime.regex.matches(in: dateString, options: [], range: NSRange(dateString.startIndex..<dateString.endIndex, in: dateString)).first else {
+            throw DecoderError.invalidMatch(value: dateString)
+        }
+        hour = try? matches.namedInt("hour", in: dateString)
+        minute = try matches.namedInt("minute", in: dateString)
+        seconds = try matches.namedDouble("second", in: dateString)
+        
+        if var timezoneString = try? matches.namedString("timezoneOffset", in: dateString) {
+            let ordinal = timezoneString.removeFirst()
+            let components = timezoneString.components(separatedBy: ":")
+            let time = (Int(components[0])!*60 + Int(components[1])!) * 60
+            if ordinal == "-" {
+                timezone = TimeZone(secondsFromGMT: time * -1)!
+            } else {
+                timezone = TimeZone(secondsFromGMT: time)!
+            }
+        } else {
+            timezone = nil
+        }
+    }
+    
+    var second: Int {
+        Int(seconds)
+    }
+    
+    var nanoSecond: Int {
+        Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
+    }
+    
+    var dateComponents: DateComponents {
+        return DateComponents(timeZone: timezone, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    }
+        
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        var timeStringComponents = [String]()
+        
+        if let hour = hour {
+            timeStringComponents.append(String(format: "%02d", hour))
+        }
+        timeStringComponents.append(String(format: "%02d", minute))
+        timeStringComponents.append(String(format: "%02.3f", seconds))
+        
+        var timeString = timeStringComponents.joined(separator: ":")
+        
+        if let timezone = timezone {
+            timeString += timezone.apiTimeZoneString
+        } else {
+            timeString += "Z"
+        }
+        
+        try container.encode(timeString)
+    }
+}
