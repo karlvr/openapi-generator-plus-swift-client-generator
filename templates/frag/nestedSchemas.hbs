@@ -1,12 +1,18 @@
 {{#each schemas}}
 {{#if (isEnum)}}
 {{>frag/enum}}
+
 {{else if (isInterface)}}
-{{>interfaceNested}}
+{{>frag/interface}}
+
 {{else if (isObject)}}
 {{>frag/pojo}}
-{{else if (isWrapper)}}
-{{>wrapperNested}}
-{{/if}}
 
+{{else if (isWrapper)}}
+{{>frag/wrapper}}
+
+{{else if (isOneOf)}}
+{{>frag/oneOf}}
+
+{{/if}}
 {{/each}}

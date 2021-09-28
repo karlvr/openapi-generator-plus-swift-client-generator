@@ -1,4 +1,4 @@
-import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema } from '@openapi-generator-plus/types'
+import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema } from '@openapi-generator-plus/types'
 import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
@@ -31,11 +31,7 @@ function computeCustomTemplatesPath(configPath: string | undefined, customTempla
 }
 
 function toSafeTypeForComposing(nativeType: string): string {
-	if (/[^a-zA-Z0-9_.]/.test(nativeType)) {
-		return `(${nativeType})`
-	} else {
-		return nativeType
-	}
+	return nativeType
 }
 
 export interface SwiftGeneratorContext extends CodegenGeneratorContext {
@@ -260,7 +256,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			if (options.schemaType === CodegenSchemaType.ENUM) {
 				name = `${name}`
 			} else if (options.purpose === CodegenSchemaPurpose.EXTRACTED_INTERFACE) {
-				name = `i_${name}`
+				name = `${name}_protocol`
 			} else if (options.purpose === CodegenSchemaPurpose.IMPLEMENTATION) {
 				name = `abstract_${name}`
 			}
@@ -315,11 +311,13 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			return context.operationGroupingStrategies.addToGroupsByTagOrPath
 		},
 		allOfStrategy: () => CodegenAllOfStrategy.OBJECT,
-		anyOfStrategy: () => CodegenAnyOfStrategy.NATIVE,
+		anyOfStrategy: () => CodegenAnyOfStrategy.OBJECT,
 		oneOfStrategy: () => CodegenOneOfStrategy.NATIVE,
-		supportsInheritance: () => true,
-		supportsMultipleInheritance: () => true, /* As we use structs not classes */
-		nativeOneOfCanBeScope: () => true,
+		supportsInheritance: () => false,
+		supportsMultipleInheritance: () => false, /* As we use structs not classes */
+		nativeCompositionCanBeScope: () => true,
+		nativeComposedSchemaRequiresName: () => true, /* So we can name our enum cases */
+		nativeComposedSchemaRequiresObjectLikeOrWrapper: () => false,
 
 		watchPaths: () => {
 			const result = [path.resolve(__dirname, '..', 'templates')]
@@ -397,6 +395,9 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				} else if (isCodegenWrapperSchema(schema)) {
 					await emit('wrapper', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
 						{ ...rootContext, schema }, true, hbs)
+				} else if (isCodegenOneOfSchema(schema)) {
+					await emit('oneOf', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
+						{ ...rootContext, oneOf: schema }, true, hbs)
 				}
 			}
 

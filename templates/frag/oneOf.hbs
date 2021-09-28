@@ -1,0 +1,40 @@
+public enum {{{name}}}: Codable, Hashable {
+{{#each composes}}
+	case {{{camelCase name}}}(value: {{{nativeType}}})
+{{/each}}
+	case unknown
+        
+	public func encode(to encoder: Encoder) throws {
+		switch self {
+{{#each composes}}
+		case let .{{{camelCase name}}}(value):
+			try value.encode(to: encoder)
+{{/each}}
+		case .unknown:
+			break
+		}
+	}
+
+{{#if discriminator}}
+	enum CodingKeys: String, CodingKey, CaseIterable {
+{{#with discriminator}}
+		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
+{{/with}}
+
+{{/if}}
+	public init(from decoder: Decoder) throws {
+{{#if discriminator}}
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+{{else}}
+{{#each composes}}
+		do {
+			self = .{{{camelCase name}}}(value: try {{{nativeType}}}(from: decoder))
+			return
+		} catch {}
+{{/each}}
+{{/if}}
+		self = .unknown
+	}
+
+	{{>frag/nestedSchemas}}
+}

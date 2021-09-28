@@ -6,44 +6,36 @@ Hashable
 {{/each}}
 {{/join}}
 public struct {{{name}}}: {{{_parents}}} {
-{{#each properties}}
+{{#with property}}
 	public var {{{name}}}: {{{nativeType}}}
-{{/each}}
+{{/with}}
 
 {{#join '_params' ', '}}
-{{#each properties}}
+{{#with property}}
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue}}}{{else}}nil{{/if}}{{/unless}}
-{{/each}}
+{{/with}}
 {{/join}}
 	public init({{{_params}}}) {
-{{#each properties}}
+{{#with property}}
 		self.{{{name}}} = {{{name}}}
-{{/each}}
-	}
-
-{{#if properties}}
-	enum CodingKeys: String, CodingKey, CaseIterable {
-{{#each properties}}
-		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
-{{/each}}
+{{/with}}
 	}
 
 	// Encodable protocol methods
 
 	public init(from decoder: Decoder) throws {
-		let container = try decoder.container(keyedBy: CodingKeys.self)
-{{#each properties}}
-		{{>frag/decode keyed=true}}
-{{/each}}
+		let container = try decoder.singleValueContainer()
+{{#with property}}
+		{{>frag/decode keyed=false}}
+{{/with}}
 	}
 
 	public func encode(to encoder: Encoder) throws {
-		var container = encoder.container(keyedBy: CodingKeys.self)
-{{#each properties}}
-		{{>frag/encode keyed=true}}
-{{/each}}
+		var container = encoder.singleValueContainer()
+{{#with property}}
+		{{>frag/encode keyed=false}}
+{{/with}}
 	}
 
-{{/if}}
 	{{>frag/nestedSchemas}}
 }
