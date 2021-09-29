@@ -1,12 +1,4 @@
 {{!--
 @param keyed {bool}
 --}}
-{{#if (isDate)}}
-{{{name}}} = try container.decode(LocalDate.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{else if (isTime)}}
-{{{name}}} = try container.decode(LocalTime.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{else if (isDateTime)}}
-{{{name}}} = try container.decode(OffsetDateTime.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{else}}
-{{{name}}} = try container.decode({{{nativeType.concreteType}}}.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{/if}}
+{{{name}}} = try container.decode({{{nativeType}}}.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
