@@ -16,7 +16,7 @@ describe('compile test cases', () => {
 					},
 					includeTests: true,
 				})
-				await testGenerate(result, build, path.join('test-output', file))
+				await testGenerate(result, { postProcess: build, testName: file, clean: false })
 			})
 		}
 	}
