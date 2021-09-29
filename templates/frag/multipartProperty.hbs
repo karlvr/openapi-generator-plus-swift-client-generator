@@ -9,5 +9,5 @@ Add a multipart property to the body
 {{else ifeq contentType 'application/octet-stream'}}
 {{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}, {{{stringLiteral contentType}}}{{#if filenameProperty}}, {{{propertyVar}}}.{{identifier filenameProperty.name}}{{/if}});
 {{else}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}} || ''), {{{stringLiteral contentType}}});
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}} ?? ""), {{{stringLiteral contentType}}});
 {{/ifeq}}
