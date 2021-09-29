@@ -3,11 +3,27 @@ Add a multipart property to the body
 @param this CodegenContentPropertyEncoding
 @param propertyVar the variable name (or expression) containing the property
 @param bodyPartsVar the variable name containing the list of body parts
+@param schemaUsage the schema usage for this value
 --}}
-{{#ifeq contentType 'application/json'}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}, {{{stringLiteral contentType}}}));
-{{else ifeq contentType 'application/octet-stream'}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}, {{{stringLiteral contentType}}}{{#if filenameProperty}}, {{{propertyVar}}}.{{identifier filenameProperty.name}}{{/if}});
+{{#and (not schemaUsage.required) (ifndef _handledRequired)}}
+if let value = {{{propertyVar}}} { // required
+	{{>frag/multipartProperty _handledRequired=true propertyVar='value'}}
+}
 {{else}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}} ?? ""), {{{stringLiteral contentType}}});
+{{#and schemaUsage.nullable (ifndef _handledNullable)}}
+if let value = {{{propertyVar}}}.value { // nullable
+	{{>frag/multipartProperty _handledNullable=true propertyVar='value'}}
+}
+{{else}}
+{{#set '_valueProperty'}}
+{{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}
+{{/set}}
+{{#ifeq contentType 'application/json'}}
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{_valueProperty}}}), {{{stringLiteral contentType}}}, nil)
+{{else ifeq contentType 'application/octet-stream'}}
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}}, {{{stringLiteral contentType}}}{{#if filenameProperty}}, {{{propertyVar}}}.{{{filenameProperty.name}}}{{else}}, nil{{/if}})
+{{else}}
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{_valueProperty}}}), {{{stringLiteral contentType}}})
 {{/ifeq}}
+{{/and}}
+{{/and}}

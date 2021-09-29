@@ -14,15 +14,21 @@ localVarRequest.httpBody = try JSONEncoder().encode({{identifier ../name}})
 {{else ifmatch mediaType.mimeType 'multipart/.*'}}
 var localVarFormData = FormData()
 {{#each encoding.properties}}
-if let {{property.name}} = {{../../name}}.{{property.name}} {
 {{#if (isArray property)}}
-	for (const __anObject of {{property.name}}{{#if property.nullable}} || []{{/if}}) {
-		{{>frag/multipartProperty . propertyVar='__anObject' bodyPartsVar='localVarFormData'}}
+{{#if (or (not property.required) property.nullable)}}
+if let {{property.name}} = {{../../name}}.{{property.name}}{{#if property.nullable}}{{#unless property.required}}?{{/unless}}.value{{/if}} {
+	{{property.name}}.forEach {
+		{{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
 	}
-{{else}}
-	{{>frag/multipartProperty . propertyVar=property.name bodyPartsVar='localVarFormData'}}
-{{/if}}
 }
+{{else}}
+{{{../../name}}}.{{property.name}}.forEach {
+	{{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
+}
+{{/if}}
+{{else}}
+{{>frag/multipartProperty . propertyVar=(concat ../../name '.' property.name) bodyPartsVar='localVarFormData' schemaUsage=property}}
+{{/if}}
 {{/each}}
 localVarRequest.httpBody = localVarFormData.data
 localVarHeaderParameter.set("Content-Type", localVarFormData.contentType)
