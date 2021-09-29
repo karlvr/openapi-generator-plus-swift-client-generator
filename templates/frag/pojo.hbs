@@ -14,7 +14,7 @@ public struct {{{name}}}: {{{_parents}}} {
 
 {{#join '_params' ', '}}
 {{#each properties}}
-{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue.literalValue}}}{{else}}nil{{/if}}{{/unless}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue.literalValue}}}{{else}}{{{undefinedValueLiteral schema}}}{{/if}}{{/unless}}
 {{/each}}
 {{/join}}
 	public init({{{_params}}}) {
