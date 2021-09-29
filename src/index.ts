@@ -256,7 +256,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		nativeTypeUsageTransformer: ({ nullable, required }) => ({
 			default: function(nativeType, nativeTypeString) {
 				if (nullable) {
-					nativeTypeString = `${toSafeTypeForComposing(nativeTypeString)}?`
+					nativeTypeString = `Nullable<${toSafeTypeForComposing(nativeTypeString)}>`
 				}
 				if (!required) {
 					nativeTypeString = `${toSafeTypeForComposing(nativeTypeString)}?`

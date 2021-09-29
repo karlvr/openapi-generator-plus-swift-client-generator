@@ -1,9 +1,10 @@
 {{#with defaultContent}}
 localVarHeaderParameter.set("Content-Type", {{{stringLiteral mediaType.mediaType}}})
+
 {{#ifeq mediaType.mimeType 'application/x-www-form-urlencoded'}}
-let localVarFormParams = [NameValuePair]()
+var localVarFormParams = [NameValuePair]()
 {{#each (allProperties schema)}}
-{{>frag/requestParameter dest='localVarFormParams' var=(concat (identifier ../../name) '["' serializedName '"]') encoding=(lookup ../encoding.properties name)}}
+{{>frag/requestParameter dest='localVarFormParams' var=(concat ../../name '.' name) encoding=(lookup ../encoding.properties name)}}
 {{/each}}
 localVarRequest.httpBody = localVarFormParams.toString(separator: "&").data(using: .utf8)!
 {{else ifeq mediaType.mimeType 'application/json'}}

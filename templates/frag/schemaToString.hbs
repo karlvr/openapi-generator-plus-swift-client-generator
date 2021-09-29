@@ -1,17 +1,30 @@
-{{!--  
+{{!-- 
+@this the schema usage for the value?
 @param value the expression containing the value
 @param indent a string to indent multiline results
 @param parameter the CodegenParameter
 --}}
 {{#indent indent}}
+{{#if nullable}}
+({{{value}}}.value != nil ?{{{safe ' '}}}
+{{~#set '_suffix'}}
+.value!
+{{/set}}
+{{~else}}
+{{~#set '_suffix'}}
+{{/set}}
+{{~/if}}
 {{#if (isDateTime)}}
-String({{{value}}})
+String({{{value}}}{{{_suffix}}})
 {{~else or (isDate) (isTime)}}
-String({{{value}}})
+String({{{value}}}{{{_suffix}}})
 {{~else or (isObject) (isArray)}}
 {{!-- The behaviour for nested objects and arrays is undefined, but editor.swagger.io transforms these into JSON --}}
-String(data: try JSONEncoder().encode({{{value}}}), encoding: .utf8)
+String(data: try JSONEncoder().encode({{{value}}}{{{_suffix}}}), encoding: .utf8)
 {{~else}}
-String({{{value}}})
-{{~/if~}}
-{{/indent}}
+String({{{value}}}{{{_suffix}}})
+{{~/if}}
+{{#if nullable}}
+ : "")
+{{~/if}}
+{{~/indent}}

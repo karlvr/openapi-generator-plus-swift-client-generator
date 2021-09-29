@@ -86,7 +86,7 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 		localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
 	}
 {{#each queryParams}}
-	{{>frag/requestParameterWrapper dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
+	{{>frag/requestParameter dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
 {{/each}}
 	localVarUrlComponents.queryItems = localVarQueryParameter.toURLQueryItems()
 
@@ -99,7 +99,7 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 	localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
 
 {{#each headerParams}}
-	{{>frag/requestParameterWrapper dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
+	{{>frag/requestParameter dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
 
 {{/each}}
 {{#if cookieParams}}

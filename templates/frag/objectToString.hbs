@@ -1,0 +1,27 @@
+{{!--  
+@param value the expression containing the value
+@param separator the separator string to use if we need to join multiple values
+@param keyValueSeparator the separator string between keys and values
+@param indent a string to indent multiline results
+@param parameter the CodegenParameter
+--}}
+{{#indent indent}}
+{
+	var values = [String]()
+{{#each (allProperties schema)}}
+{{#set '_var'}}
+{{{../value}}}.{{name}}
+{{/set}}
+{{#if required}}
+	values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value=_var parameter=../parameter indent=../indent}})
+{{else}}
+	if let value = {{{_var}}} {
+		values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value='value' parameter=../parameter indent=../indent}})
+	}
+{{/if}}
+{{/each}}
+	return values
+		.map { localVarObjectElement in localVarObjectElement.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!}
+		.joined(separator: {{{stringLiteral separator}}})
+}()
+{{/indent}}
