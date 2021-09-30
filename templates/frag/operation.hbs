@@ -2,17 +2,21 @@
 {{#each parameters}}
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue}}}{{else}}nil{{/if}}{{/unless}}
 {{/each}}
+{{#if requestBody.nativeType}}
 {{#with requestBody}}
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue}}}{{else}}nil{{/if}}{{/unless}}
 {{/with}}
+{{/if}}
 {{/join}}
 {{#join '_callParams' ', '}}
 {{#each parameters}}
 {{{name}}}: {{{name}}}
 {{/each}}
+{{#if requestBody.nativeType}}
 {{#with requestBody}}
 {{{name}}}: {{{name}}}
 {{/with}}
+{{/if}}
 {{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
@@ -111,6 +115,7 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 	localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
 
 {{/if}}
+{{#if requestBody.nativeType}}
 {{#with requestBody}}
 	{{#if required}}
 	{{>frag/requestBody}}
@@ -121,6 +126,7 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 	{{/if}}
 	
 {{/with}}
+{{/if}}
 	localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
 	if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
