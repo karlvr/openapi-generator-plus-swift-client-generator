@@ -265,6 +265,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			},
 			/* We don't transform the concrete type as the concrete type is never null; we use it to make new objects */
 			concreteType: null,
+			parentType: null,
 		}),
 		toSuggestedSchemaName: (name, options) => {
 			if (options.schemaType === CodegenSchemaType.ENUM) {
