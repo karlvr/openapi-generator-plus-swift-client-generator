@@ -20,7 +20,7 @@ String({{{value}}}{{{_suffix}}})
 String({{{value}}}{{{_suffix}}})
 {{~else or (isObject) (isArray)}}
 {{!-- The behaviour for nested objects and arrays is undefined, but editor.swagger.io transforms these into JSON --}}
-String(data: try JSONEncoder().encode({{{value}}}{{{_suffix}}}), encoding: .utf8)
+String(data: try! JSONEncoder().encode({{{value}}}{{{_suffix}}}), encoding: .utf8)
 {{~else}}
 String({{{value}}}{{{_suffix}}})
 {{~/if}}
