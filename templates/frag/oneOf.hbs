@@ -1,9 +1,21 @@
 {{>frag/schemaDocumentation}}
 public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{#each composes}}
-	case {{{camelCase name}}}(value: {{{nativeType}}})
+	case {{{camelCase name}}}(_ value: {{{nativeType}}})
 {{/each}}
+{{#if discriminator}}
+	case unknown(_ discriminatorValue: {{{discriminator.nativeType}}})
+{{else}}
 	case unknown
+{{/if}}
+
+	enum EncoderError: Error {
+{{#if discriminator}}
+		case cannotEncodeUnknown(_ discriminatorValue: {{{discriminator.nativeType}}})
+{{else}}
+        case cannotEncodeUnknown
+{{/if}}
+    }
         
 	public func encode(to encoder: Swift.Encoder) throws {
 		switch self {
@@ -11,8 +23,13 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 		case let .{{{camelCase name}}}(value):
 			try value.encode(to: encoder)
 {{/each}}
+{{#if discriminator}}
+		case let .unknown(discriminatorValue):
+			throw EncoderError.cannotEncodeUnknown(discriminatorValue)
+{{else}}
 		case .unknown:
-			break
+			throw EncoderError.cannotEncodeUnknown
+{{/if}}
 		}
 	}
 
@@ -21,29 +38,34 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{#with discriminator}}
 		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
 {{/with}}
+	}
 
 {{/if}}
 	public init(from decoder: Swift.Decoder) throws {
 {{#if discriminator}}
 		let container = try decoder.container(keyedBy: CodingKeys.self)
-		let discriminator = try container.decode({{{discriminator.nativeType.concreteType}}}.self, forKey: .{{{name}}})
+		let discriminator = try container.decode({{{discriminator.nativeType.concreteType}}}.self, forKey: .{{{discriminator.name}}})
 		switch discriminator {
 {{#each discriminator.references}}
 			case {{{literalValue}}}:
-				self = .{{{camelCase schema.name}}}(value: try {{{schema.nativeType.concreteType}}}(from: decoder))
+				self = .{{{camelCase schema.name}}}(try {{{schema.nativeType.concreteType}}}(from: decoder))
 {{/each}}
 			default:
-				// TODO throw
+				self = .unknown(discriminator)
 		}
 {{else}}
 {{#each composes}}
 		do {
-			self = .{{{camelCase name}}}(value: try {{{nativeType.concreteType}}}(from: decoder))
+			self = .{{{camelCase name}}}(try {{{nativeType.concreteType}}}(from: decoder))
 			return
 		} catch {}
 {{/each}}
 {{/if}}
+{{#if discriminator}}
+		self = .unknown(discriminator)
+{{else}}
 		self = .unknown
+{{/if}}
 	}
 
 	{{>frag/nestedSchemas}}
