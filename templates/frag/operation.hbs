@@ -80,25 +80,22 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 	{{!-- Avoid Swift complaining that localVarHeaderParameter should be a let --}}
 	localVarHeaderParameter.removeAll()
 
-	{{>frag/requestSecurity}}
-
 	var localVarUrlComponents = URLComponents(string: "\(self.basePath)\(localVarPath)")!
-
-{{#if queryParams}}
 	var localVarQueryParameter = [NameValuePair]()
 	if let localVarExistingQueryItems = localVarUrlComponents.queryItems {
 		localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
 	}
+
+{{#if queryParams}}
 {{#each queryParams}}
 	{{>frag/requestParameter dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
 {{/each}}
-	localVarUrlComponents.queryItems = localVarQueryParameter.toURLQueryItems()
-
-{{else}}
-	{{!-- Avoid Swift complaining that localVarUrlComponents should be a let --}}
-	localVarUrlComponents.queryItems = localVarUrlComponents.queryItems
 
 {{/if}}
+	{{>frag/requestSecurity}}
+
+	localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
+
 	var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
 	localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
 
