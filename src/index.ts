@@ -172,7 +172,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				case 'anyOf':
 				case 'oneOf':
 					context.log(CodegenLogLevel.WARN, `Literal value of type ${typeof value} is unsupported for schema type object: ${debugStringify(value)}`)
-					return 'null'
+					return 'nil'
 				case 'file':
 					throw new Error(`Cannot format literal for type ${type}`)
 				case 'array': {
