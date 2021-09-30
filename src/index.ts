@@ -271,8 +271,10 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				name = `${name}`
 			} else if (options.purpose === CodegenSchemaPurpose.EXTRACTED_INTERFACE) {
 				name = `${name}_protocol`
-			} else if (options.purpose === CodegenSchemaPurpose.IMPLEMENTATION) {
+			} else if (options.purpose === CodegenSchemaPurpose.ABSTRACT_IMPLEMENTATION) {
 				name = `abstract_${name}`
+			} else if (options.purpose === CodegenSchemaPurpose.IMPLEMENTATION) {
+				name = `${name}_impl`
 			}
 			return name
 		},
