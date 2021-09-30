@@ -1,4 +1,4 @@
-import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema } from '@openapi-generator-plus/types'
+import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema } from '@openapi-generator-plus/types'
 import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
@@ -345,7 +345,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		operationGroupingStrategy: () => {
 			return context.operationGroupingStrategies.addToGroupsByTagOrPath
 		},
-		allOfStrategy: () => CodegenAllOfStrategy.OBJECT,
+		allOfStrategy: () => CodegenAllOfStrategy.HIERARCHY,
 		anyOfStrategy: () => CodegenAnyOfStrategy.OBJECT,
 		oneOfStrategy: () => CodegenOneOfStrategy.NATIVE,
 		supportsInheritance: () => false,
@@ -428,6 +428,9 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				} else if (isCodegenInterfaceSchema(schema)) {
 					await emit('interface', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
 						{ ...rootContext, interface: schema }, true, hbs)
+				} else if (isCodegenHierarchySchema(schema)) {
+					await emit('hierarchy', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
+						{ ...rootContext, hierarchy: schema }, true, hbs)
 				} else if (isCodegenWrapperSchema(schema)) {
 					await emit('wrapper', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
 						{ ...rootContext, schema }, true, hbs)
