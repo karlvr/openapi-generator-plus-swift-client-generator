@@ -353,6 +353,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		nativeCompositionCanBeScope: () => true,
 		nativeComposedSchemaRequiresName: () => true, /* So we can name our enum cases */
 		nativeComposedSchemaRequiresObjectLikeOrWrapper: () => false,
+		interfaceCanBeNested: () => false,
 
 		watchPaths: () => {
 			const result = [path.resolve(__dirname, '..', 'templates')]
