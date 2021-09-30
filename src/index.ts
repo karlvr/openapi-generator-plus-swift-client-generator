@@ -160,6 +160,8 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 						return `DateFormatter.ISO8601TIME.date(from: "${value}")`
 					} else if (format === 'date-time') {
 						return `DateFormatter.ISO8601DATETIME.date(from: "${value}")`
+					} else if (format === 'binary') {
+						return `"${escapeString(String(value))}".data(using: .utf8)!`
 					} else {
 						return `"${escapeString(String(value))}"`
 					}
