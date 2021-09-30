@@ -221,14 +221,11 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				case CodegenSchemaType.DATETIME:
 					return new context.NativeType('OffsetDateTime')
 				case CodegenSchemaType.STRING:
-					if (format === 'binary') {
-						return new context.NativeType('Data')
-					}
 					return new context.NativeType('String')
 				case CodegenSchemaType.BOOLEAN:
 					return new context.NativeType('Bool')
-				case CodegenSchemaType.FILE:
-					return new context.NativeType('String') // TODO
+				case CodegenSchemaType.BINARY:
+					return new context.NativeType('Data')
 			}
 
 			throw new Error(`Unsupported schema type: ${schemaType}`)
