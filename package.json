@@ -1,6 +1,6 @@
 {
   "name": "@openapi-generator-plus/swift-client-generator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An OpenAPI Generator Plus template for a Swift API client",
   "keywords": [
     "openapi-generator-plus",
