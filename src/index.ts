@@ -4,7 +4,7 @@ import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
-import { commonGenerator, configBoolean, configObject, configString } from '@openapi-generator-plus/generator-common'
+import { commonGenerator, configBoolean, configObject, configString, debugStringify } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
@@ -169,7 +169,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				case 'object':
 				case 'anyOf':
 				case 'oneOf':
-					context.log(CodegenLogLevel.WARN, `Literal value of type ${typeof value} is unsupported for schema type object: ${JSON.stringify(value)}`)
+					context.log(CodegenLogLevel.WARN, `Literal value of type ${typeof value} is unsupported for schema type object: ${debugStringify(value)}`)
 					return 'null'
 				case 'file':
 					throw new Error(`Cannot format literal for type ${type}`)
