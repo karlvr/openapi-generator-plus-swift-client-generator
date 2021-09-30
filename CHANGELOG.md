@@ -1,6 +1,13 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.1.1
+
+### Patch Changes
+
+- a99ec14: Update to core 0.41.2
+
 ## 0.1.0
+
 ### Minor Changes
 
 - 4ee0eb5: Upgrade to core v0.40.0
