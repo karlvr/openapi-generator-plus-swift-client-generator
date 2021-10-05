@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.1.3
+
+### Patch Changes
+
+- c8f9458: Removed named capture groups for iOS 9 compatibility
+
 ## 0.1.2
 
 ### Patch Changes
