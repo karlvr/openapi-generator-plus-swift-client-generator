@@ -13,6 +13,7 @@ specifiers:
   '@typescript-eslint/parser': ^4.32.0
   eslint: ^7.32.0
   eslint-plugin-jest: ^24.5.0
+  handlebars: ^4.7.7
   jest: ^27.2.4
   openapi-generator-plus: ^0.41.2
   rimraf: ^3.0.2
@@ -26,6 +27,7 @@ dependencies:
   '@openapi-generator-plus/java-like-generator-helper': 0.16.3_c1fe13b58db3e190d63a2fcecd00d239
   '@openapi-generator-plus/testing': 0.41.0
   '@openapi-generator-plus/types': 0.41.2
+  handlebars: 4.7.7
   openapi-generator-plus: 0.41.2
 
 devDependencies:

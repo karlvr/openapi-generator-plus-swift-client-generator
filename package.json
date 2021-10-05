@@ -33,6 +33,7 @@
     "@openapi-generator-plus/java-like-generator-helper": "^0.16.3",
     "@openapi-generator-plus/testing": "^0.41.0",
     "@openapi-generator-plus/types": "^0.41.2",
+    "handlebars": "^4.7.7",
     "openapi-generator-plus": "^0.41.2"
   },
   "peerDependencies": {
