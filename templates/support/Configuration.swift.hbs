@@ -8,33 +8,33 @@ public struct Configuration {
 	/**
 	 * Return the API key if using apiKey authentication.
 	 */
-	var apiKeyBlock: ((_ name: String) -> String?)?
+	public var apiKeyBlock: ((_ name: String) -> String?)?
 
 	/**
 	 * The username if using basic authentication.
 	 */
-	var username: String?
+	public var username: String?
 
 	/**
 	 * The password if using basic authentication.
 	 */
-	var password: String?
+	public var password: String?
 
 	/**
 	 * Return the authorization value to use for the named security scheme and scopes.
 	 */
-	var authorizationBlock: ((_ name: String, _ scopes: [String]?) -> String?)?
+	public var authorizationBlock: ((_ name: String, _ scopes: [String]?) -> String?)?
 
 	/**
 	 * Override the default base path.
 	 */
-	var basePath: String?
+	public var basePath: String?
 
-	var cachePolicy: URLRequest.CachePolicy?
+	public var cachePolicy: URLRequest.CachePolicy?
 
-	var timeoutInterval: TimeInterval
+	public var timeoutInterval: TimeInterval = 30
 
-	var responseQueue: DispatchQueue?
+	public var responseQueue: DispatchQueue?
 
-	var prepareRequestBlock: ((_ request: inout URLRequest) -> Void)?
+	public var prepareRequestBlock: ((_ request: inout URLRequest) -> Void)?
 }
