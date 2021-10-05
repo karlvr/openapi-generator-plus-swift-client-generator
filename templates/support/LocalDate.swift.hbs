@@ -6,7 +6,7 @@ import Foundation
 
 public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
     
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})$", options: [])
 
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -31,9 +31,9 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             return nil
         }
         do {
-            self.year = try matches.namedInt("year", in: description)
-            self.month = try matches.namedInt("month", in: description)
-            self.day = try matches.namedInt("day", in: description)
+            self.year = try matches.intAt(1, in: description)
+            self.month = try matches.intAt(2, in: description)
+            self.day = try matches.intAt(3, in: description)
         } catch {
             return nil
         }

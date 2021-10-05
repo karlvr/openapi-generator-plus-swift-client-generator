@@ -6,7 +6,7 @@ import Foundation
 
 public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
     
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)$", options: [])
     
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -31,9 +31,9 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             return nil
         }
         do {
-            hour = try? matches.namedInt("hour", in: description)
-            minute = try matches.namedInt("minute", in: description)
-            seconds = try matches.namedDouble("second", in: description)
+            hour = try? matches.intAt(1, in: description)
+            minute = try matches.intAt(2, in: description)
+            seconds = try matches.doubleAt(3, in: description)
         } catch {
             return nil
         }

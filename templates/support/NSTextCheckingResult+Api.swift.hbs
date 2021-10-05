@@ -9,22 +9,25 @@ extension Foundation.NSTextCheckingResult {
         case noValueFound
     }
     
-    func namedInt(_ name: String, in str: String) throws -> Int {
-        if let range = Swift.Range(range(withName: name), in: str), let val = Int(str[range]) {
+    func intAt(_ index: Int, in str: String) throws -> Int {
+        guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
+        if let range = Swift.Range(range(at: index), in: str), let val = Int(str[range]) {
             return val
         }
         throw RegexError.noValueFound
     }
     
-    func namedDouble(_ name: String, in str: String) throws -> Double {
-        if let range = Swift.Range(range(withName: name), in: str), let val = Double(str[range]) {
+    func doubleAt(_ index: Int, in str: String) throws -> Double {
+        guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
+        if let range = Swift.Range(range(at: index), in: str), let val = Double(str[range]) {
             return val
         }
         throw RegexError.noValueFound
     }
     
-    func namedString(_ name: String, in str: String) throws -> String {
-        if let range = Swift.Range(range(withName: name), in: str) {
+    func stringAt(_ index: Int, in str: String) throws -> String {
+        guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
+        if let range = Swift.Range(range(at: index), in: str) {
             return String(str[range])
         }
         throw RegexError.noValueFound

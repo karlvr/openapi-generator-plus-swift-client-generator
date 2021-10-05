@@ -5,7 +5,7 @@
 import Foundation
 
 public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})T(?:(?<hour>\\d*):)?(?:(?<minute>\\d*):)(?<second>\\d*\\.?\\d*)(?:(?<timezone>Z)|(?<timezoneOffset>[+-]\\d{2}:\\d{2}))?$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(?:Z)|([+-]\\d{2}:\\d{2}))?$", options: [])
     
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -35,14 +35,14 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
         }
         
         do {
-            year = try matches.namedInt("year", in: description)
-            month = try matches.namedInt("month", in: description)
-            day = try matches.namedInt("day", in: description)
-            hour = try matches.namedInt("hour", in: description)
-            minute = try matches.namedInt("minute", in: description)
-            seconds = try matches.namedDouble("second", in: description)
+            year = try matches.intAt(1, in: description)
+            month = try matches.intAt(2, in: description)
+            day = try matches.intAt(3, in: description)
+            hour = try matches.intAt(4, in: description)
+            minute = try matches.intAt(5, in: description)
+            seconds = try matches.doubleAt(6, in: description)
             
-            if var timezoneString = try? matches.namedString("timezoneOffset", in: description) {
+            if var timezoneString = try? matches.stringAt(7, in: description) {
                 let ordinal = timezoneString.removeFirst()
                 let components = timezoneString.components(separatedBy: ":")
                 let time = (Int(components[0])!*60 + Int(components[1])!) * 60
