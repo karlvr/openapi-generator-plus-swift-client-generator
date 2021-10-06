@@ -71,7 +71,7 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 
 {{>frag/operationDocumentation}}
 open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
-	let localVarPath = "{{{../path}}}{{{path}}}"
+	let localVarPath = "{{{group.path}}}{{{path}}}"
 	{{#each pathParams}}
 		.replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
 	{{/each}}
