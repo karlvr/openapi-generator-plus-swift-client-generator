@@ -4,11 +4,15 @@
 
 import Foundation
 
+public typealias ConfigurationAPIKeyBlock = ((_ name: String) -> String?)
+public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [String]?) -> String?)
+public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
+
 public struct Configuration {
 	/**
 	 * Return the API key if using apiKey authentication.
 	 */
-	public var apiKeyBlock: ((_ name: String) -> String?)?
+	public var apiKeyBlock: ConfigurationAPIKeyBlock?
 
 	/**
 	 * The username if using basic authentication.
@@ -23,7 +27,7 @@ public struct Configuration {
 	/**
 	 * Return the authorization value to use for the named security scheme and scopes.
 	 */
-	public var authorizationBlock: ((_ name: String, _ scopes: [String]?) -> String?)?
+	public var authorizationBlock: ConfigurationAuthorizationBlock?
 
 	/**
 	 * Override the default base path.
@@ -32,9 +36,31 @@ public struct Configuration {
 
 	public var cachePolicy: URLRequest.CachePolicy?
 
-	public var timeoutInterval: TimeInterval = 30
+	public var timeoutInterval: TimeInterval
 
 	public var responseQueue: DispatchQueue?
 
-	public var prepareRequestBlock: ((_ request: inout URLRequest) -> Void)?
+	public var prepareRequestBlock: ConfigurationPrepareRequestBlock?
+    
+    public init(
+        username: String? = nil,
+        password: String? = nil,
+        basePath: String? = nil,
+        cachePolicy: URLRequest.CachePolicy? = nil,
+        timeoutInterval: TimeInterval = 30,
+        responseQueue: DispatchQueue? = nil,
+        apiKeyBlock: ConfigurationAPIKeyBlock? = nil,
+        authorizationBlock: ConfigurationAuthorizationBlock? = nil,
+        prepareRequestBlock: ConfigurationPrepareRequestBlock? = nil
+    ) {
+        self.username = username
+        self.password = password
+        self.basePath = basePath
+        self.cachePolicy = cachePolicy
+        self.timeoutInterval = timeoutInterval
+        self.responseQueue = responseQueue
+        self.apiKeyBlock = apiKeyBlock
+        self.authorizationBlock = authorizationBlock
+        self.prepareRequestBlock = prepareRequestBlock
+    }
 }
