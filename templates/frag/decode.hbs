@@ -1,4 +1,12 @@
 {{!--
 @param keyed {bool}
 --}}
+{{#if required}}
 {{{name}}} = try container.decode({{{nativeType}}}.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
+{{else}}
+{{#if nullable}}
+{{{name}}} = try container.decodeIfPresent(Nullable<{{{nativeType.concreteType}}}>.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
+{{else}}
+{{{name}}} = try container.decodeIfPresent({{{nativeType.concreteType}}}.self{{#if keyed}}, forKey: .{{{name}}}{{/if}})
+{{/if}}
+{{/if}}
