@@ -37,8 +37,8 @@ public enum {{className name}}Result {
 {{>frag/parametersStruct}}
 
 {{>frag/operationDocumentation}}
-open func {{{name}}}(_ request: {{{className (concat name '_' 'request')}}}, responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
-	{{{name}}}({{#each parameters}}{{{name}}}: request.{{{name}}}, {{/each}}responseQueue: responseQueue, completion: completion)
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+	{{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
 }
 
 {{/if}}

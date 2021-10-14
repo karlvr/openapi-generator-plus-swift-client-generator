@@ -4,12 +4,12 @@ public struct {{{className (concat name '_' 'request')}}} {
 	public var {{{name}}}: {{{nativeType}}}
 {{/each}}
 
-{{#join '_params' ', '}}
+{{#join '_parametersStructParams' ', '}}
 {{#each parameters}}
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{{undefinedValueLiteral schema}}}{{/unless}}
 {{/each}}
 {{/join}}
-	public init({{{_params}}}) {
+	public init({{{_parametersStructParams}}}) {
 {{#each parameters}}
 		self.{{{name}}} = {{{name}}}
 {{/each}}
