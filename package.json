@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/karlvr/openapi-generator-plus-swift-client-generator#readme",
   "dependencies": {
-    "@openapi-generator-plus/core": "^0.41.3",
     "@openapi-generator-plus/generator-common": "^0.25.1",
     "@openapi-generator-plus/handlebars-templates": "^0.27.0",
     "@openapi-generator-plus/java-like-generator-helper": "^0.16.3",
