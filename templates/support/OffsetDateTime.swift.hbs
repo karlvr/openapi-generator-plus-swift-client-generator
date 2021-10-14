@@ -5,8 +5,8 @@
 import Foundation
 
 public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(?:Z)|([+-]\\d{2}:\\d{2}))?$", options: [])
-    
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(?:Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
+
     enum DecoderError: Error {
         case invalidMatch(value: String)
     }
@@ -44,8 +44,11 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
             
             if var timezoneString = try? matches.stringAt(7, in: description) {
                 let ordinal = timezoneString.removeFirst()
-                let components = timezoneString.components(separatedBy: ":")
-                let time = (Int(components[0])!*60 + Int(components[1])!) * 60
+                                
+                let hourComponent = try matches.intAt(8, in: description)
+                let minuteComponent = (try? matches.intAt(9, in: description)) ?? 0
+                
+                let time = ((hourComponent * 60) + minuteComponent) * 60
                 if ordinal == "-" {
                     timezone = Foundation.TimeZone(secondsFromGMT: time * -1)!
                 } else {
