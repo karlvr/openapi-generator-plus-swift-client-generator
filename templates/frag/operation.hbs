@@ -33,6 +33,15 @@ public enum {{className name}}Result {
 	case error(_ error: Error)
 }
 
+{{#if (gt (count parameters) 1)}}
+{{>frag/parametersStruct}}
+
+{{>frag/operationDocumentation}}
+open func {{{name}}}(_ request: {{{className (concat name '_' 'request')}}}, responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+	{{{name}}}({{#each parameters}}{{{name}}}: request.{{{name}}}, {{/each}}responseQueue: responseQueue, completion: completion)
+}
+
+{{/if}}
 {{>frag/operationDocumentation}}
 open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
 	do {
