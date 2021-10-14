@@ -1,10 +1,10 @@
 {{#join '_params' ', '}}
 {{#each parameters}}
-{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue.literalValue}}}{{else}}nil{{/if}}{{/unless}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = nil{{/unless}}
 {{/each}}
 {{#if requestBody.nativeType}}
 {{#with requestBody}}
-{{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if defaultValue}}{{{defaultValue.literalValue}}}{{else}}nil{{/if}}{{/unless}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = nil{{/unless}}
 {{/with}}
 {{/if}}
 {{/join}}
