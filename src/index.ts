@@ -312,36 +312,30 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 		},
 		initialValue: (options) => {
-			const { schemaType, required } = options
+			const { required, defaultValue } = options
+
+			/*
+			  Default values in the spec are intended to be applied when a client or server receives a
+			  response or request, respectively, and values are missing.
+
+			  This implementation means that properties with defaults will get those default values as
+			  their initial value, meaning that any properties that are omitted in the _received_ request or
+			  response will have the default value.
+
+			  TODO But it also means that any requests or responses _sent_ will _also_ have the default values,
+			  rather than omitting the property and letting the receiving side apply the default value. This
+			  is NOT according to the spec and should be fixed.
+			 */
+			if (defaultValue) {
+				return defaultValue
+			}
 
 			if (!required) {
 				return null
 			}
 
-			switch (schemaType) {
-				case CodegenSchemaType.NUMBER: {
-					const literalValue = context.generator().toLiteral(0.0, options)
-					if (literalValue === null) {
-						return null
-					}
-					return { value: 0.0, literalValue }
-				}
-				case CodegenSchemaType.INTEGER: {
-					const literalValue = context.generator().toLiteral(0, options)
-					if (literalValue === null) {
-						return null
-					}
-					return { value: 0, literalValue }
-				}
-				case CodegenSchemaType.BOOLEAN:
-					return { value: false, literalValue: 'false' }
-				case CodegenSchemaType.ARRAY:
-					return { value: [], literalValue: '[]' }
-				case CodegenSchemaType.MAP:
-					return { value: {}, literalValue: '[:]' }
-				default:
-					return null
-			}
+			/* For required fields, we initialise them with whatever their default value should be */
+			return context.generator().defaultValue(options)
 		},
 		operationGroupingStrategy: () => {
 			return context.operationGroupingStrategies.addToGroupsByTagOrPath
