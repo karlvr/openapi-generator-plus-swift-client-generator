@@ -123,9 +123,10 @@ function createJavaLikeContext(context: SwiftGeneratorContext): JavaLikeContext 
 export default function createGenerator(config: CodegenConfig, context: SwiftGeneratorContext): CodegenGenerator {
 	const generatorOptions = options(config, context)
 
+	const baseGenerator = context.baseGenerator(config, context)
 	const aCommonGenerator = commonGenerator(config, context)
 	return {
-		...context.baseGenerator(config, context),
+		...baseGenerator,
 		...aCommonGenerator,
 		...javaLikeGenerator(config, createJavaLikeContext(context)),
 		toLiteral: (value, options) => {
@@ -454,6 +455,20 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			if (!generatorOptions.package.name) {
 				generatorOptions.package.name = context.generator().toClassName(doc.info.title)
 			}
+		},
+
+		checkPropertyCompatibility: (parentProp, childProp) => {
+			if (!baseGenerator.checkPropertyCompatibility(parentProp, childProp)) {
+				return false
+			}
+
+			/* Because in Swift we use `Nullable` if a property is nullable, properties are not compatible
+			   if their nullability varies.
+			 */
+			if (!parentProp.nullable !== !childProp.nullable) {
+				return false
+			}
+			return true
 		},
 	}
 }
