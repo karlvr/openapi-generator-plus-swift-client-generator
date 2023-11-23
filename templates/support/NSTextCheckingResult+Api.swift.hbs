@@ -1,4 +1,4 @@
-//  
+//
 //  {{>frag/generatedBy}}
 //
 
@@ -8,7 +8,7 @@ extension Foundation.NSTextCheckingResult {
     enum RegexError : Error {
         case noValueFound
     }
-    
+
     func intAt(_ index: Int, in str: String) throws -> Int {
         guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
         if let range = Swift.Range(range(at: index), in: str), let val = Int(str[range]) {
@@ -16,7 +16,7 @@ extension Foundation.NSTextCheckingResult {
         }
         throw RegexError.noValueFound
     }
-    
+
     func doubleAt(_ index: Int, in str: String) throws -> Double {
         guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
         if let range = Swift.Range(range(at: index), in: str), let val = Double(str[range]) {
@@ -24,7 +24,7 @@ extension Foundation.NSTextCheckingResult {
         }
         throw RegexError.noValueFound
     }
-    
+
     func stringAt(_ index: Int, in str: String) throws -> String {
         guard index >= 0, index < numberOfRanges else { throw RegexError.noValueFound }
         if let range = Swift.Range(range(at: index), in: str) {
@@ -32,5 +32,5 @@ extension Foundation.NSTextCheckingResult {
         }
         throw RegexError.noValueFound
     }
-    
+
 }

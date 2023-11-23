@@ -22,7 +22,7 @@ public enum {{{name}}} : Swift.Codable, Swift.Hashable, Swift.CaseIterable, Swif
 {{/each}}
         }
     }
-    
+
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawString = try container.decode(String.self)

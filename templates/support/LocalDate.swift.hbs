@@ -5,17 +5,17 @@
 import Foundation
 
 public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
-    
+
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})$", options: [])
 
     enum DecoderError: Error {
         case invalidMatch(value: String)
     }
-    
+
     public var year: Int
     public var month: Int
     public var day: Int
-    
+
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dateString = try container.decode(String.self)
@@ -38,15 +38,15 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             return nil
         }
     }
-    
+
     public var dateComponents: Foundation.DateComponents {
         return Foundation.DateComponents(calendar: Calendar(identifier: .gregorian), year: year, month: month, day: day)
     }
-    
+
     public var date: Foundation.Date {
         return self.dateComponents.date!
     }
-    
+
     public func encode(to encoder: Swift.Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.description)
@@ -54,11 +54,11 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
 
     public var description: String {
         var timeStringComponents = [String]()
-        
+
         timeStringComponents.append(String(format: "%04d", year))
         timeStringComponents.append(String(format: "%02d", month))
         timeStringComponents.append(String(format: "%02d", day))
-        
+
         return timeStringComponents.joined(separator: "-")
     }
 

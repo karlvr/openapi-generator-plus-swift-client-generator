@@ -16,7 +16,7 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
         case cannotEncodeUnknown
 {{/if}}
     }
-        
+
 	public func encode(to encoder: Swift.Encoder) throws {
 		switch self {
 {{#each composes}}

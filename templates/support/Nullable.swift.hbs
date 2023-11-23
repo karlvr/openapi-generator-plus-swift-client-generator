@@ -8,10 +8,10 @@ import Foundation
  * Contains a value that may be explicitly set to `null` when sent via the API.
  */
 public enum Nullable<T>: Swift.Codable, Swift.Hashable where T: Swift.Codable, T: Swift.Hashable {
-    
+
 	case some(_ value: T)
 	case null
-    
+
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let value = try container.decode(T?.self) {
@@ -39,5 +39,5 @@ public enum Nullable<T>: Swift.Codable, Swift.Hashable where T: Swift.Codable, T
 				return nil
 		}
 	}
-    
+
 }

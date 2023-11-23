@@ -11,7 +11,7 @@ extension Foundation.TimeZone {
         seconds = abs(seconds)
         let hours = seconds / 3600
         let minutes = (seconds - (hours * 3600)) / 60
-        
+
         return String(format: "\(prefix)%02d:%02d", hours, minutes)
     }
 }

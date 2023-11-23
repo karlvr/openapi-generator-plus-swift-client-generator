@@ -7,14 +7,14 @@ import Foundation
 struct NameValuePair {
     var name: String
     var value: String?
-    
+
     func toURLQueryItem() -> URLQueryItem {
         return URLQueryItem(name: name, value: value)
     }
 }
 
 extension Array where Element == NameValuePair {
-    
+
     mutating func append(queryItems: [URLQueryItem]) {
         self.append(contentsOf: queryItems.map { NameValuePair(name: $0.name, value: $0.value) })
     }
@@ -23,13 +23,13 @@ extension Array where Element == NameValuePair {
 		self.removeAll { $0.name == name }
 		self.append(NameValuePair(name: name, value: value))
 	}
-    
+
     func toURLQueryItems() -> [URLQueryItem] {
         return self.map { $0.toURLQueryItem() }
     }
-    
+
     func toString(separator: String) -> String {
         return self.map { "\($0.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)=\($0.value?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }.joined(separator: separator)
     }
-    
+
 }

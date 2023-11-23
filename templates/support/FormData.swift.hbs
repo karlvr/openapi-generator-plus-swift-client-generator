@@ -5,26 +5,26 @@
 import Foundation
 
 struct FormData {
-    
+
     private enum Part {
         case string(name: String, value: String, contentType: String?)
         case data(name: String, data: Data, contentType: String?, filename: String?)
     }
-    
+
     private var parts = [Part]()
     let boundary = UUID().uuidString
-    
+
     mutating func append(_ name: String, _ value: String, _ contentType: String?) {
         self.parts.append(.string(name: name, value: value, contentType: contentType))
 	}
-    
+
     mutating func append(_ name: String, _ value: Data, _ contentType: String?, _ filename: String?) {
         self.parts.append(.data(name: name, data: value, contentType: contentType, filename: filename))
 	}
 
 	var data: Data {
 		var result = Data()
-        
+
         parts.forEach { part in
             result.append("--\(boundary)\r\n".data(using: .utf8)!)
             switch part {
@@ -49,15 +49,15 @@ struct FormData {
                 result.append(data)
                 result.append("\r\n".data(using: .utf8)!)
             }
-            
+
         }
-        
+
         result.append("--\(boundary)--\r\n".data(using: .utf8)!)
         return result
 	}
-    
+
     var contentType: String {
         return "multipart/form-data; boundary=\(boundary)"
     }
-    
+
 }

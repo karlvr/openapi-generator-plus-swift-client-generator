@@ -5,17 +5,17 @@
 import Foundation
 
 public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
-    
+
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)$", options: [])
-    
+
     enum DecoderError: Error {
         case invalidMatch(value: String)
     }
-    
+
     public var hour: Int?
     public var minute: Int
     public var seconds: Double
-        
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dateString = try container.decode(String.self)
@@ -38,23 +38,23 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             return nil
         }
     }
-    
+
     var second: Int {
         Int(seconds)
     }
-    
+
     var nanoSecond: Int {
         Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
     }
-    
+
     public var dateComponents: DateComponents {
         return DateComponents(calendar: Calendar(identifier: .gregorian), hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
     }
-    
+
     public var date: Foundation.Date {
         return self.dateComponents.date!
     }
-        
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.description)
@@ -62,13 +62,13 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
 
     public var description: String {
         var timeStringComponents = [String]()
-        
+
         if let hour = hour {
             timeStringComponents.append(String(format: "%02d", hour))
         }
         timeStringComponents.append(String(format: "%02d", minute))
         timeStringComponents.append(String(format: "%02.3f", seconds))
-        
+
         return timeStringComponents.joined(separator: ":")
     }
 
