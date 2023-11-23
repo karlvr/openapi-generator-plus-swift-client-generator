@@ -48,7 +48,9 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 		let __request = try {{{name}}}Request({{{_callParams}}})
 		URLSession.handleApiRequest(__request) { response, data, error in
 			if let error = error {
-				completion(.error(error))
+				responseQueue.asyncIfPresent {
+					completion(.error(error))
+				}
 				return
 			}
 
