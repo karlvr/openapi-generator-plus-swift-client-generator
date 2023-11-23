@@ -8,34 +8,34 @@ import Foundation
 
 open class {{name}}Api {
 
-	var configuration: Configuration
-	var basePath: String
-	var cachePolicy: URLRequest.CachePolicy
-	var timeoutInterval: TimeInterval
+    var configuration: Configuration
+    var basePath: String
+    var cachePolicy: URLRequest.CachePolicy
+    var timeoutInterval: TimeInterval
 
     public init(configuration: Configuration) {
-		self.configuration = configuration
+        self.configuration = configuration
         if let basePath = configuration.basePath {
-			self.basePath = basePath
-		} else {
+            self.basePath = basePath
+        } else {
 {{#each @root.servers}}
 {{#if @first}}
-			self.basePath = {{{stringLiteral url}}}.replacingOccurrences(of: "/", with: "", options: [.anchored, .backwards], range: nil)
+            self.basePath = {{{stringLiteral url}}}.replacingOccurrences(of: "/", with: "", options: [.anchored, .backwards], range: nil)
 {{/if}}
 {{/each}}
 {{#unless @root.servers}}
-			self.basePath = ""
+            self.basePath = ""
 {{/unless}}
-		}
-		if let cachePolicy = configuration.cachePolicy {
-			self.cachePolicy = cachePolicy
-		} else {
-			self.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData
-		}
-		self.timeoutInterval = configuration.timeoutInterval
+        }
+        if let cachePolicy = configuration.cachePolicy {
+            self.cachePolicy = cachePolicy
+        } else {
+            self.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData
+        }
+        self.timeoutInterval = configuration.timeoutInterval
     }
 
 {{#each operations}}
-	{{>frag/operation group=..}}
+    {{>frag/operation group=..}}
 {{/each}}
 }

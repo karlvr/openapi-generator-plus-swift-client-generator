@@ -9,8 +9,8 @@ import Foundation
  */
 public enum Nullable<T>: Swift.Codable, Swift.Hashable where T: Swift.Codable, T: Swift.Hashable {
 
-	case some(_ value: T)
-	case null
+    case some(_ value: T)
+    case null
 
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -31,13 +31,13 @@ public enum Nullable<T>: Swift.Codable, Swift.Hashable where T: Swift.Codable, T
         }
     }
 
-	public var value: T? {
-		switch self {
-			case .some(let value):
-				return value
-			case .null:
-				return nil
-		}
-	}
+    public var value: T? {
+        switch self {
+            case .some(let value):
+                return value
+            case .null:
+                return nil
+        }
+    }
 
 }

@@ -17,13 +17,13 @@ var localVarFormData = FormData()
 {{#if (isArray property)}}
 {{#if (or (not property.required) property.nullable)}}
 if let {{property.name}} = {{../../name}}.{{property.name}}{{#if property.nullable}}{{#unless property.required}}?{{/unless}}.value{{/if}} {
-	{{property.name}}.forEach {
-		{{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
-	}
+    {{property.name}}.forEach {
+        {{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
+    }
 }
 {{else}}
 {{{../../name}}}.{{property.name}}.forEach {
-	{{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
+    {{>frag/multipartProperty . propertyVar='$0' bodyPartsVar='localVarFormData' schemaUsage=property.schema.component}}
 }
 {{/if}}
 {{else}}

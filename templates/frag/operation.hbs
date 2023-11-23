@@ -20,17 +20,17 @@
 {{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
-	{{#if description}}
-	/**
-	 * {{#indent '	 * '}}{{{md description}}}{{/indent}}
-	 */
-	{{/if}}
-	case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
+    {{#if description}}
+    /**
+     * {{#indent '     * '}}{{{md description}}}{{/indent}}
+     */
+    {{/if}}
+    case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
 {{/each}}
-	/** An unexpected response */
-	case unexpected(response: HTTPURLResponse, data: Data?)
-	/** An error occurred in processing */
-	case error(_ error: Error)
+    /** An unexpected response */
+    case unexpected(response: HTTPURLResponse, data: Data?)
+    /** An error occurred in processing */
+    case error(_ error: Error)
 }
 
 {{#if (gt (count parameters) 1)}}
@@ -38,120 +38,120 @@ public enum {{className name}}Result {
 
 {{>frag/operationDocumentation}}
 open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
-	{{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
+    {{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
 }
 
 {{/if}}
 {{>frag/operationDocumentation}}
 open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
-	let responseQueue = responseQueue ?? configuration.responseQueue
-	do {
-		let __request = try {{{name}}}Request({{{_callParams}}})
-		URLSession.handleApiRequest(__request) { response, data, error in
-			if let error = error {
-				responseQueue.asyncIfPresent {
-					completion(.error(error))
-				}
-				return
-			}
+    let responseQueue = responseQueue ?? configuration.responseQueue
+    do {
+        let __request = try {{{name}}}Request({{{_callParams}}})
+        URLSession.handleApiRequest(__request) { response, data, error in
+            if let error = error {
+                responseQueue.asyncIfPresent {
+                    completion(.error(error))
+                }
+                return
+            }
 
-			switch response!.statusCode {
+            switch response!.statusCode {
 {{#each responses}}
-			case {{{code}}}:
-				{{#if defaultContent.nativeType}}
-				if let data = data {
-					do {
-						let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
-						responseQueue.asyncIfPresent {
-							completion(._{{{code}}}(decodedData))
-						}
-					} catch let decodingError {
-						responseQueue.asyncIfPresent {
-							completion(.error(decodingError))
-						}
-					}
-				} else {
-					responseQueue.asyncIfPresent {
-						completion(.unexpected(response: response!, data: data))
-					}
-				}
-				{{else}}
-				responseQueue.asyncIfPresent {
-					completion(._{{{code}}})
-				}
-				{{/if}}
+            case {{{code}}}:
+                {{#if defaultContent.nativeType}}
+                if let data = data {
+                    do {
+                        let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+                        responseQueue.asyncIfPresent {
+                            completion(._{{{code}}}(decodedData))
+                        }
+                    } catch let decodingError {
+                        responseQueue.asyncIfPresent {
+                            completion(.error(decodingError))
+                        }
+                    }
+                } else {
+                    responseQueue.asyncIfPresent {
+                        completion(.unexpected(response: response!, data: data))
+                    }
+                }
+                {{else}}
+                responseQueue.asyncIfPresent {
+                    completion(._{{{code}}})
+                }
+                {{/if}}
 {{/each}}
-			default:
-				responseQueue.asyncIfPresent {
-					completion(.unexpected(response: response!, data: data))
-				}
-			}
-		}
-	} catch let error {
-		completion(.error(error))
-	}
+            default:
+                responseQueue.asyncIfPresent {
+                    completion(.unexpected(response: response!, data: data))
+                }
+            }
+        }
+    } catch let error {
+        completion(.error(error))
+    }
 }
 
 {{>frag/operationDocumentation}}
 open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
-	let localVarPath = "{{{group.path}}}{{{path}}}"
-	{{#each pathParams}}
-		.replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
-	{{/each}}
+    let localVarPath = "{{{group.path}}}{{{path}}}"
+    {{#each pathParams}}
+        .replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
+    {{/each}}
 
-	var localVarHeaderParameter = [NameValuePair]()
-	{{!-- Avoid Swift complaining that localVarHeaderParameter should be a let --}}
-	localVarHeaderParameter.removeAll()
+    var localVarHeaderParameter = [NameValuePair]()
+    {{!-- Avoid Swift complaining that localVarHeaderParameter should be a let --}}
+    localVarHeaderParameter.removeAll()
 
-	var localVarUrlComponents = URLComponents(string: "\(self.basePath)\(localVarPath)")!
-	var localVarQueryParameter = [NameValuePair]()
-	if let localVarExistingQueryItems = localVarUrlComponents.queryItems {
-		localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
-	}
+    var localVarUrlComponents = URLComponents(string: "\(self.basePath)\(localVarPath)")!
+    var localVarQueryParameter = [NameValuePair]()
+    if let localVarExistingQueryItems = localVarUrlComponents.queryItems {
+        localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
+    }
 
 {{#if queryParams}}
 {{#each queryParams}}
-	{{>frag/requestParameter dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
+    {{>frag/requestParameter dest='localVarQueryParameter' var=(identifier name) encoding=encoding}}
 {{/each}}
 
 {{/if}}
-	{{>frag/requestSecurity}}
+    {{>frag/requestSecurity}}
 
-	localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
+    localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
 
-	var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
-	localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
+    var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
+    localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
 
 {{#each headerParams}}
-	{{>frag/requestParameter dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
+    {{>frag/requestParameter dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
 
 {{/each}}
 {{#if cookieParams}}
-	var localVarCookieParams = [NameValuePair]()
+    var localVarCookieParams = [NameValuePair]()
 {{#each cookieParams}}
-	{{>frag/requestParameter dest='localVarCookieParams' var=(identifier name) encoding=encoding}}
+    {{>frag/requestParameter dest='localVarCookieParams' var=(identifier name) encoding=encoding}}
 
 {{/each}}
-	localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
+    localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
 
 {{/if}}
 {{#if requestBody.nativeType}}
 {{#with requestBody}}
-	{{#if required}}
-	{{>frag/requestBody}}
-	{{else}}
-	if let {{{name}}} = {{{name}}} {
-		{{>frag/requestBody}}
-	}
-	{{/if}}
-	
+    {{#if required}}
+    {{>frag/requestBody}}
+    {{else}}
+    if let {{{name}}} = {{{name}}} {
+        {{>frag/requestBody}}
+    }
+    {{/if}}
+    
 {{/with}}
 {{/if}}
-	localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
+    localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
-	if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
-		localVarPrepareRequestBlock(&localVarRequest)
-	}
-	return localVarRequest
+    if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
+        localVarPrepareRequestBlock(&localVarRequest)
+    }
+    return localVarRequest
 }
 

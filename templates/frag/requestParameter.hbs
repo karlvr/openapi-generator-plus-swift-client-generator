@@ -8,34 +8,34 @@ Handle parameters when building an API request
 --}}
 {{#and (not required) (ifndef _handledRequired)}}
 if let value = {{{var}}} { // required
-	{{>frag/requestParameter var='value' _handledRequired=true}}
+    {{>frag/requestParameter var='value' _handledRequired=true}}
 }
 {{else}}
 {{#if (isArray)}}
 {{#and nullable (ifndef _handledNullable)}}
 if let value = {{{var}}}.value { // nullable
-	{{>frag/requestParameter var='value' _handledNullable=true}}
+    {{>frag/requestParameter var='value' _handledNullable=true}}
 }
 {{else}}
 {{#ifeq encoding.style 'form'}}
 {{#if encoding.explode}}
 /* array form exploded */
 {{{var}}}.forEach { localVarArrayElement in
-	{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString schema.component value='localVarArrayElement' parameter=. indent='		'}}))
+    {{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString schema.component value='localVarArrayElement' parameter=. indent='        '}}))
 }
 {{else}}
 /* array form */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=',' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=',' indent='    '}}))
 {{/if}}
 {{else ifeq encoding.style 'spaceDelimited'}}
 /* array space delimited */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=' ' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=' ' indent='    '}}))
 {{else ifeq encoding.style 'pipeDelimited'}}
 /* array pipe delimited */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator='|' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator='|' indent='    '}}))
 {{else ifeq encoding.style 'simple'}}
 /* array simple */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=',' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/arrayToString value=var parameter=. separator=',' indent='    '}}))
 {{else}}
 throw new Error("Unsupported parameter encoding")
 {{warn (concat 'Array encoding style ' encoding.style ' not supported')}}
@@ -45,7 +45,7 @@ throw new Error("Unsupported parameter encoding")
 {{else if (isObject)}}
 {{#and nullable (ifndef _handledNullable)}}
 if let value = {{{var}}}.value { // nullable
-	{{>frag/requestParameter var='value' _handledNullable=true}}
+    {{>frag/requestParameter var='value' _handledNullable=true}}
 }
 {{else}}
 {{#ifeq encoding.style 'form'}}
@@ -54,40 +54,40 @@ if let value = {{{var}}}.value { // nullable
 {{#each (allProperties schema)}}
 {{#unless required}}
 if let {{{name}}} = {{{concat ../var '.' name}}} {
-	{{{../dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=name parameter=.. indent='		'}}))
+    {{{../dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=name parameter=.. indent='        '}}))
 }
 {{else}}
-{{{../dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=(concat ../var '.' name) parameter=.. indent='		'}}))
+{{{../dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=(concat ../var '.' name) parameter=.. indent='        '}}))
 {{/unless}}
 {{/each}}
 {{else}}
 /* object form */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator=',' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator=',' indent='    '}}))
 {{/if}}
 {{else ifeq encoding.style 'spaceDelimited'}}
 /* object space delimited */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=' ' keyValueSeparator=' ' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=' ' keyValueSeparator=' ' indent='    '}}))
 {{else ifeq encoding.style 'pipeDelimited'}}
 /* object pipe delimited */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator='|' keyValueSeparator='|' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator='|' keyValueSeparator='|' indent='    '}}))
 {{else ifeq encoding.style 'deepObject'}}
 /* object deepObject */
 {{#each (allProperties schema)}}
 {{#unless required}}
 if let {{{name}}} = {{{concat ../var '.' name}}} {
-	{{{../dest}}}.append(NameValuePair(name: "{{../serializedName}}[{{serializedName}}]", value: {{>frag/schemaToString value=name parameter=.. indent='		'}}))
+    {{{../dest}}}.append(NameValuePair(name: "{{../serializedName}}[{{serializedName}}]", value: {{>frag/schemaToString value=name parameter=.. indent='        '}}))
 }
 {{else}}
-{{{../dest}}}.append(NameValuePair(name: "{{../serializedName}}[{{serializedName}}]", value: {{>frag/schemaToString value=(concat ../var '.' name) parameter=.. indent='		'}}))
+{{{../dest}}}.append(NameValuePair(name: "{{../serializedName}}[{{serializedName}}]", value: {{>frag/schemaToString value=(concat ../var '.' name) parameter=.. indent='        '}}))
 {{/unless}}
 {{/each}}
 {{else ifeq encoding.style 'simple'}}
 {{#if encoding.explode}}
 /* object simple exploded */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator='=' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator='=' indent='    '}}))
 {{else}}
 /* object simple */
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator=',' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/objectToString value=var parameter=. separator=',' keyValueSeparator=',' indent='    '}}))
 {{/if}}
 {{else}}
 throw new Error("Unsupported parameter encoding")
@@ -96,7 +96,7 @@ throw new Error("Unsupported parameter encoding")
 {{/and}}
 {{!-- nullable object --}}
 {{else}}
-{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=var parameter=. separator=',' indent='	'}}))
+{{{dest}}}.append(NameValuePair(name: "{{{serializedName}}}", value: {{>frag/schemaToString value=var parameter=. separator=',' indent='    '}}))
 {{/if}}
 {{/and}}
 {{!-- required --}}

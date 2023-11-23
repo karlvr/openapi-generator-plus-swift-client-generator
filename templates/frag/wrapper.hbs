@@ -8,8 +8,8 @@ Swift.Hashable
 {{/join}}
 public struct {{{name}}}: {{{_parents}}} {
 {{#with property}}
-	{{>frag/propertyDocumentation}}
-	public var {{{name}}}: {{{nativeType}}}
+    {{>frag/propertyDocumentation}}
+    public var {{{name}}}: {{{nativeType}}}
 {{/with}}
 
 {{#join '_params' ', '}}
@@ -17,27 +17,27 @@ public struct {{{name}}}: {{{_parents}}} {
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue}}}{{else}}nil{{/if}}{{/unless}}
 {{/with}}
 {{/join}}
-	public init({{{_params}}}) {
+    public init({{{_params}}}) {
 {{#with property}}
-		self.{{{name}}} = {{{name}}}
+        self.{{{name}}} = {{{name}}}
 {{/with}}
-	}
+    }
 
-	// Encodable protocol methods
+    // Encodable protocol methods
 
-	public init(from decoder: Swift.Decoder) throws {
-		let container = try decoder.singleValueContainer()
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.singleValueContainer()
 {{#with property}}
-		{{>frag/decode keyed=false}}
+        {{>frag/decode keyed=false}}
 {{/with}}
-	}
+    }
 
-	public func encode(to encoder: Swift.Encoder) throws {
-		var container = encoder.singleValueContainer()
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.singleValueContainer()
 {{#with property}}
-		{{>frag/encode keyed=false}}
+        {{>frag/encode keyed=false}}
 {{/with}}
-	}
+    }
 
-	{{>frag/nestedSchemas}}
+    {{>frag/nestedSchemas}}
 }

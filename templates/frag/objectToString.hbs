@@ -7,21 +7,21 @@
 --}}
 {{#indent indent}}
 {
-	var values = [String]()
+    var values = [String]()
 {{#each (allProperties schema)}}
 {{#set '_var'}}
 {{{../value}}}.{{name}}
 {{/set}}
 {{#if required}}
-	values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value=_var parameter=../parameter indent=../indent}})
+    values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value=_var parameter=../parameter indent=../indent}})
 {{else}}
-	if let value = {{{_var}}} {
-		values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value='value' parameter=../parameter indent=../indent}})
-	}
+    if let value = {{{_var}}} {
+        values.append("{{{serializedName}}}{{{../keyValueSeparator}}}" + {{>frag/schemaToString value='value' parameter=../parameter indent=../indent}})
+    }
 {{/if}}
 {{/each}}
-	return values
-		.map { localVarObjectElement in localVarObjectElement.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!}
-		.joined(separator: {{{stringLiteral separator}}})
+    return values
+        .map { localVarObjectElement in localVarObjectElement.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!}
+        .joined(separator: {{{stringLiteral separator}}})
 }()
 {{/indent}}

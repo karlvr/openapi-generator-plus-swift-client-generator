@@ -1,7 +1,7 @@
 public struct {{{className (concat name '_' 'request')}}} {
 {{#each parameters}}
-	{{>frag/propertyDocumentation}}
-	public var {{{name}}}: {{{nativeType}}}
+    {{>frag/propertyDocumentation}}
+    public var {{{name}}}: {{{nativeType}}}
 {{/each}}
 
 {{#join '_parametersStructParams' ', '}}
@@ -9,9 +9,9 @@ public struct {{{className (concat name '_' 'request')}}} {
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{{undefinedValueLiteral schema}}}{{/unless}}
 {{/each}}
 {{/join}}
-	public init({{{_parametersStructParams}}}) {
+    public init({{{_parametersStructParams}}}) {
 {{#each parameters}}
-		self.{{{name}}} = {{{name}}}
+        self.{{{name}}} = {{{name}}}
 {{/each}}
-	}
+    }
 }

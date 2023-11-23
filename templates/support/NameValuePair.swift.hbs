@@ -19,10 +19,10 @@ extension Array where Element == NameValuePair {
         self.append(contentsOf: queryItems.map { NameValuePair(name: $0.name, value: $0.value) })
     }
 
-	mutating func set(_ name: String, _ value: String?) {
-		self.removeAll { $0.name == name }
-		self.append(NameValuePair(name: name, value: value))
-	}
+    mutating func set(_ name: String, _ value: String?) {
+        self.removeAll { $0.name == name }
+        self.append(NameValuePair(name: name, value: value))
+    }
 
     func toURLQueryItems() -> [URLQueryItem] {
         return self.map { $0.toURLQueryItem() }

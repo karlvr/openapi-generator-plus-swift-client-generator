@@ -9,38 +9,38 @@ public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [
 public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
 
 public struct Configuration {
-	/**
-	 * Return the API key if using apiKey authentication.
-	 */
-	public var apiKeyBlock: ConfigurationAPIKeyBlock?
+    /**
+     * Return the API key if using apiKey authentication.
+     */
+    public var apiKeyBlock: ConfigurationAPIKeyBlock?
 
-	/**
-	 * The username if using basic authentication.
-	 */
-	public var username: String?
+    /**
+     * The username if using basic authentication.
+     */
+    public var username: String?
 
-	/**
-	 * The password if using basic authentication.
-	 */
-	public var password: String?
+    /**
+     * The password if using basic authentication.
+     */
+    public var password: String?
 
-	/**
-	 * Return the authorization value to use for the named security scheme and scopes.
-	 */
-	public var authorizationBlock: ConfigurationAuthorizationBlock?
+    /**
+     * Return the authorization value to use for the named security scheme and scopes.
+     */
+    public var authorizationBlock: ConfigurationAuthorizationBlock?
 
-	/**
-	 * Override the default base path.
-	 */
-	public var basePath: String?
+    /**
+     * Override the default base path.
+     */
+    public var basePath: String?
 
-	public var cachePolicy: URLRequest.CachePolicy?
+    public var cachePolicy: URLRequest.CachePolicy?
 
-	public var timeoutInterval: TimeInterval
+    public var timeoutInterval: TimeInterval
 
-	public var responseQueue: DispatchQueue?
+    public var responseQueue: DispatchQueue?
 
-	public var prepareRequestBlock: ConfigurationPrepareRequestBlock?
+    public var prepareRequestBlock: ConfigurationPrepareRequestBlock?
 
     public init(
         username: String? = nil,

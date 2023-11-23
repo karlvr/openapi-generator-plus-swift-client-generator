@@ -7,12 +7,12 @@ Add a multipart property to the body
 --}}
 {{#and (not schemaUsage.required) (ifndef _handledRequired)}}
 if let value = {{{propertyVar}}} { // required
-	{{>frag/multipartProperty _handledRequired=true propertyVar='value'}}
+    {{>frag/multipartProperty _handledRequired=true propertyVar='value'}}
 }
 {{else}}
 {{#and schemaUsage.nullable (ifndef _handledNullable)}}
 if let value = {{{propertyVar}}}.value { // nullable
-	{{>frag/multipartProperty _handledNullable=true propertyVar='value'}}
+    {{>frag/multipartProperty _handledNullable=true propertyVar='value'}}
 }
 {{else}}
 {{#set '_valueProperty'}}

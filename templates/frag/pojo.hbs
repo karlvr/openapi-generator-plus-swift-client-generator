@@ -8,8 +8,8 @@ Swift.Hashable
 {{/join}}
 public struct {{{name}}}: {{{_parents}}} {
 {{#each properties}}
-	{{>frag/propertyDocumentation}}
-	public var {{{name}}}: {{{nativeType}}}
+    {{>frag/propertyDocumentation}}
+    public var {{{name}}}: {{{nativeType}}}
 {{/each}}
 
 {{#join '_params' ', '}}
@@ -17,43 +17,43 @@ public struct {{{name}}}: {{{_parents}}} {
 {{{name}}}: {{{nativeType}}}{{#unless required}} = {{#if initialValue}}{{{initialValue.literalValue}}}{{else}}{{{undefinedValueLiteral schema}}}{{/if}}{{/unless}}
 {{/each}}
 {{/join}}
-	public init({{{_params}}}) {
+    public init({{{_params}}}) {
 {{#each properties}}
-		self.{{{name}}} = {{{name}}}
+        self.{{{name}}} = {{{name}}}
 {{/each}}
-	}
+    }
 
 {{#or properties discriminatorValues}}
-	enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
+    enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
 {{#each discriminatorValues}}
-		case {{{schema.discriminator.name}}}{{#ifeq schema.discriminator.name schema.discriminator.serializedName}}{{else}} = {{{stringLiteral schema.discriminator.serializedName}}}{{/ifeq}}
+        case {{{schema.discriminator.name}}}{{#ifeq schema.discriminator.name schema.discriminator.serializedName}}{{else}} = {{{stringLiteral schema.discriminator.serializedName}}}{{/ifeq}}
 {{/each}}
 {{#each properties}}
 {{#unless discriminators}}
-		case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
+        case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
 {{/unless}}
 {{/each}}
-	}
+    }
 
-	// Encodable protocol methods
+    // Encodable protocol methods
 
-	public init(from decoder: Swift.Decoder) throws {
-		let container = try decoder.container(keyedBy: CodingKeys.self)
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
 {{#each properties}}
-		{{>frag/decode keyed=true}}
+        {{>frag/decode keyed=true}}
 {{/each}}
-	}
+    }
 
-	public func encode(to encoder: Swift.Encoder) throws {
-		var container = encoder.container(keyedBy: CodingKeys.self)
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
 {{#each discriminatorValues}}
-		try container.encode({{{literalValue}}}, forKey: .{{{schema.discriminator.name}}})
+        try container.encode({{{literalValue}}}, forKey: .{{{schema.discriminator.name}}})
 {{/each}}
 {{#each properties}}
-		{{>frag/encode keyed=true}}
+        {{>frag/encode keyed=true}}
 {{/each}}
-	}
+    }
 
 {{/or}}
-	{{>frag/nestedSchemas}}
+    {{>frag/nestedSchemas}}
 }

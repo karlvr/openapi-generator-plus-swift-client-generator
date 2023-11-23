@@ -16,14 +16,14 @@ struct FormData {
 
     mutating func append(_ name: String, _ value: String, _ contentType: String?) {
         self.parts.append(.string(name: name, value: value, contentType: contentType))
-	}
+    }
 
     mutating func append(_ name: String, _ value: Data, _ contentType: String?, _ filename: String?) {
         self.parts.append(.data(name: name, data: value, contentType: contentType, filename: filename))
-	}
+    }
 
-	var data: Data {
-		var result = Data()
+    var data: Data {
+        var result = Data()
 
         parts.forEach { part in
             result.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -54,7 +54,7 @@ struct FormData {
 
         result.append("--\(boundary)--\r\n".data(using: .utf8)!)
         return result
-	}
+    }
 
     var contentType: String {
         return "multipart/form-data; boundary=\(boundary)"
