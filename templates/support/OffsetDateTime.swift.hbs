@@ -5,7 +5,7 @@
 import Foundation
 
 public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(?:Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
 
     enum DecoderError: Error {
         case invalidMatch(value: String)
@@ -43,16 +43,20 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
             seconds = try matches.doubleAt(6, in: description)
             
             if var timezoneString = try? matches.stringAt(7, in: description) {
-                let ordinal = timezoneString.removeFirst()
-                                
-                let hourComponent = try matches.intAt(8, in: description)
-                let minuteComponent = (try? matches.intAt(9, in: description)) ?? 0
-                
-                let time = ((hourComponent * 60) + minuteComponent) * 60
-                if ordinal == "-" {
-                    timezone = Foundation.TimeZone(secondsFromGMT: time * -1)!
+                if timezoneString == "Z" {
+                    timezone = Foundation.TimeZone(secondsFromGMT: 0)
                 } else {
-                    timezone = Foundation.TimeZone(secondsFromGMT: time)!
+                    let ordinal = timezoneString.removeFirst()
+                    
+                    let hourComponent = try matches.intAt(8, in: description)
+                    let minuteComponent = (try? matches.intAt(9, in: description)) ?? 0
+                    
+                    let time = ((hourComponent * 60) + minuteComponent) * 60
+                    if ordinal == "-" {
+                        timezone = Foundation.TimeZone(secondsFromGMT: -time)!
+                    } else {
+                        timezone = Foundation.TimeZone(secondsFromGMT: time)!
+                    }
                 }
             } else {
                 timezone = nil
