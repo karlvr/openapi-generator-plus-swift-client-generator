@@ -1,5 +1,26 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.3.0
+
+### Minor Changes
+
+- e2a3c91: Improve Nullable
+- 64ec613: Support url string formats
+
+### Patch Changes
+
+- 318747a: Actually use the responseQueue to report results
+- cbd95ba: Use configuration.responseQueue and make responseQueue parameter on API operations optional
+- d66fca5: Use responseQueue for errors as well
+- c77241a: Fix oneOf schemas that contain anonymous schemas
+- ac58a0a: Standardise indentation to spaces in templates
+- edb99df: Expose literal values of enums
+- a573d78: Expose dateComponents and add Date() accessor on date/time types
+- 2857915: Fix OffsetDateTime handling of zulu time
+- 40c6289: Add Comparable to date/time types
+- b10006e: Upgrade dependencies
+- 8c303b6: Remove trailing whitespace from templates
+
 ## 0.2.0
 
 ### Minor Changes
