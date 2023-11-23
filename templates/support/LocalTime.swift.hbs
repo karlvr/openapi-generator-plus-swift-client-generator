@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
+public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
     
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)$", options: [])
     
@@ -66,5 +66,15 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
         timeStringComponents.append(String(format: "%02.3f", seconds))
         
         return timeStringComponents.joined(separator: ":")
+    }
+
+    public static func < (lhs: LocalTime, rhs: LocalTime) -> Bool {
+        if lhs.hour != rhs.hour {
+            return (lhs.hour ?? 0) < (rhs.hour ?? 0)
+        } else if lhs.minute != rhs.minute {
+            return lhs.minute < rhs.minute
+        } else {
+            return lhs.seconds < rhs.seconds
+        }
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
+public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(?:Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
 
     enum DecoderError: Error {
@@ -103,5 +103,19 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
         }
         
         return "\(dateString)T\(timeString)"
+    }
+
+    public static func < (lhs: OffsetDateTime, rhs: OffsetDateTime) -> Bool {
+        if let lhsDate = lhs.dateComponents.date, let rhsDate = rhs.dateComponents.date {
+            return lhsDate < rhsDate
+        } else {
+            if lhs.year != rhs.year {
+                return lhs.year < rhs.year
+            } else if lhs.month != rhs.month {
+                return lhs.month < rhs.month
+            } else {
+                return lhs.day < rhs.day
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible {
+public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
     
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})$", options: [])
 
@@ -56,5 +56,15 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
         timeStringComponents.append(String(format: "%02d", day))
         
         return timeStringComponents.joined(separator: "-")
+    }
+
+    public static func < (lhs: LocalDate, rhs: LocalDate) -> Bool {
+        if lhs.year != rhs.year {
+            return lhs.year < rhs.year
+        } else if lhs.month != rhs.month {
+            return lhs.month < rhs.month
+        } else {
+            return lhs.day < rhs.day
+        }
     }
 }
