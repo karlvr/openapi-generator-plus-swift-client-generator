@@ -1,10 +1,11 @@
-import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema } from '@openapi-generator-plus/types'
+import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema, CodegenNativeType } from '@openapi-generator-plus/types'
 import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator, configBoolean, configObject, configString, debugStringify } from '@openapi-generator-plus/generator-common'
+import * as idx from '@openapi-generator-plus/indexed-type'
 import { promises as fs } from 'fs'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
@@ -458,6 +459,24 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		postProcessDocument: (doc) => {
 			if (!generatorOptions.package.name) {
 				generatorOptions.package.name = context.generator().toClassName(doc.info.title)
+			}
+		},
+
+		postProcessSchema(schema, helper) {
+			function suggestedNameForType(type: CodegenNativeType): string {
+				if (type.componentType) {
+					return `${type.componentType.nativeType}_array`
+				} else {
+					return type.nativeType
+				}
+			}
+			if (isCodegenOneOfSchema(schema)) {
+				/* oneOf schemas turn into an enum, so each member needs a `name` for our enum */
+				for (const comp of schema.composes) {
+					if (comp.name === null) {
+						comp.name = helper.uniqueName(suggestedNameForType(comp.nativeType), helper.scopeOf(schema), comp.schemaType)
+					}
+				}
 			}
 		},
 
