@@ -37,13 +37,14 @@ public enum {{className name}}Result {
 {{>frag/parametersStruct}}
 
 {{>frag/operationDocumentation}}
-open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
 	{{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
 }
 
 {{/if}}
 {{>frag/operationDocumentation}}
-open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue?, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+	let responseQueue = responseQueue ?? configuration.responseQueue
 	do {
 		let __request = try {{{name}}}Request({{{_callParams}}})
 		URLSession.handleApiRequest(__request) { response, data, error in
