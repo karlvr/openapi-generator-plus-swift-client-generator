@@ -14,7 +14,7 @@ public enum {{{name}}} : Swift.Codable, Swift.Hashable, Swift.CaseIterable, Swif
         }
     }
 
-    var value: String {
+    public var value: String {
         switch self {
         case let .unknown(value): return value
 {{#each enumValues}}
