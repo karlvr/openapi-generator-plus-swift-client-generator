@@ -39,8 +39,12 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
         }
     }
     
-    var dateComponents: Foundation.DateComponents {
-        return Foundation.DateComponents(year: year, month: month, day: day)
+    public var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(calendar: Calendar(identifier: .gregorian), year: year, month: month, day: day)
+    }
+    
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
     }
     
     public func encode(to encoder: Swift.Encoder) throws {

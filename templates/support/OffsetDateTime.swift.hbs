@@ -74,8 +74,12 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
         Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
     }
     
-    var dateComponents: Foundation.DateComponents {
-        return Foundation.DateComponents(timeZone: timezone, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    public var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(calendar: Calendar(identifier: .gregorian), timeZone: timezone, year: year, month: month, day: day, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    }
+    
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
     }
     
     public func encode(to encoder: Swift.Encoder) throws {

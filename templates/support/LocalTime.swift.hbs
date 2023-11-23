@@ -47,8 +47,12 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
         Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
     }
     
-    var dateComponents: DateComponents {
-        return DateComponents(hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    public var dateComponents: DateComponents {
+        return DateComponents(calendar: Calendar(identifier: .gregorian), hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    }
+    
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
     }
         
     public func encode(to encoder: Encoder) throws {
