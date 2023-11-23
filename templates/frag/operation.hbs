@@ -54,23 +54,34 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 
 			switch response!.statusCode {
 {{#each responses}}
-				case {{{code}}}:
-					{{#if defaultContent.nativeType}}
-					if let data = data {
-						do {
-							completion(._{{{code}}}(try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)))
-						} catch let decodingError {
+			case {{{code}}}:
+				{{#if defaultContent.nativeType}}
+				if let data = data {
+					do {
+						let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+						responseQueue.asyncIfPresent {
+							completion(._{{{code}}}(decodedData))
+						}
+					} catch let decodingError {
+						responseQueue.asyncIfPresent {
 							completion(.error(decodingError))
 						}
-					} else {
+					}
+				} else {
+					responseQueue.asyncIfPresent {
 						completion(.unexpected(response: response!, data: data))
 					}
-					{{else}}
+				}
+				{{else}}
+				responseQueue.asyncIfPresent {
 					completion(._{{{code}}})
-					{{/if}}
+				}
+				{{/if}}
 {{/each}}
-				default:
+			default:
+				responseQueue.asyncIfPresent {
 					completion(.unexpected(response: response!, data: data))
+				}
 			}
 		}
 	} catch let error {
