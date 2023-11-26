@@ -490,6 +490,13 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			if (!parentProp.nullable !== !childProp.nullable) {
 				return false
 			}
+
+			/* Because in Swift we use a protocol for allOf, we can't comply if the required status mismatches at all,
+			   for the same reason as nullability above.
+			 */
+			if (parentProp.required !== childProp.required) {
+				return false
+			}
 			return true
 		},
 	}
