@@ -5,7 +5,6 @@ import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator, configBoolean, configObject, configString, debugStringify } from '@openapi-generator-plus/generator-common'
-import * as idx from '@openapi-generator-plus/indexed-type'
 import { promises as fs } from 'fs'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
