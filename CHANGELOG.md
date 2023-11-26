@@ -1,5 +1,12 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.3.1
+
+### Patch Changes
+
+- 11b48e6: Support allOf schema where required differs between parent and child
+- f4fc1fd: Update to latest core types
+
 ## 0.3.0
 
 ### Minor Changes
