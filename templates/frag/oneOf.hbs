@@ -60,11 +60,11 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
             return
         } catch {}
 {{/each}}
-{{/if}}
 {{#if discriminator}}
         self = .unknown(discriminator)
 {{else}}
         self = .unknown
+{{/if}}
 {{/if}}
     }
 
