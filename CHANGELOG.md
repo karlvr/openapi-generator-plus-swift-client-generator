@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.3.2
+
+### Patch Changes
+
+- 9420814: Fix decoding of compositions
+
 ## 0.3.1
 
 ### Patch Changes
