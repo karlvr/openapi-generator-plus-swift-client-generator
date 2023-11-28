@@ -1,4 +1,7 @@
 {{>frag/schemaDocumentation}}
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
 {{#join '_parents' ', '}}
 Swift.Codable
 Swift.Hashable
@@ -9,6 +12,9 @@ Swift.Hashable
 public struct {{{name}}}: {{{_parents}}} {
 {{#each properties}}
     {{>frag/propertyDocumentation}}
+    {{#if deprecated}}
+    @available(*, deprecated)
+    {{/if}}
     public var {{{name}}}: {{{nativeType}}}
 {{/each}}
 
