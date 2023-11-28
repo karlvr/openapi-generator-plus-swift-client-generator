@@ -1,5 +1,12 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 0.3.3
+
+### Patch Changes
+
+- 4f2ce09: Add annotations to deprecated operations and properties
+- eb05a27: Update core and other deps
+
 ## 0.3.2
 
 ### Patch Changes
