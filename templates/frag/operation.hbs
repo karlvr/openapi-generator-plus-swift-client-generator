@@ -48,50 +48,40 @@ open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {
 {{>frag/operationDocumentation}}
 open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
-    do {
-        let __request = try {{{name}}}Request({{{_callParams}}})
-        URLSession.handleApiRequest(__request) { response, data, error in
-            if let error = error {
-                responseQueue.asyncIfPresent {
-                    completion(.error(error))
-                }
-                return
+    Task {
+        do {
+            let result = try await {{{name}}}({{{_callParams}}})
+            responseQueue.asyncIfPresent {
+                completion(result)
             }
-
-            switch response!.statusCode {
-{{#each responses}}
-            case {{{code}}}:
-                {{#if defaultContent.nativeType}}
-                if let data = data {
-                    do {
-                        let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
-                        responseQueue.asyncIfPresent {
-                            completion(._{{{code}}}(decodedData))
-                        }
-                    } catch let decodingError {
-                        responseQueue.asyncIfPresent {
-                            completion(.error(decodingError))
-                        }
-                    }
-                } else {
-                    responseQueue.asyncIfPresent {
-                        completion(.unexpected(response: response!, data: data))
-                    }
-                }
-                {{else}}
-                responseQueue.asyncIfPresent {
-                    completion(._{{{code}}})
-                }
-                {{/if}}
-{{/each}}
-            default:
-                responseQueue.asyncIfPresent {
-                    completion(.unexpected(response: response!, data: data))
-                }
+        } catch {
+            responseQueue.asyncIfPresent {
+                completion(.error(error))
             }
         }
-    } catch let error {
-        completion(.error(error))
+    }
+}
+
+{{>frag/operationDocumentation}}
+open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
+    let __request = try {{{name}}}Request({{{_callParams}}})
+    let (response, data) = try await URLSession.handleApiRequest(__request)
+    switch response.statusCode {
+{{#each responses}}
+    case {{{code}}}:
+    {{#if defaultContent.nativeType}}
+        do {
+            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+            return ._{{{code}}}(decodedData)
+        } catch {
+            throw APIError.invalidResponse(error)
+        }
+        {{else}}
+        return ._{{{code}}}
+    {{/if}}
+{{/each}}
+    default:
+        throw APIError.unexpectedResponse(response, data: data)
     }
 }
 

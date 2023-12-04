@@ -1,0 +1,13 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public enum APIError: Error {
+    case authenticationFailed
+    case invalidResponse(_ error: Error)
+    case systemError(_ error: Error)
+    case securitySchemeNotConfigured(_ securityScheme: SecurityScheme)
+    case unexpectedResponse(_ response: HTTPURLResponse, data: Data)
+}

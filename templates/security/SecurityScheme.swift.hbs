@@ -1,6 +1,6 @@
 /** The security schemes declared by the API specification. */
 public enum SecurityScheme: String {
 {{#each securitySchemes}}
-    case {{identifier name}}: {{{stringLiteral name}}}
+    case {{identifier name}} = {{{stringLiteral name}}}
 {{/each}}
 }
