@@ -1,0 +1,270 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public protocol SecurityClient {
+    /** An API request received a 401 response */
+    func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws
+    
+    /** An authorization header to the request */
+    func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest
+}
+
+/** Delegates security requiements to the appropriate SecurityClient. */
+public class SecurityClientController: SecurityClient {
+    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        if let client = clients[securityScheme] {
+            try await client.authenticationFailed(securityScheme: securityScheme, scopes: scopes)
+        } else {
+            throw APIError.securitySchemeNotConfigured(securityScheme)
+        }
+    }
+
+    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+        if let client = clients[securityScheme] {
+            return try await client.authorize(securityScheme: securityScheme, scopes: scopes, request: request)
+        } else {
+            return request
+        }
+    }
+    
+    var clients: [SecurityScheme: SecurityClient] = [:]
+    
+    public func setClient(securityScheme: SecurityScheme, client: SecurityClient) {
+        self.clients[securityScheme] = client
+    }
+
+    public init(clients: [SecurityScheme : SecurityClient] = [:]) {
+        self.clients = clients
+    }
+}
+
+func createOAuthRequest(url: URL, params: [String: String]) -> URLRequest {
+    var refreshRequest = URLRequest(url: url)
+    refreshRequest.httpMethod = "POST"
+    refreshRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    refreshRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+    
+    let queryString = params.map({ key, value in
+        let k = key.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        let v = value.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        return "\(k)=\(v)"
+    }).joined(separator: "&")
+    
+    let formData = queryString.data(using: .utf8)
+    
+    refreshRequest.httpBody = formData
+    
+    return refreshRequest
+}
+
+public class AbstractOAuthFlowClient: SecurityClient {
+    
+    private let tokenManager: OAuthAccessTokenManager
+    
+    let clientId: String
+    let clientSecret: String
+    
+    public var refreshToken: String? {
+         get async {
+            return await tokenManager.accessToken?.refreshToken
+        }
+    }
+
+    init(clientId: String, clientSecret: String, refreshURL: URL?, automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil) {
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+    }
+    
+    func setAccessToken(_ token: OAuthToken) async throws {
+        try await tokenManager.setAccessToken(token)
+    }
+    
+    func setRefreshToken(_ token: String) async throws {
+        try await tokenManager.setRefreshToken(token)
+        try await tokenManager.refreshToken()
+    }
+    
+    public func authenticate(refreshToken: String) async throws {
+        try await setRefreshToken(refreshToken)
+    }
+    
+    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        try await tokenManager.refreshToken()
+    }
+    
+    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+        return try await tokenManager.authorize(request: request)
+    }
+}
+
+public class OAuthPasswordFlowClient: AbstractOAuthFlowClient {
+    
+    public private(set) var tokenURL: URL?
+    
+    public init(clientId: String,
+                clientSecret: String,
+                refreshURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
+                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token")) {
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        self.tokenURL = tokenURL
+    }
+    
+    public func authenticate(username: String, password: String, scopes: [String]?, additionalParams params: [String: String]? = nil) async throws {
+        guard let url: URL = tokenURL else {
+            throw APIError.authenticationPrevented
+        }
+        var form: [String: String] = [
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ]
+        if let scope = scopes {
+            form["scope"] = scopes?.joined(separator: " ")
+        }
+        if let params = params {
+            form.merge(params, uniquingKeysWith: { (_, new) in new })
+        }
+        let request = createOAuthRequest(url: url, params: form)
+        
+        let requestDate = Date()
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+            resultData.createdAt = requestDate
+            await try setAccessToken(resultData)
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+}
+
+public class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient {
+    
+    private let tokenURL: URL?
+    
+    public init(clientId: String,
+                clientSecret: String,
+                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token")) {
+        self.tokenURL = tokenURL
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: nil, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+    }
+    
+    public func authenticate(scopes: [String]?, additionalParams params: [String: String]? = nil) async throws {
+        guard let url: URL = tokenURL else {
+            throw APIError.authenticationPrevented
+        }
+        var form: [String: String] = [
+            "grant_type": "client_credentials",
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ]
+        if let scope = scopes {
+            form["scope"] = scopes?.joined(separator: " ")
+        }
+        if let params = params {
+            form.merge(params, uniquingKeysWith: { (_, new) in new })
+        }
+        let request = createOAuthRequest(url: url, params: form)
+        
+        let requestDate = Date()
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+            resultData.createdAt = requestDate
+            await try setAccessToken(resultData)
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+    
+    public override func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        do {
+            try await super.authenticationFailed(securityScheme: securityScheme, scopes: scopes)
+        } catch {
+            try await authenticate(scopes: scopes)
+        }
+    }
+    
+}
+
+public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
+    
+    private let tokenURL: URL?
+    private let authorizationURL: URL?
+    
+    public init(clientId: String,
+                clientSecret: String,
+                refreshURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
+                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
+                authorizationURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/authorize")) {
+        self.tokenURL = tokenURL
+        self.authorizationURL = authorizationURL
+        
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+    }
+    
+}
+
+public struct OAuthToken : Decodable, Equatable {
+    public var accessToken: String?
+    public var tokenType: String?
+    public var refreshToken: String?
+    public var expiresIn: TimeInterval?
+    public var scope: String?
+    
+    var createdAt: Date?
+    var isExpired: Bool {
+        guard let createdAt = createdAt, let expiresIn = expiresIn else {
+            return false // We don't know in this situation so best to assume the token is valid and have the API try it
+        }
+        
+        return createdAt.addingTimeInterval(expiresIn) >= Date()
+    }
+    
+    public init(accessToken: String? = nil, tokenType: String? = nil, refreshToken: String? = nil, expiresIn: TimeInterval? = nil, scope: String? = nil) {
+        self.accessToken = accessToken
+        self.tokenType = tokenType
+        self.refreshToken = refreshToken
+        self.expiresIn = expiresIn
+        self.scope = scope
+    }
+
+    enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case refreshToken = "refresh_token"
+        case expiresIn = "expires_in"
+        case scope
+    }
+
+    // Encodable protocol methods
+
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accessToken = try container.decodeIfPresent(String.self, forKey: .accessToken)
+        tokenType = try container.decodeIfPresent(String.self, forKey: .tokenType)
+        refreshToken = try container.decodeIfPresent(String.self, forKey: .refreshToken)
+        expiresIn = try container.decodeIfPresent(TimeInterval.self, forKey: .expiresIn)
+        scope = try container.decodeIfPresent(String.self, forKey: .scope)
+    }
+
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(accessToken, forKey: .accessToken)
+        try container.encodeIfPresent(tokenType, forKey: .tokenType)
+        try container.encodeIfPresent(refreshToken, forKey: .refreshToken)
+        try container.encodeIfPresent(expiresIn, forKey: .expiresIn)
+        try container.encodeIfPresent(scope, forKey: .scope)
+    }
+}

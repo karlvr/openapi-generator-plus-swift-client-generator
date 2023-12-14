@@ -1,0 +1,15 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+extension CharacterSet {
+
+    /// The character set for percent encoding x-www-form-urlencoded data.
+    static let formUrlEncoded: CharacterSet = {
+        var set = CharacterSet.urlQueryAllowed
+        set.remove("+")
+        return set
+    }()
+}

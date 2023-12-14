@@ -5,7 +5,12 @@
 import Foundation
 
 public enum APIError: Error {
-    case authenticationFailed
+    /// The authentication could not be attempted
+    case authenticationPrevented
+
+    /// The authentication request failed
+    case authenticationFailed(_ response: HTTPURLResponse, data: Data)
+    
     case invalidResponse(_ error: Error)
     case systemError(_ error: Error)
     case securitySchemeNotConfigured(_ securityScheme: SecurityScheme)

@@ -1,0 +1,126 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+/** A token manager that will group refresh attempts to prevent concurrent token requests */
+import Foundation
+
+actor OAuthAccessTokenManager {
+    
+    var accessToken: OAuthToken? {
+        didSet {
+            restartRefreshTimer()
+        }
+    }
+    
+    private let refreshTokenURL: URL?
+    private let automaticallyRefreshTokensThisManySecondsEarly: TimeInterval?
+    private var refreshTask: Task<(), Error>?
+    private var refreshTimer: Timer?
+    private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
+    
+    init(refreshTokenURL: URL?, automaticallyRefreshTokensThisManySecondsEarly: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil) {
+        self.automaticallyRefreshTokensThisManySecondsEarly = automaticallyRefreshTokensThisManySecondsEarly
+        self.prepareRequest = prepareRequest
+        self.refreshTokenURL = refreshTokenURL
+    }
+        
+    private func restartRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        
+        guard 
+            let autoTime = automaticallyRefreshTokensThisManySecondsEarly,
+            let token = accessToken, 
+            let expiresIn = token.expiresIn,
+            expiresIn - autoTime > 0
+        else {
+            return
+        }
+        
+        let timeout = Date(timeIntervalSinceNow: expiresIn - autoTime)
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: expiresIn - autoTime, repeats: false, block: { t in
+            Task {
+                do {
+                    try await self.refreshToken()
+                } catch {
+                    print("An error ocurred in the automatic refresh: \(error)")
+                }
+            }
+        })
+    }
+    
+    func setAccessToken(_ token: OAuthToken) async throws {
+        accessToken = token
+    }
+    
+    func setRefreshToken(_ token: String) async throws {
+        accessToken = OAuthToken(refreshToken: token)
+    }
+    
+    func refreshToken() async throws {
+        guard let refreshTokenURL = refreshTokenURL else {
+            throw APIError.authenticationPrevented
+        }
+        guard let refreshToken = accessToken?.refreshToken else {
+            throw APIError.authenticationPrevented
+        }
+        
+        if let t = refreshTask {
+            let _ = try await t.value
+            return
+        }
+        
+        // Clear out the refresh timer if active
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        
+        let t = Task {
+            // Do the refresh
+            let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
+            let requestDate = Date()
+            let result = try await URLSession.handleApiRequest(request)
+            switch result.response.statusCode {
+            case 200:
+                var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+                resultData.createdAt = requestDate
+                self.accessToken = resultData
+            default:
+                throw APIError.authenticationFailed(result.response, data: result.data)
+            }
+            
+        }
+        
+        refreshTask = t
+        try await t.value
+        refreshTask = nil
+    }
+    
+    private func createRefreshRequest(_ token: String, url: URL) -> URLRequest {
+        return createOAuthRequest(url: url, params: [
+            "grant_type" : "refresh_token",
+            "refresh_token": token
+        ])
+    }
+    
+    func authorize(request: URLRequest) async throws -> URLRequest {
+        if accessToken?.accessToken == nil || accessToken?.isExpired == true {
+            try await refreshToken()
+        }
+        
+        if let t = refreshTask {
+            let _ = try await t.value
+        }
+        
+        guard let token = accessToken?.accessToken else {
+            throw APIError.authenticationPrevented
+        }
+        
+        var authedRequest = request
+        // get the token and stick it on the URL Request
+        authedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return authedRequest
+    }
+    
+}

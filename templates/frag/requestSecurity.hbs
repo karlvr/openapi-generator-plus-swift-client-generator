@@ -26,10 +26,8 @@ if let localVarUsername = self.configuration.username, let localVarPassword = se
 {{/if}}
 {{#or scheme.isOAuth scheme.isOpenIdConnect}}
 // oauth or openIdConnect required
-if let authorizationBlock = self.configuration.authorizationBlock {
-    if let localVarAuthorizationValue = authorizationBlock({{{stringLiteral scheme.name}}}, [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}]) {
-        localVarHeaderParameter.set("Authorization", "Bearer \(localVarAuthorizationValue)")
-    }
+if let securityClient = self.configuration.securityClient {
+    localVarRequest = try await securityClient.authorize(securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}], request: localVarRequest)
 }
 {{/or}}
 {{#if scheme.isHttp}}

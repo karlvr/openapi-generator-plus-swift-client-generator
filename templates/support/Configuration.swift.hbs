@@ -5,7 +5,8 @@
 import Foundation
 
 public typealias ConfigurationAPIKeyBlock = ((_ name: String) -> String?)
-public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [String]?) -> String?)
+public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [String]?, _ request: URLRequest) -> URLRequest)
+public typealias ConfigurationAuthenticationFailedBlock = ((_ name: String, _ scopes: [String]?, _ completion: @escaping(_ result: Result<Void, APIError>) -> Void) -> Void)
 public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
 
 public struct Configuration {
@@ -27,7 +28,7 @@ public struct Configuration {
     /**
      * Return the authorization value to use for the named security scheme and scopes.
      */
-    public var authorizationBlock: ConfigurationAuthorizationBlock?
+    public var securityClient: SecurityClient?
 
     /**
      * Override the default base path.
@@ -50,7 +51,7 @@ public struct Configuration {
         timeoutInterval: TimeInterval = 30,
         responseQueue: DispatchQueue? = nil,
         apiKeyBlock: ConfigurationAPIKeyBlock? = nil,
-        authorizationBlock: ConfigurationAuthorizationBlock? = nil,
+        securityClient: SecurityClient? = nil,
         prepareRequestBlock: ConfigurationPrepareRequestBlock? = nil
     ) {
         self.username = username
@@ -60,7 +61,7 @@ public struct Configuration {
         self.timeoutInterval = timeoutInterval
         self.responseQueue = responseQueue
         self.apiKeyBlock = apiKeyBlock
-        self.authorizationBlock = authorizationBlock
+        self.securityClient = securityClient
         self.prepareRequestBlock = prepareRequestBlock
     }
 }

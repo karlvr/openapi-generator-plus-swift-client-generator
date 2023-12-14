@@ -64,7 +64,11 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 
 {{>frag/operationDocumentation}}
 open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
-    let __request = try {{{name}}}Request({{{_callParams}}})
+    return try await {{{name}}}({{{_callParams}}}, allowsReauth: true)
+}
+
+private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
+    let __request = try await {{{name}}}Request({{{_callParams}}})
     let (response, data) = try await URLSession.handleApiRequest(__request)
     switch response.statusCode {
 {{#each responses}}
@@ -80,13 +84,20 @@ open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
         return ._{{{code}}}
     {{/if}}
 {{/each}}
+    case 401:
+        if allowsReauth, let securityClient = configuration.securityClient {
+            try await securityClient.authenticationFailed(securityScheme: .oauth, scopes: nil)
+            return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
+        } else {
+            throw APIError.authenticationFailed
+        }
     default:
         throw APIError.unexpectedResponse(response, data: data)
     }
 }
 
 {{>frag/operationDocumentation}}
-open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
+open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
     let localVarPath = "{{{group.path}}}{{{path}}}"
     {{#each pathParams}}
         .replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
@@ -108,7 +119,7 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 {{/each}}
 
 {{/if}}
-    {{>frag/requestSecurity}}
+    
 
     localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
 
@@ -140,6 +151,9 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
     
 {{/with}}
 {{/if}}
+
+    {{>frag/requestSecurity}}
+
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
     if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
