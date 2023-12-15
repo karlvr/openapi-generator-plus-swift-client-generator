@@ -64,7 +64,7 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 
 {{>frag/operationDocumentation}}
 open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
-    return try await {{{name}}}({{{_callParams}}}, allowsReauth: true)
+    return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
 }
 
 private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
