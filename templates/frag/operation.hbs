@@ -89,7 +89,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             try await securityClient.authenticationFailed(securityScheme: .oauth, scopes: nil)
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
-            throw APIError.authenticationFailed
+            throw APIError.authenticationFailed(response, data: data)
         }
     default:
         throw APIError.unexpectedResponse(response, data: data)
