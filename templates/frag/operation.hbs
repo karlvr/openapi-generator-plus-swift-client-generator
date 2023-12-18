@@ -72,6 +72,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     let (response, data) = try await URLSession.handleApiRequest(__request)
     switch response.statusCode {
 {{#each responses}}
+    {{#ifneq code 401}}
     case {{{code}}}:
     {{#if defaultContent.nativeType}}
         do {
@@ -83,10 +84,32 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
         {{else}}
         return ._{{{code}}}
     {{/if}}
+    {{/ifneq}}
 {{/each}}
     case 401:
         if allowsReauth, let securityClient = configuration.securityClient {
-            try await securityClient.authenticationFailed(securityScheme: .oauth, scopes: nil)
+            {{#if securityRequirements}}
+            var didAuthenticate = false
+            var lastError: Error?
+            {{#each securityRequirements.requirements}}
+            if !didAuthenticate {
+                do {
+                    {{#each schemes}}
+                    try await securityClient.authenticationFailed(securityScheme: .{{{scheme.name}}}, scopes: nil)
+                    {{/each}}
+                    didAuthenticate = true
+                } catch (let error) {
+                    lastError = error
+                }
+            }
+            {{/each}}
+            {{/if}}
+            {{#if securityRequirements.optional}}
+            {{else}}
+            if (!didAuthenticate) {
+                throw lastError ?? APIError.authenticationPrevented
+            }
+            {{/if}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
             throw APIError.authenticationFailed(response, data: data)

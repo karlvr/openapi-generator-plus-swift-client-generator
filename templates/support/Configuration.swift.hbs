@@ -10,20 +10,6 @@ public typealias ConfigurationAuthenticationFailedBlock = ((_ name: String, _ sc
 public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
 
 public struct Configuration {
-    /**
-     * Return the API key if using apiKey authentication.
-     */
-    public var apiKeyBlock: ConfigurationAPIKeyBlock?
-
-    /**
-     * The username if using basic authentication.
-     */
-    public var username: String?
-
-    /**
-     * The password if using basic authentication.
-     */
-    public var password: String?
 
     /**
      * Return the authorization value to use for the named security scheme and scopes.
@@ -44,23 +30,17 @@ public struct Configuration {
     public var prepareRequestBlock: ConfigurationPrepareRequestBlock?
 
     public init(
-        username: String? = nil,
-        password: String? = nil,
         basePath: String? = nil,
         cachePolicy: URLRequest.CachePolicy? = nil,
         timeoutInterval: TimeInterval = 30,
         responseQueue: DispatchQueue? = nil,
-        apiKeyBlock: ConfigurationAPIKeyBlock? = nil,
         securityClient: SecurityClient? = nil,
         prepareRequestBlock: ConfigurationPrepareRequestBlock? = nil
     ) {
-        self.username = username
-        self.password = password
         self.basePath = basePath
         self.cachePolicy = cachePolicy
         self.timeoutInterval = timeoutInterval
         self.responseQueue = responseQueue
-        self.apiKeyBlock = apiKeyBlock
         self.securityClient = securityClient
         self.prepareRequestBlock = prepareRequestBlock
     }

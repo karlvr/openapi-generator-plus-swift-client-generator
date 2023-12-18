@@ -107,9 +107,9 @@ public class OAuthPasswordFlowClient: AbstractOAuthFlowClient {
     
     public init(clientId: String,
                 clientSecret: String,
-                refreshURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
+                refreshURL: URL? = nil,
                 automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
-                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token")) {
+                tokenURL: URL? = nil) {
         super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
         self.tokenURL = tokenURL
     }
@@ -152,10 +152,11 @@ public class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient {
     
     public init(clientId: String,
                 clientSecret: String,
+                refreshURL: URL? = nil,
                 automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
-                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token")) {
+                tokenURL: URL? = nil) {
         self.tokenURL = tokenURL
-        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: nil, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
     }
     
     public func authenticate(scopes: [String]?, additionalParams params: [String: String]? = nil) async throws {
@@ -204,10 +205,10 @@ public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
     
     public init(clientId: String,
                 clientSecret: String,
-                refreshURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
+                refreshURL: URL? = nil,
                 automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
-                tokenURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/token"),
-                authorizationURL: URL? = URL(string: "https://api.letterboxd.com/api/v0/auth/authorize")) {
+                tokenURL: URL? = nil,
+                authorizationURL: URL? = nil) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
         
@@ -223,8 +224,8 @@ public struct OAuthToken : Decodable, Equatable {
     public var expiresIn: TimeInterval?
     public var scope: String?
     
-    var createdAt: Date?
-    var isExpired: Bool {
+    public var createdAt: Date?
+    public var isExpired: Bool {
         guard let createdAt = createdAt, let expiresIn = expiresIn else {
             return false // We don't know in this situation so best to assume the token is valid and have the API try it
         }
@@ -266,5 +267,95 @@ public struct OAuthToken : Decodable, Equatable {
         try container.encodeIfPresent(refreshToken, forKey: .refreshToken)
         try container.encodeIfPresent(expiresIn, forKey: .expiresIn)
         try container.encodeIfPresent(scope, forKey: .scope)
+    }
+}
+
+/// A `SecurityClient` responsible for handling basic authentication credentials.
+public class BasicAuthenticationSecurityClient: SecurityClient {
+    
+    private let username: String
+    private let password: String
+    
+    /// Initializes a `BasicAuthenticationSecurityClient` instance with provided credentials.
+    ///
+    /// - Parameters:
+    ///   - username: A string representing the username for authentication.
+    ///   - password: A string representing the password for authentication.
+    public init(username: String, password: String) {
+        self.username = username
+        self.password = password
+    }
+    
+    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        
+    }
+    
+    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+        var request = request
+        let token = "\(username):\(password)".data(using: .utf8)!.base64EncodedString()
+        request.setValue("Basic \(token)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+
+}
+
+/// A `SecurityClient` responsible for handling api key authentication credentials.
+public class APIKeySecurityClient: SecurityClient {
+    
+    private let apiKey: String
+    private let paramName: String
+    
+    public enum Mode {
+        case header
+        case query
+        case cookie
+    }
+    
+    private let mode: Mode
+    
+    /// Initializes a `APIKeySecurityClient` instance with provided credentials.
+    ///
+    /// - Parameters:
+    ///   - apiKey: A string representing the username for authentication.
+    ///   - mode: A setting to configure the location of the API Key in the request.
+    ///   - paramName: The name of the parameter which will appear as the header or query name
+    public init(apiKey: String, mode: Mode, paramName: String) {
+        self.apiKey = apiKey
+        self.mode = mode
+        self.paramName = paramName
+    }
+    
+    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        
+    }
+    
+    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+        var request = request
+        switch mode {
+        case .header:
+            request.setValue(apiKey, forHTTPHeaderField: paramName)
+        case .query:
+            guard let url = request.url else {
+                throw APIError.authenticationPrevented
+            }
+            var components = URLComponents(string: url.absoluteString)
+            var queryItems = components?.queryItems ?? []
+            queryItems.append(URLQueryItem(name: paramName, value: apiKey))
+            components?.queryItems = queryItems
+            request.url = components?.url
+        case .cookie:
+            let cookieProperties: [HTTPCookiePropertyKey: Any] = [
+                HTTPCookiePropertyKey.name: paramName,
+                HTTPCookiePropertyKey.value: apiKey,
+            ]
+
+            if let cookie = HTTPCookie(properties: cookieProperties) {
+                let headers = HTTPCookie.requestHeaderFields(with: [cookie])
+                headers.forEach { key, value in
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+            }
+        }
+        return request
     }
 }

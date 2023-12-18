@@ -1,43 +1,27 @@
 {{#if securityRequirements}}
+var didAuthenticate = false
+var lastError: Error?
+
 {{#each securityRequirements.requirements}}
-{{#each schemes}}
-// authentication {{scheme.name}} required
-{{#if scheme.isApiKey}}
-{{#if scheme.isInHeader}}
-if let localVarApiKeyBlock = self.configuration.apiKeyBlock {
-    if let localVarApiKeyValue = localVarApiKeyBlock({{{stringLiteral scheme.name}}}) {
-        localVarHeaderParameter.set({{{stringLiteral scheme.paramName}}}, localVarApiKeyValue)
+if !didAuthenticate {
+    var authedRequest = localVarRequest
+    do {
+        {{#each schemes}}
+        if let securityClient = self.configuration.securityClient {
+            authedRequest = try await securityClient.authorize(securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}], request: authedRequest)
+        }
+        {{/each}}
+        didAuthenticate = true
+        localVarRequest = authedRequest
+    } catch (let error) {
+        lastError = error
     }
 }
-{{/if}}
-{{#if scheme.isInQuery}}
-if let localVarApiKeyBlock = self.configuration.apiKeyBlock {
-    if let localVarApiKeyValue = localVarApiKeyBlock({{{stringLiteral scheme.name}}}) {
-        localVarQueryParameter.set({{{stringLiteral scheme.paramName}}}, localVarApiKeyValue)
-    }
-}
-{{/if}}
-{{/if}}
-{{#if scheme.isBasic}}
-// http basic authentication required
-if let localVarUsername = self.configuration.username, let localVarPassword = self.configuration.password {
-    localVarHeaderParameter.set("Authorization", "Basic \("\(localVarUsername):\(localVarPassword)".data(using: .utf8)!.base64EncodedString())")
-}
-{{/if}}
-{{#or scheme.isOAuth scheme.isOpenIdConnect}}
-// oauth or openIdConnect required
-if let securityClient = self.configuration.securityClient {
-    localVarRequest = try await securityClient.authorize(securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}], request: localVarRequest)
-}
-{{/or}}
-{{#if scheme.isHttp}}
-// http authorization required
-if let authorizationBlock = self.configuration.authorizationBlock {
-    if let localVarAuthorizationValue = authorizationBlock({{{stringLiteral scheme.name}}}, nil) {
-        localVarHeaderParameter.set("Authorization", "{{capitalize scheme.scheme}} \(localVarAuthorizationValue)")
-    }
-}
-{{/if}}
 {{/each}}
-{{/each}}
+{{#if securityRequirements.optional}}
+{{else}}
+if (!didAuthenticate) {
+    throw lastError ?? APIError.authenticationPrevented
+}
+{{/if}}
 {{/if}}
