@@ -103,12 +103,11 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
                 }
             }
             {{/each}}
-            {{/if}}
-            {{#if securityRequirements.optional}}
-            {{else}}
+            {{#unless securityRequirements.optional}}
             if (!didAuthenticate) {
                 throw lastError ?? APIError.authenticationPrevented
             }
+            {{/unless}}
             {{/if}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {

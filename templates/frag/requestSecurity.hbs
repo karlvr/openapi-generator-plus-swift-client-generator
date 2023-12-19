@@ -18,10 +18,9 @@ if !didAuthenticate {
     }
 }
 {{/each}}
-{{#if securityRequirements.optional}}
-{{else}}
+{{#unless securityRequirements.optional}}
 if (!didAuthenticate) {
     throw lastError ?? APIError.authenticationPrevented
 }
-{{/if}}
+{{/unless}}
 {{/if}}
