@@ -2,9 +2,9 @@
 //  {{>frag/generatedBy}}
 //
 
-/** A token manager that will group refresh attempts to prevent concurrent token requests */
 import Foundation
 
+/** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
 actor OAuthAccessTokenManager {
     
     var accessToken: OAuthToken? {

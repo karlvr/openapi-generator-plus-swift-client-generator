@@ -11,9 +11,7 @@ public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLReques
 
 public struct Configuration {
 
-    /**
-     * Return the authorization value to use for the named security scheme and scopes.
-     */
+    /** The handler for all security requests. */
     public var securityClient: SecurityClient?
 
     /**
