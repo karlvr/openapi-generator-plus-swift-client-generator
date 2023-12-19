@@ -170,16 +170,15 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
         {{>frag/requestBody}}
     }
     {{/if}}
-    
 {{/with}}
 {{/if}}
 
-    {{>frag/requestSecurity}}
-
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
-    if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
-        localVarPrepareRequestBlock(&localVarRequest)
+    {{>frag/requestSecurity}}
+
+    if let localVarFinalizeReleaseBlock = self.configuration.finalizeReleaseBlock {
+        localVarFinalizeReleaseBlock(&localVarRequest)
     }
     return localVarRequest
 }
