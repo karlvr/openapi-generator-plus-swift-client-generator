@@ -73,10 +73,10 @@ public class AbstractOAuthFlowClient: SecurityClient {
         }
     }
 
-    init(clientId: String, clientSecret: String, refreshURL: URL?, automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil) {
+    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil) {
         self.clientId = clientId
         self.clientSecret = clientSecret
-        self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
     }
     
     func setAccessToken(_ token: OAuthAccessToken) async throws {
@@ -108,9 +108,9 @@ public class OAuthPasswordFlowClient: AbstractOAuthFlowClient {
     public init(clientId: String,
                 clientSecret: String,
                 refreshURL: URL? = nil,
-                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
                 tokenURL: URL? = nil) {
-        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
         self.tokenURL = tokenURL
     }
     
@@ -153,10 +153,10 @@ public class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient {
     public init(clientId: String,
                 clientSecret: String,
                 refreshURL: URL? = nil,
-                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
                 tokenURL: URL? = nil) {
         self.tokenURL = tokenURL
-        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
     }
     
     public func authenticate(scopes: [String]?, additionalParams params: [String: String]? = nil) async throws {
@@ -206,13 +206,13 @@ public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
     public init(clientId: String,
                 clientSecret: String,
                 refreshURL: URL? = nil,
-                automaticallyRefreshTokensThisManySecondsEarly autoRefreshInterval: TimeInterval? = nil,
+                preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
                 tokenURL: URL? = nil,
                 authorizationURL: URL? = nil) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
         
-        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
     }
     
 }

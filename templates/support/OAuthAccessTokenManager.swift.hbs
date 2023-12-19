@@ -14,13 +14,13 @@ actor OAuthAccessTokenManager {
     }
     
     private let refreshTokenURL: URL?
-    private let automaticallyRefreshTokensThisManySecondsEarly: TimeInterval?
+    private let preemptiveAccessTokenRefresh: TimeInterval?
     private var refreshTask: Task<(), Error>?
     private var refreshTimer: Timer?
     private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
     
-    init(refreshTokenURL: URL?, automaticallyRefreshTokensThisManySecondsEarly: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil) {
-        self.automaticallyRefreshTokensThisManySecondsEarly = automaticallyRefreshTokensThisManySecondsEarly
+    init(refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil) {
+        self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
         self.prepareRequest = prepareRequest
         self.refreshTokenURL = refreshTokenURL
     }
@@ -30,7 +30,7 @@ actor OAuthAccessTokenManager {
         refreshTimer = nil
         
         guard 
-            let autoTime = automaticallyRefreshTokensThisManySecondsEarly,
+            let autoTime = preemptiveAccessTokenRefresh,
             let token = accessToken, 
             let expiresIn = token.expiresIn,
             expiresIn - autoTime > 0

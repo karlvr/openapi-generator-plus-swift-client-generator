@@ -25,18 +25,18 @@ extension SecurityClient {
     {{#each flows}}
     {{!-- authorizationCode, implicit, password or clientCredentials --}}
     {{#ifeq type 'password'}}
-    public static func {{{identifier ../name}}}PasswordFlow(clientId: String, clientSecret: String, automaticallyRefreshTokensThisManySecondsEarly: TimeInterval? = nil) -> SecurityClient {
-        return OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, automaticallyRefreshTokensThisManySecondsEarly: automaticallyRefreshTokensThisManySecondsEarly{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
+    public static func {{{identifier ../name}}}PasswordFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
+        return OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
     }
     {{/ifeq}}
     {{#ifeq type 'clientCredentials'}}
-    public static func {{{identifier ../name}}}ClientCredentialsFlow(clientId: String, clientSecret: String, automaticallyRefreshTokensThisManySecondsEarly: TimeInterval? = nil) -> SecurityClient {
-        return OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, automaticallyRefreshTokensThisManySecondsEarly: automaticallyRefreshTokensThisManySecondsEarly{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
+    public static func {{{identifier ../name}}}ClientCredentialsFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
+        return OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
     }
     {{/ifeq}}
     {{#ifeq type 'authorizationCode'}}
-    public static func {{{identifier ../name}}}AuthorizationCodeFlow(clientId: String, clientSecret: String, automaticallyRefreshTokensThisManySecondsEarly: TimeInterval? = nil) -> SecurityClient {
-        return OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, automaticallyRefreshTokensThisManySecondsEarly: automaticallyRefreshTokensThisManySecondsEarly{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}}{{#if authorizationUrl}}, authorizationURL: URL(string: "{{{authorizationUrl}}}"){{/if}})
+    public static func {{{identifier ../name}}}AuthorizationCodeFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
+        return OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}}{{#if authorizationUrl}}, authorizationURL: URL(string: "{{{authorizationUrl}}}"){{/if}})
     }
     {{/ifeq}}
     {{#ifeq type 'implicit'}}
