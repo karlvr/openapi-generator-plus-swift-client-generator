@@ -6,7 +6,7 @@ import Foundation
 
 public protocol SecurityClient {
     /** An API request received a 401 response */
-    func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws
+    func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws
     
     /** An authorization header to the request */
     func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest
@@ -14,9 +14,9 @@ public protocol SecurityClient {
 
 /** Delegates security requiements to the appropriate SecurityClient. */
 public class SecurityClientController: SecurityClient {
-    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         if let client = clients[securityScheme] {
-            try await client.authenticationFailed(securityScheme: securityScheme, scopes: scopes)
+            try await client.reauthenticate(securityScheme: securityScheme, scopes: scopes)
         } else {
             throw APIError.securitySchemeNotConfigured(securityScheme)
         }
@@ -92,7 +92,7 @@ public class AbstractOAuthFlowClient: SecurityClient {
         try await setRefreshToken(refreshToken)
     }
     
-    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         try await tokenManager.refreshToken()
     }
     
@@ -188,9 +188,9 @@ public class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient {
         }
     }
     
-    public override func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public override func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         do {
-            try await super.authenticationFailed(securityScheme: securityScheme, scopes: scopes)
+            try await super.reauthenticate(securityScheme: securityScheme, scopes: scopes)
         } catch {
             try await authenticate(scopes: scopes)
         }
@@ -286,7 +286,7 @@ public class BasicAuthenticationSecurityClient: SecurityClient {
         self.password = password
     }
     
-    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         
     }
     
@@ -325,7 +325,7 @@ public class APIKeySecurityClient: SecurityClient {
         self.paramName = paramName
     }
     
-    public func authenticationFailed(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         
     }
     
