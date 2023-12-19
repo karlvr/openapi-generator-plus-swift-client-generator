@@ -73,6 +73,12 @@ public class AbstractOAuthFlowClient: SecurityClient {
         }
     }
 
+    public var accessToken: OAuthAccessToken? {
+         get async {
+            return await tokenManager.accessToken
+        }
+    }
+
     init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil) {
         self.clientId = clientId
         self.clientSecret = clientSecret
