@@ -104,8 +104,8 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             }
             {{/each}}
             {{#unless securityRequirements.optional}}
-            if (!didAuthenticate) {
-                throw lastError ?? APIError.authenticationPrevented
+            if !didAuthenticate {
+                throw lastError!
             }
             {{/unless}}
             {{/if}}
