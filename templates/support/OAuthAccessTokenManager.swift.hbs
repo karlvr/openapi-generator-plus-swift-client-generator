@@ -7,7 +7,7 @@ import Foundation
 /** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
 actor OAuthAccessTokenManager {
     
-    var accessToken: OAuthToken? {
+    var accessToken: OAuthAccessToken? {
         didSet {
             restartRefreshTimer()
         }
@@ -50,12 +50,12 @@ actor OAuthAccessTokenManager {
         })
     }
     
-    func setAccessToken(_ token: OAuthToken) async throws {
+    func setAccessToken(_ token: OAuthAccessToken) async throws {
         accessToken = token
     }
     
     func setRefreshToken(_ token: String) async throws {
-        accessToken = OAuthToken(refreshToken: token)
+        accessToken = OAuthAccessToken(refreshToken: token)
     }
     
     func refreshToken() async throws {
@@ -82,7 +82,7 @@ actor OAuthAccessTokenManager {
             let result = try await URLSession.handleApiRequest(request)
             switch result.response.statusCode {
             case 200:
-                var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+                var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
             default:

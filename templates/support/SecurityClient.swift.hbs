@@ -79,7 +79,7 @@ public class AbstractOAuthFlowClient: SecurityClient {
         self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, automaticallyRefreshTokensThisManySecondsEarly: autoRefreshInterval)
     }
     
-    func setAccessToken(_ token: OAuthToken) async throws {
+    func setAccessToken(_ token: OAuthAccessToken) async throws {
         try await tokenManager.setAccessToken(token)
     }
     
@@ -137,7 +137,7 @@ public class OAuthPasswordFlowClient: AbstractOAuthFlowClient {
         let result = try await URLSession.handleApiRequest(request)
         switch result.response.statusCode {
         case 200:
-            var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+            var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
             resultData.createdAt = requestDate
             await try setAccessToken(resultData)
         default:
@@ -180,7 +180,7 @@ public class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient {
         let result = try await URLSession.handleApiRequest(request)
         switch result.response.statusCode {
         case 200:
-            var resultData = try JSONDecoder().decode(OAuthToken.self, from: result.data)
+            var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
             resultData.createdAt = requestDate
             await try setAccessToken(resultData)
         default:
@@ -217,7 +217,7 @@ public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
     
 }
 
-public struct OAuthToken : Decodable, Equatable {
+public struct OAuthAccessToken : Decodable, Equatable {
     public var accessToken: String?
     public var tokenType: String?
     public var refreshToken: String?
