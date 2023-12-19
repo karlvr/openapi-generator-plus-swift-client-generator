@@ -4,9 +4,6 @@
 
 import Foundation
 
-public typealias ConfigurationAPIKeyBlock = ((_ name: String) -> String?)
-public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [String]?, _ request: URLRequest) -> URLRequest)
-public typealias ConfigurationAuthenticationFailedBlock = ((_ name: String, _ scopes: [String]?, _ completion: @escaping(_ result: Result<Void, APIError>) -> Void) -> Void)
 public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
 
 public struct Configuration {
