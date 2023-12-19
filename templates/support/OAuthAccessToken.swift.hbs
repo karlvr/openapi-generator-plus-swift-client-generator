@@ -1,0 +1,58 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public struct OAuthAccessToken : Decodable, Equatable {
+    public var accessToken: String?
+    public var tokenType: String?
+    public var refreshToken: String?
+    public var expiresIn: TimeInterval?
+    public var scope: String?
+    
+    public var createdAt: Date?
+    public var isExpired: Bool {
+        guard let createdAt = createdAt, let expiresIn = expiresIn else {
+            return false // We don't know in this situation so best to assume the token is valid and have the API try it
+        }
+        
+        return createdAt.addingTimeInterval(expiresIn) >= Date()
+    }
+    
+    public init(accessToken: String? = nil, tokenType: String? = nil, refreshToken: String? = nil, expiresIn: TimeInterval? = nil, scope: String? = nil) {
+        self.accessToken = accessToken
+        self.tokenType = tokenType
+        self.refreshToken = refreshToken
+        self.expiresIn = expiresIn
+        self.scope = scope
+    }
+
+    enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case refreshToken = "refresh_token"
+        case expiresIn = "expires_in"
+        case scope
+    }
+
+    // Encodable protocol methods
+
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accessToken = try container.decodeIfPresent(String.self, forKey: .accessToken)
+        tokenType = try container.decodeIfPresent(String.self, forKey: .tokenType)
+        refreshToken = try container.decodeIfPresent(String.self, forKey: .refreshToken)
+        expiresIn = try container.decodeIfPresent(TimeInterval.self, forKey: .expiresIn)
+        scope = try container.decodeIfPresent(String.self, forKey: .scope)
+    }
+
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(accessToken, forKey: .accessToken)
+        try container.encodeIfPresent(tokenType, forKey: .tokenType)
+        try container.encodeIfPresent(refreshToken, forKey: .refreshToken)
+        try container.encodeIfPresent(expiresIn, forKey: .expiresIn)
+        try container.encodeIfPresent(scope, forKey: .scope)
+    }
+}
