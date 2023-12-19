@@ -116,6 +116,7 @@ actor OAuthAccessTokenManager {
             try await refreshToken()
         }
         
+        /// Wait for an existing refresh task, if there is one
         if let t = refreshTask {
             let _ = try await t.value
         }

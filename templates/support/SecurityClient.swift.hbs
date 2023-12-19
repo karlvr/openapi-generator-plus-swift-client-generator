@@ -12,7 +12,7 @@ public protocol SecurityClient {
     func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest
 }
 
-/** Delegates security requiements to the appropriate SecurityClient. */
+/** Delegates security requirements to the appropriate SecurityClient. */
 public class SecurityClientController: SecurityClient {
     public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         if let client = clients[securityScheme] {
