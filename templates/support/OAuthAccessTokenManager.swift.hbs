@@ -3,6 +3,10 @@
 //
 
 import Foundation
+import OSLog
+
+@available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+private let logger = Logger(subsystem: "{{@root.generatorClass}}", category: "oauth")
 
 /** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
 actor OAuthAccessTokenManager {
@@ -44,7 +48,11 @@ actor OAuthAccessTokenManager {
                 do {
                     try await self.refreshToken()
                 } catch {
-                    print("An error ocurred in the automatic refresh: \(error)")
+                    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+                        logger.error("An error ocurred in the automatic refresh: \(error)")
+                    } else {
+                        print("An error ocurred in the automatic refresh: \(error)")
+                    }
                 }
             }
         })
