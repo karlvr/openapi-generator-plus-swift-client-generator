@@ -97,7 +97,6 @@ actor OAuthAccessTokenManager {
             default:
                 throw APIError.authenticationFailed(result.response, data: result.data)
             }
-            
         }
         
         refreshTask = t
