@@ -79,7 +79,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
             return ._{{{code}}}(decodedData)
         } catch {
-            throw APIError.invalidResponse(error)
+            throw APIError.invalidResponse(error, response: response, data: data)
         }
         {{else}}
         return ._{{{code}}}
