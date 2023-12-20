@@ -26,7 +26,7 @@ public class SecurityClientController: SecurityClient {
         if let client = clients[securityScheme] {
             return try await client.authorize(securityScheme: securityScheme, scopes: scopes, request: request)
         } else {
-            return request
+            throw APIError.securitySchemeNotConfigured(securityScheme)
         }
     }
     
