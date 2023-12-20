@@ -25,7 +25,7 @@ public class BasicAuthenticationSecurityClient: SecurityClient {
         
     }
     
-    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+    public func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest {
         var request = request
         let token = "\(username):\(password)".data(using: .utf8)!.base64EncodedString()
         request.setValue("Basic \(token)", forHTTPHeaderField: "Authorization")

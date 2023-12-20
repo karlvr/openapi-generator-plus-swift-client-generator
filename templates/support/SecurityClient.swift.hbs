@@ -22,16 +22,16 @@ public protocol SecurityClient {
     func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws
     
     /**
-     Authorizes an API request.
+     Modify the request to authorise it for the required SecurityScheme and scopes.
 
      - Parameters:
+        - request: The original URLRequest to be authorized.
         - securityScheme: The security scheme to be used for authorization.
         - scopes: Optional scopes associated with the authorization.
-        - request: The original URLRequest to be authorized.
 
-     - Returns: An authorized URLRequest with the necessary authorization headers.
+     - Returns: An authorized URLRequest.
 
      - Throws: An error if the authorization process encounters an issue.
      */
-    func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest
+    func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest
 }

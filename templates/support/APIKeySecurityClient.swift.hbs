@@ -34,7 +34,7 @@ public class APIKeySecurityClient: SecurityClient {
         
     }
     
-    public func authorize(securityScheme: SecurityScheme, scopes: [String]?, request: URLRequest) async throws -> URLRequest {
+    public func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest {
         var request = request
         switch mode {
         case .header:
