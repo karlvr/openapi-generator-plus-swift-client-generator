@@ -12,7 +12,9 @@ public enum APIError: Error {
     case authenticationFailed(_ response: HTTPURLResponse, data: Data)
 
     case invalidResponse(_ error: Error, response: HTTPURLResponse, data: Data)
+
     case systemError(_ error: Error)
+
     case securitySchemeNotConfigured(_ securityScheme: SecurityScheme)
-    case unexpectedResponse(_ response: HTTPURLResponse, data: Data)
+    case unexpectedResponse(_ response: URLResponse, data: Data)
 }

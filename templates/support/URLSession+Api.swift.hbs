@@ -24,7 +24,7 @@ extension Foundation.URLSession {
         do {
             let (data, response) = try await apiSession.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
-                fatalError("Expected non-nil HTTPURLResponse from URLRequest")
+                throw APIError.unexpectedResponse(response, data: data)
             }
             return (response: httpResponse, data: data)
         } catch {
