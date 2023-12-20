@@ -57,7 +57,7 @@ public class APIKeySecurityClient: SecurityClient {
             if let cookie = HTTPCookie(properties: cookieProperties) {
                 let headers = HTTPCookie.requestHeaderFields(with: [cookie])
                 headers.forEach { key, value in
-                    request.setValue(value, forHTTPHeaderField: key)
+                    request.addValue(value, forHTTPHeaderField: key)
                 }
             }
         }
