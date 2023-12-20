@@ -14,6 +14,17 @@ public protocol SecurityClient {
 
 /** Delegates security requirements to the appropriate SecurityClient. */
 public class SecurityClientController: SecurityClient {
+
+    var clients: [SecurityScheme: SecurityClient] = [:]
+
+    public init(clients: [SecurityScheme : SecurityClient] = [:]) {
+        self.clients = clients
+    }
+
+    public func setClient(securityScheme: SecurityScheme, client: SecurityClient) {
+        self.clients[securityScheme] = client
+    }
+
     public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
         if let client = clients[securityScheme] {
             try await client.reauthenticate(securityScheme: securityScheme, scopes: scopes)
@@ -28,16 +39,6 @@ public class SecurityClientController: SecurityClient {
         } else {
             throw APIError.securitySchemeNotConfigured(securityScheme)
         }
-    }
-    
-    var clients: [SecurityScheme: SecurityClient] = [:]
-    
-    public func setClient(securityScheme: SecurityScheme, client: SecurityClient) {
-        self.clients[securityScheme] = client
-    }
-
-    public init(clients: [SecurityScheme : SecurityClient] = [:]) {
-        self.clients = clients
     }
 }
 
