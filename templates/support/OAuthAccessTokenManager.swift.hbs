@@ -62,10 +62,6 @@ actor OAuthAccessTokenManager {
         accessToken = token
     }
     
-    func setRefreshToken(_ token: String) async throws {
-        accessToken = OAuthAccessToken(refreshToken: token)
-    }
-    
     func refreshToken() async throws {
         guard let refreshTokenURL = refreshTokenURL else {
             throw APIError.authenticationPrevented

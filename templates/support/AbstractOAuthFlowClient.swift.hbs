@@ -6,7 +6,7 @@ import Foundation
 
 public class AbstractOAuthFlowClient: SecurityClient {
     
-    private let tokenManager: OAuthAccessTokenManager
+    let tokenManager: OAuthAccessTokenManager
     
     let clientId: String
     let clientSecret: String
@@ -29,17 +29,9 @@ public class AbstractOAuthFlowClient: SecurityClient {
         self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
     }
     
-    func setAccessToken(_ token: OAuthAccessToken) async throws {
-        try await tokenManager.setAccessToken(token)
-    }
-    
-    func setRefreshToken(_ token: String) async throws {
-        try await tokenManager.setRefreshToken(token)
-        try await tokenManager.refreshToken()
-    }
-    
     public func authenticate(refreshToken: String) async throws {
-        try await setRefreshToken(refreshToken)
+        try await tokenManager.setAccessToken(OAuthAccessToken(refreshToken: refreshToken))
+        try await tokenManager.refreshToken()
     }
     
     public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
