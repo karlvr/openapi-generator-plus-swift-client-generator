@@ -64,10 +64,10 @@ actor OAuthAccessTokenManager {
     
     func refreshToken() async throws {
         guard let refreshTokenURL = refreshTokenURL else {
-            throw APIError.authenticationPrevented
+            throw APIError.notAuthenticated
         }
         guard let refreshToken = accessToken?.refreshToken else {
-            throw APIError.authenticationPrevented
+            throw APIError.notAuthenticated
         }
         
         /// Wait for an existing refresh task, if there is one
@@ -118,7 +118,7 @@ actor OAuthAccessTokenManager {
         }
         
         guard let token = accessToken?.accessToken else {
-            throw APIError.authenticationPrevented
+            throw APIError.notAuthenticated
         }
         
         var authedRequest = request

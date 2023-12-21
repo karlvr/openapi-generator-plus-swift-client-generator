@@ -40,9 +40,7 @@ public class APIKeySecurityClient: SecurityClient {
         case .header:
             request.setValue(apiKey, forHTTPHeaderField: paramName)
         case .query:
-            guard let url = request.url else {
-                throw APIError.authenticationPrevented
-            }
+            let url = request.url!
             var components = URLComponents(string: url.absoluteString)
             var queryItems = components?.queryItems ?? []
             queryItems.append(URLQueryItem(name: paramName, value: apiKey))

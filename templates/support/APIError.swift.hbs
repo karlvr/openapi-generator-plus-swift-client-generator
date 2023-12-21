@@ -6,7 +6,7 @@ import Foundation
 
 public enum APIError: Error {
     /// The authentication could not be attempted
-    case authenticationPrevented
+    case notAuthenticated
 
     /// The authentication request failed
     case authenticationFailed(_ response: HTTPURLResponse, data: Data)
