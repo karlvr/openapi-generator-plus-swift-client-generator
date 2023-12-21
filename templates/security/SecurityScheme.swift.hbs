@@ -2,47 +2,78 @@
 import Foundation
 
 /// The security schemes documented in the API specification.
-public enum SecurityScheme: String {
+public enum SecurityScheme: String, CustomDebugStringConvertible {
 {{#each securitySchemes}}
     case {{identifier name}} = {{{stringLiteral name}}}
 {{/each}}
+
+    public var debugDescription: String {
+        return "SecurityScheme: \(rawValue)"
+    }
 }
 
-extension SecurityClient {
+{{#each securitySchemes}}
+{{#if isOAuth}}
+{{#each flows}}
 
-    {{#each securitySchemes}}
-    {{#if isBasic}}
-    public static func {{{identifier name}}}(username: String, password: String) -> SecurityClient {
-        return BasicAuthenticationSecurityClient(username: username, password: password)
+{{#if tokenUrl}}
+{{#ifeq type 'password'}}
+extension OAuthPasswordFlowClient {
+    /**
+    Initializes an instance of `OAuthPasswordFlowClient` with provided authentication credentials.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+
+    - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token and refresh URLs defined in the API specification.
+    */
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!)
     }
-    {{/if}}
-    {{#if isApiKey}}
-    public static func {{{identifier name}}}(apiKey: String) -> SecurityClient {
-        return APIKeySecurityClient(apiKey: apiKey, mode: .{{in}}, paramName: {{{stringLiteral paramName}}})
-    }
-    {{/if}}
-    {{#if isOAuth}}
-    {{#each flows}}
-    {{!-- authorizationCode, implicit, password or clientCredentials --}}
-    {{#ifeq type 'password'}}
-    public static func {{{identifier ../name}}}PasswordFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
-        return OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
-    }
-    {{/ifeq}}
-    {{#ifeq type 'clientCredentials'}}
-    public static func {{{identifier ../name}}}ClientCredentialsFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
-        return OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}})
-    }
-    {{/ifeq}}
-    {{#ifeq type 'authorizationCode'}}
-    public static func {{{identifier ../name}}}AuthorizationCodeFlow(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) -> SecurityClient {
-        return OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh{{#if tokenUrl}}, tokenURL: URL(string: "{{{tokenUrl}}}"){{/if}}{{#if authorizationUrl}}, authorizationURL: URL(string: "{{{authorizationUrl}}}"){{/if}})
-    }
-    {{/ifeq}}
-    {{#ifeq type 'implicit'}}
-    // TODO: Generate the implicit flow client
-    {{/ifeq}}
-    {{/each}}
-    {{/if}}
-    {{/each}}
 }
+{{/ifeq}}
+{{#ifeq type 'clientCredentials'}}
+extension OAuthClientCredentialsFlowClient {
+    /**
+    Initializes an instance of `OAuthClientCredentialsFlowClient` with provided authentication credentials.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+
+    - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token and refresh URLs defined in the API specification.
+    */
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!)
+    }
+}
+{{/ifeq}}
+{{#ifeq type 'authorizationCode'}}
+{{#if authorizationUrl}}
+extension OAuthAuthorizationCodeFlowClient {
+    /**
+    Initializes an instance of `OAuthAuthorizationCodeFlowClient` with provided authentication credentials.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+
+    - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token, refresh, and authorization URLs defined in the API specification.
+    */
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!)
+    }
+}
+{{/if}}
+{{/ifeq}}
+{{#ifeq type 'implicit'}}
+// TODO: Generate the implicit flow client
+{{/ifeq}}
+{{/if}}
+{{/each}}
+{{/if}}
+{{/each}}

@@ -7,15 +7,15 @@ import Foundation
 /// A client for communicating with an OAuth 2.0 server using the authorization code flow.
 public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
     
-    private let tokenURL: URL?
-    private let authorizationURL: URL?
+    private let tokenURL: URL
+    private let authorizationURL: URL
     
     public init(clientId: String,
                 clientSecret: String,
                 refreshURL: URL? = nil,
                 preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
-                tokenURL: URL? = nil,
-                authorizationURL: URL? = nil) {
+                tokenURL: URL,
+                authorizationURL: URL) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
         
