@@ -29,6 +29,7 @@ public class AbstractOAuthFlowClient: SecurityClient {
         self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
     }
     
+    /// Authenticate the security client using a refresh token.
     public func authenticate(refreshToken: String) async throws {
         try await tokenManager.setAccessToken(OAuthAccessToken(refreshToken: refreshToken))
         try await tokenManager.refreshToken()
