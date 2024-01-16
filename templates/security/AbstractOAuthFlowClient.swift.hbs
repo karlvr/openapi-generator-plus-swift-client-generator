@@ -36,7 +36,7 @@ public class AbstractOAuthFlowClient: SecurityClient {
     }
     
     public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
-        try await tokenManager.refreshToken()
+        try await tokenManager.refreshToken(failedRequest: failedRequest)
     }
     
     public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {

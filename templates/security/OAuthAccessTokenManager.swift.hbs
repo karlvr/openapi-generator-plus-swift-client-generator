@@ -108,6 +108,29 @@ actor OAuthAccessTokenManager {
         try await t.value
         refreshTask = nil
     }
+
+    func refreshToken(failedRequest: URLRequest) async throws {
+        guard let token = accessToken?.accessToken else {
+            try await refreshToken()
+            return
+        }
+
+        if let authorizationHeader = failedRequest.value(forHTTPHeaderField: "Authorization") {
+            if authorizationHeader == self.authorizationHeader(token: token) {
+                // The failed request was using our current access token, so refresh
+                try await refreshToken()
+                return
+            }
+        }
+
+        // Wait for an existing refresh task, if there is one
+        if let t = refreshTask {
+            let _ = try await t.value
+            return
+        }
+
+        // Try again with the current access token (it's not the one that the failed request used)
+    }
     
     private func createRefreshRequest(_ token: String, url: URL) -> URLRequest {
         return createOAuthRequest(url: url, params: [
@@ -123,17 +146,16 @@ actor OAuthAccessTokenManager {
             try await refreshToken()
         }
         
-        // Wait for an existing refresh task, if there is one
-        if let t = refreshTask {
-            let _ = try await t.value
-        }
-        
         guard let token = accessToken?.accessToken else {
             throw APIError.notAuthenticated
         }
         
         // Get the token and stick it on the URL Request
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(authorizationHeader(token: token), forHTTPHeaderField: "Authorization")
+    }
+
+    private func authorizationHeader(token: String) -> String {
+        "Bearer \(token)"
     }
     
 }
