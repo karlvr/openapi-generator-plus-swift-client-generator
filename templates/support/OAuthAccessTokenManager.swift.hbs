@@ -123,7 +123,7 @@ actor OAuthAccessTokenManager {
             try await refreshToken()
         }
         
-        /// Wait for an existing refresh task, if there is one
+        // Wait for an existing refresh task, if there is one
         if let t = refreshTask {
             let _ = try await t.value
         }
@@ -133,7 +133,7 @@ actor OAuthAccessTokenManager {
         }
         
         var authedRequest = request
-        // get the token and stick it on the URL Request
+        // Get the token and stick it on the URL Request
         authedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         return authedRequest
