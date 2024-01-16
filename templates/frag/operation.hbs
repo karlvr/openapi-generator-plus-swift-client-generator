@@ -143,8 +143,6 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
 {{/each}}
 
 {{/if}}
-    
-
     localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
 
     var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
@@ -173,8 +171,8 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
     }
     {{/if}}
 {{/with}}
-{{/if}}
 
+{{/if}}
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
     {{>frag/requestSecurity}}
