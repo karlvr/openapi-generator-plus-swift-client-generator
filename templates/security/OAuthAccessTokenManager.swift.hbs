@@ -118,7 +118,7 @@ actor OAuthAccessTokenManager {
         ])
     }
     
-    func authorize(request: URLRequest) async throws -> URLRequest {
+    func authorize(request: inout URLRequest) async throws {
         if accessToken?.accessToken == nil || accessToken?.isExpired == true {
             try await refreshToken()
         }
@@ -132,11 +132,8 @@ actor OAuthAccessTokenManager {
             throw APIError.notAuthenticated
         }
         
-        var authedRequest = request
         // Get the token and stick it on the URL Request
-        authedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        return authedRequest
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
     
 }

@@ -39,8 +39,8 @@ public class AbstractOAuthFlowClient: SecurityClient {
         try await tokenManager.refreshToken()
     }
     
-    public func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest {
-        return try await tokenManager.authorize(request: request)
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        try await tokenManager.authorize(request: &request)
     }
 }
 

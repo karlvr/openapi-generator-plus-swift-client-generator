@@ -29,9 +29,7 @@ public protocol SecurityClient {
         - securityScheme: The security scheme to be used for authorization.
         - scopes: Optional scopes associated with the authorization.
 
-     - Returns: An authorized URLRequest.
-
      - Throws: An error if the authorization process encounters an issue.
      */
-    func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest
+    func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
 }

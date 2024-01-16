@@ -8,7 +8,7 @@ if !didAuthenticate {
     do {
         {{#each schemes}}
         if let securityClient = self.configuration.securityClient {
-            authedRequest = try await securityClient.authorize(request: authedRequest, securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+            try await securityClient.authorize(request: &authedRequest, securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
         }
         {{/each}}
         didAuthenticate = true

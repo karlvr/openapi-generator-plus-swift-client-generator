@@ -31,9 +31,9 @@ public class SecurityClientController: SecurityClient {
         }
     }
 
-    public func authorize(request: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws -> URLRequest {
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
         if let client = clients[securityScheme] {
-            return try await client.authorize(request: request, securityScheme: securityScheme, scopes: scopes)
+            try await client.authorize(request: &request, securityScheme: securityScheme, scopes: scopes)
         } else {
             throw APIError.securitySchemeNotConfigured(securityScheme)
         }
