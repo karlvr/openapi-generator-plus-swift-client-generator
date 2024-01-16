@@ -4,17 +4,23 @@
 
 import Foundation
 
+/// Errors that occur while using the API
 public enum APIError: Error {
-    /// The authentication could not be attempted
+    /// The security client is not authenticated
     case notAuthenticated
 
     /// The authentication request failed
     case authenticationFailed(_ response: HTTPURLResponse, data: Data)
 
+    /// A response was received that could not be decoded
     case invalidResponse(_ error: Error, response: HTTPURLResponse, data: Data)
 
+    /// A system error occurred, such as a networking error
     case systemError(_ error: Error)
 
+    /// The API requested authentication using a `SecurityScheme` that has not been configured in the `SecurityClientController`
     case securitySchemeNotConfigured(_ securityScheme: SecurityScheme)
+
+    /// An response was received with an undocumented status code
     case unexpectedResponse(_ response: URLResponse, data: Data)
 }
