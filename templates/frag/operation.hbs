@@ -86,9 +86,9 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     {{/if}}
     {{/ifneq}}
 {{/each}}
+{{#if securityRequirements}}
     case 401:
         if allowsReauth, let securityClient = configuration.securityClient {
-            {{#if securityRequirements}}
             var didAuthenticate = false
             var lastError: Error?
             {{#each securityRequirements.requirements}}
@@ -108,13 +108,11 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
                 throw lastError!
             }
             {{/unless}}
-            {{else}}
-            try await securityClient.reauthenticate(securityScheme: .unspecified, scopes: [])
-            {{/if}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
             throw APIError.authenticationFailed(response, data: data)
         }
+{{/if}}
     default:
         throw APIError.unexpectedResponse(response, data: data)
     }

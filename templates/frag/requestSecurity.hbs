@@ -23,8 +23,4 @@ if !didAuthenticate {
     throw lastError!
 }
 {{/unless}}
-{{else}}
-if let securityClient = self.configuration.securityClient {
-    localVarRequest = try await securityClient.authorize(request: localVarRequest, securityScheme: .unspecified, scopes: [])
-}
 {{/if}}

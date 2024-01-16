@@ -8,7 +8,7 @@ public enum SecurityScheme: String, CustomDebugStringConvertible {
     case {{identifier name}} = {{{stringLiteral name}}}
 {{/each}}
 {{else}}
-    /// No security schemes were specified so this scheme will be reported to the SecurityClient
+    /// No security schemes were specified. This case is a placeholder so the enum is valid.
     case unspecified = "unspecified"
 {{/if}}
 
