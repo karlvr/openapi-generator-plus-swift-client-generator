@@ -25,6 +25,12 @@ public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             throw DecoderError.invalidMatch(value: dateString)
         }
     }
+    
+    public init(year: Int, month: Int, day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
 
     public init?(_ description: String) {
         guard let matches = LocalDate.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
