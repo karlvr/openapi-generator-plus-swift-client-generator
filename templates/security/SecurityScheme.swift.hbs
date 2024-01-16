@@ -3,9 +3,14 @@ import Foundation
 
 /// The security schemes documented in the API specification.
 public enum SecurityScheme: String, CustomDebugStringConvertible {
+{{#if securitySchemes}}
 {{#each securitySchemes}}
     case {{identifier name}} = {{{stringLiteral name}}}
 {{/each}}
+{{else}}
+    /// No security schemes were specified so this scheme will be reported to the SecurityClient
+    case unspecified = "unspecified"
+{{/if}}
 
     public var debugDescription: String {
         return "SecurityScheme: \(rawValue)"

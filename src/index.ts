@@ -448,15 +448,13 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			}
 
 			/* Security */
-			if (doc.securitySchemes?.length) {
-				await emit(
-					'security/SecurityScheme.swift',
-					path.join(outputPath, relativeSourceOutputPath, 'Security', 'SecurityScheme.swift'),
-					{ ...rootContext, securitySchemes: doc.securitySchemes },
-					true,
-					hbs
-				)
-			}
+			await emit(
+				'security/SecurityScheme.swift',
+				path.join(outputPath, relativeSourceOutputPath, 'Security', 'SecurityScheme.swift'),
+				{ ...rootContext, securitySchemes: doc.securitySchemes },
+				true,
+				hbs
+			)
 
 			await emit('Package', path.join(outputPath, 'Package.swift'),
 				{ ...rootContext }, true, hbs)

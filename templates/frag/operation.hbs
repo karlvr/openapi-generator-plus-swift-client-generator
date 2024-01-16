@@ -108,6 +108,8 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
                 throw lastError!
             }
             {{/unless}}
+            {{else}}
+            try await securityClient.reauthenticate(securityScheme: .unspecified, scopes: [])
             {{/if}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
