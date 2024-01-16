@@ -50,7 +50,6 @@ actor OAuthAccessTokenManager {
             return
         }
         
-        let timeout = Date(timeIntervalSinceNow: expiresIn - autoTime)
         refreshTimer = Timer.scheduledTimer(withTimeInterval: expiresIn - autoTime, repeats: false, block: { t in
             Task {
                 do {
