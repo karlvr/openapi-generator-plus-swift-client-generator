@@ -81,7 +81,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
         } catch {
             throw APIError.invalidResponse(error, response: response, data: data)
         }
-        {{else}}
+    {{else}}
         return ._{{{code}}}
     {{/if}}
     {{/ifneq}}
