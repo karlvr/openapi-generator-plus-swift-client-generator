@@ -4,7 +4,7 @@
 
 import Foundation
 
-public typealias ConfigurationFinalizeReleaseBlock = ((_ request: inout URLRequest) -> Void)
+public typealias ConfigurationFinalizeRequestBlock = ((_ request: inout URLRequest) -> Void)
 
 public struct Configuration {
 
@@ -22,7 +22,7 @@ public struct Configuration {
 
     public var responseQueue: DispatchQueue?
 
-    public var finalizeReleaseBlock: ConfigurationFinalizeReleaseBlock?
+    public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
 
     public init(
         basePath: String? = nil,
@@ -30,13 +30,13 @@ public struct Configuration {
         timeoutInterval: TimeInterval = 30,
         responseQueue: DispatchQueue? = nil,
         securityClient: SecurityClient? = nil,
-        finalizeReleaseBlock: ConfigurationFinalizeReleaseBlock? = nil
+        finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
     ) {
         self.basePath = basePath
         self.cachePolicy = cachePolicy
         self.timeoutInterval = timeoutInterval
         self.responseQueue = responseQueue
         self.securityClient = securityClient
-        self.finalizeReleaseBlock = finalizeReleaseBlock
+        self.finalizeRequestBlock = finalizeRequestBlock
     }
 }

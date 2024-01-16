@@ -175,8 +175,8 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
 
     {{>frag/requestSecurity}}
 
-    if let localVarFinalizeReleaseBlock = self.configuration.finalizeReleaseBlock {
-        localVarFinalizeReleaseBlock(&localVarRequest)
+    if let localVarFinalizeRequestBlock = self.configuration.finalizeRequestBlock {
+        localVarFinalizeRequestBlock(&localVarRequest)
     }
     return localVarRequest
 }
