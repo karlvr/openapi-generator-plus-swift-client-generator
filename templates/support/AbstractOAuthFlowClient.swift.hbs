@@ -23,10 +23,10 @@ public class AbstractOAuthFlowClient: SecurityClient {
         }
     }
 
-    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil) {
+    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler?) {
         self.clientId = clientId
         self.clientSecret = clientSecret
-        self.tokenManager = OAuthAccessTokenManager(refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
+        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
     }
     
     public func authenticate(refreshToken: String) async throws {

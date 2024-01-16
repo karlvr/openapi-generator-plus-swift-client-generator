@@ -8,6 +8,8 @@ import OSLog
 @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
 private let logger = Logger(subsystem: "{{@root.info.title}}", category: "oauth")
 
+public typealias AccessTokenHandler = (_ accessToken: OAuthAccessToken) -> ()
+
 /** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
 actor OAuthAccessTokenManager {
     
@@ -17,16 +19,22 @@ actor OAuthAccessTokenManager {
         }
     }
     
+    private let clientId: String
+    private let clientSecret: String
     private let refreshTokenURL: URL?
     private let preemptiveAccessTokenRefresh: TimeInterval?
     private var refreshTask: Task<(), Error>?
     private var refreshTimer: Timer?
     private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
+    private let accessTokenDidChange: AccessTokenHandler?
     
-    init(refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil) {
+    init(clientId: String, clientSecret: String, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.clientId = clientId
+        self.clientSecret = clientSecret
         self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
         self.prepareRequest = prepareRequest
         self.refreshTokenURL = refreshTokenURL
+        self.accessTokenDidChange = accessTokenDidChange
     }
         
     private func restartRefreshTimer() {
@@ -60,6 +68,7 @@ actor OAuthAccessTokenManager {
     
     func setAccessToken(_ token: OAuthAccessToken) async throws {
         accessToken = token
+        accessTokenDidChange?(token)
     }
     
     func refreshToken() async throws {
@@ -90,6 +99,7 @@ actor OAuthAccessTokenManager {
                 var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
+                self.accessTokenDidChange?(resultData)
             default:
                 throw APIError.authenticationFailed(result.response, data: result.data)
             }
@@ -103,7 +113,9 @@ actor OAuthAccessTokenManager {
     private func createRefreshRequest(_ token: String, url: URL) -> URLRequest {
         return createOAuthRequest(url: url, params: [
             "grant_type" : "refresh_token",
-            "refresh_token": token
+            "refresh_token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
         ])
     }
     

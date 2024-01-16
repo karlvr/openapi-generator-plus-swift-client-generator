@@ -31,11 +31,12 @@ extension OAuthPasswordFlowClient {
         - clientId: The client ID associated with the API.
         - clientSecret: The client secret associated with the API.
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
 
     - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token and refresh URLs defined in the API specification.
     */
-    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
-        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!)
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/ifeq}}
@@ -48,11 +49,12 @@ extension OAuthClientCredentialsFlowClient {
         - clientId: The client ID associated with the API.
         - clientSecret: The client secret associated with the API.
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
 
     - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token and refresh URLs defined in the API specification.
     */
-    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
-        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!)
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/ifeq}}
@@ -66,11 +68,12 @@ extension OAuthAuthorizationCodeFlowClient {
         - clientId: The client ID associated with the API.
         - clientSecret: The client secret associated with the API.
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
-
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
+        
     - Important: This convenience initializer is recommended as the default constructor since it automatically makes use of the token, refresh, and authorization URLs defined in the API specification.
     */
-    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil) {
-        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!)
+    public convenience init(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.init(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/if}}

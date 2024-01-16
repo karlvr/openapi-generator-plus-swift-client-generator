@@ -15,11 +15,12 @@ public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
                 refreshURL: URL? = nil,
                 preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
                 tokenURL: URL,
-                authorizationURL: URL) {
+                authorizationURL: URL,
+                accessTokenDidChange: AccessTokenHandler? = nil) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
         
-        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval)
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
     }
     
 }
