@@ -30,7 +30,7 @@ public class APIKeySecurityClient: SecurityClient {
         self.paramName = paramName
     }
     
-    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
         
     }
     

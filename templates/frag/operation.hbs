@@ -95,7 +95,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             if !didAuthenticate {
                 do {
                     {{#each schemes}}
-                    try await securityClient.reauthenticate(securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+                    try await securityClient.reauthenticate(failedRequest: __request, securityScheme: .{{{scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
                     {{/each}}
                     didAuthenticate = true
                 } catch (let error) {

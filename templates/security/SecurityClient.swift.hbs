@@ -12,6 +12,7 @@ public protocol SecurityClient {
      Handles reauthentication when an API request receives a 401 response.
 
      - Parameters:
+        - failedRequest: The URLRequest that received an authentication failure response.
         - securityScheme: The security scheme to be reauthenticated.
         - scopes: Optional scopes associated with the reauthentication.
 
@@ -19,7 +20,7 @@ public protocol SecurityClient {
 
      - Note: If no errors are thrown the session will be reauthenticated and new requests should be attempted.
      */
-    func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws
+    func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
     
     /**
      Modify the request to authorise it for the required SecurityScheme and scopes.

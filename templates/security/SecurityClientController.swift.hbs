@@ -23,9 +23,9 @@ public class SecurityClientController: SecurityClient {
         self.clients[securityScheme] = client
     }
 
-    public func reauthenticate(securityScheme: SecurityScheme, scopes: [String]?) async throws {
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
         if let client = clients[securityScheme] {
-            try await client.reauthenticate(securityScheme: securityScheme, scopes: scopes)
+            try await client.reauthenticate(failedRequest: failedRequest, securityScheme: securityScheme, scopes: scopes)
         } else {
             throw APIError.securitySchemeNotConfigured(securityScheme)
         }
