@@ -17,7 +17,7 @@ public struct OAuthAccessToken : Decodable, Equatable {
             return false // We don't know in this situation so best to assume the token is valid and have the API try it
         }
         
-        return createdAt.addingTimeInterval(expiresIn) >= Date()
+        return createdAt.addingTimeInterval(expiresIn) <= Date()
     }
     
     public init(accessToken: String? = nil, tokenType: String? = nil, refreshToken: String? = nil, expiresIn: TimeInterval? = nil, scope: String? = nil) {
