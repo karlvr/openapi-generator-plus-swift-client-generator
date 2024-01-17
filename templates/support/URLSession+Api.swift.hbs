@@ -21,14 +21,10 @@ extension Foundation.URLSession {
     }
     
     static func handleApiRequest(_ request: Foundation.URLRequest) async throws -> (response: HTTPURLResponse, data: Data) {
-        do {
-            let (data, response) = try await apiSession.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw APIError.unexpectedResponse(response, data: data)
-            }
-            return (response: httpResponse, data: data)
-        } catch {
-            throw APIError.systemError(error)
+        let (data, response) = try await apiSession.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.unexpectedResponse(response, data: data)
         }
+        return (response: httpResponse, data: data)
     }
 }

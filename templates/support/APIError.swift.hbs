@@ -15,9 +15,6 @@ public enum APIError: Error {
     /// A response was received that could not be decoded
     case invalidResponse(_ error: Error, response: HTTPURLResponse, data: Data)
 
-    /// A system error occurred, such as a networking error
-    case systemError(_ error: Error)
-
     /// The API requested authentication using a `SecurityScheme` that has not been configured in the `SecurityClientController`
     case securitySchemeNotConfigured(_ securityScheme: SecurityScheme)
 
