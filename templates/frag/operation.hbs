@@ -27,10 +27,6 @@ public enum {{className name}}Result {
     {{/if}}
     case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
 {{/each}}
-    /** An unexpected response */
-    case unexpected(response: HTTPURLResponse, data: Data?)
-    /** An error occurred in processing */
-    case error(_ error: Error)
 }
 
 {{#if (gt (count parameters) 1)}}
@@ -40,23 +36,23 @@ public enum {{className name}}Result {
 {{#if deprecated}}
 @available(*, deprecated)
 {{/if}}
-open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     {{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
 }
 
 {{/if}}
 {{>frag/operationDocumentation}}
-open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
     Task {
         do {
             let result = try await {{{name}}}({{{_callParams}}})
             responseQueue.asyncIfPresent {
-                completion(result)
+                completion(.success(result))
             }
         } catch {
             responseQueue.asyncIfPresent {
-                completion(.error(error))
+                completion(.failure(error))
             }
         }
     }
