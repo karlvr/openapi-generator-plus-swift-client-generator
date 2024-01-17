@@ -20,12 +20,14 @@
 {{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
+    {{#ifneq code 401}}
     {{#if description}}
     /**
      * {{#indent '     * '}}{{{md description}}}{{/indent}}
      */
     {{/if}}
     case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
+    {{/ifneq}}
 {{/each}}
 }
 
