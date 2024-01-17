@@ -157,5 +157,49 @@ actor OAuthAccessTokenManager {
     private func authorizationHeader(token: String) -> String {
         "Bearer \(token)"
     }
+
+    func revokeRefreshToken(url: URL) async throws {
+        guard let token = accessToken?.refreshToken else {
+            // There is no token to revoke
+            return
+        }
+        
+        var request = createOAuthRequest(url: url, params: [
+            "token_type_hint": "refresh_token",
+            "token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+        
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            self.accessToken?.refreshToken = nil
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+
+    func revokeAccessToken(url: URL) async throws {
+        guard let token = accessToken?.accessToken else {
+            // There is no token to revoke
+            return
+        }
+        
+        var request = createOAuthRequest(url: url, params: [
+            "token_type_hint": "access_token",
+            "token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+        
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            self.accessToken?.accessToken = nil
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
     
 }
