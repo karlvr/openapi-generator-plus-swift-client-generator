@@ -4,7 +4,7 @@
 
 import Foundation
 
-public typealias ConfigurationFinalizeRequestBlock = ((_ request: inout URLRequest) -> Void)
+public typealias ConfigurationFinalizeRequestBlock = ((_ request: inout Foundation.URLRequest) -> Void)
 
 public struct Configuration {
 
@@ -14,21 +14,21 @@ public struct Configuration {
     /**
      * Override the default base path.
      */
-    public var basePath: String?
+    public var basePath: Swift.String?
 
-    public var cachePolicy: URLRequest.CachePolicy?
+    public var cachePolicy: Foundation.URLRequest.CachePolicy?
 
-    public var timeoutInterval: TimeInterval
+    public var timeoutInterval: Foundation.TimeInterval
 
-    public var responseQueue: DispatchQueue?
+    public var responseQueue: Dispatch.DispatchQueue?
 
     public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
 
     public init(
-        basePath: String? = nil,
-        cachePolicy: URLRequest.CachePolicy? = nil,
-        timeoutInterval: TimeInterval = 30,
-        responseQueue: DispatchQueue? = nil,
+        basePath: Swift.String? = nil,
+        cachePolicy: Foundation.URLRequest.CachePolicy? = nil,
+        timeoutInterval: Foundation.TimeInterval = 30,
+        responseQueue: Dispatch.DispatchQueue? = nil,
         securityClient: SecurityClient? = nil,
         finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
     ) {

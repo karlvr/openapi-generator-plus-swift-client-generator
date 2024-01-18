@@ -4,8 +4,8 @@
 
 import Foundation
 
-extension Optional where Wrapped == DispatchQueue {
-    public func asyncIfPresent(group: DispatchGroup? = nil, qos: DispatchQoS = .unspecified, flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) {
+extension Swift.Optional where Wrapped == Dispatch.DispatchQueue {
+    public func asyncIfPresent(group: Dispatch.DispatchGroup? = nil, qos: Dispatch.DispatchQoS = .unspecified, flags: Dispatch.DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) {
         if let q = self {
             q.async(group: group, qos: qos, flags: flags, execute: work)
         } else {

@@ -4,11 +4,11 @@
 
 import Foundation
 
-extension CharacterSet {
+extension Foundation.CharacterSet {
 
     /// The character set for percent encoding x-www-form-urlencoded data.
-    static let formUrlEncoded: CharacterSet = {
-        var set = CharacterSet.urlQueryAllowed
+    static let formUrlEncoded: Foundation.CharacterSet = {
+        var set = Foundation.CharacterSet.urlQueryAllowed
         set.remove("+")
         return set
     }()
