@@ -18,6 +18,16 @@
 {{/with}}
 {{/if}}
 {{/join}}
+{{#join '_requestCallParams' ', '}}
+{{#each parameters}}
+{{{name}}}: __request.{{{name}}}
+{{/each}}
+{{#if requestBody.nativeType}}
+{{#with requestBody}}
+{{{name}}}: {{{name}}}
+{{/with}}
+{{/if}}
+{{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
     {{#ifneq code 401}}
@@ -39,11 +49,22 @@ public enum {{className name}}Result {
 @available(*, deprecated)
 {{/if}}
 open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
-    {{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
+    {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}}, responseQueue: responseQueue, completion: completion)
+}
+
+{{>frag/operationDocumentation}}
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
+    return try await {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}})
 }
 
 {{/if}}
 {{>frag/operationDocumentation}}
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
 open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
     Task {
@@ -61,6 +82,9 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 }
 
 {{>frag/operationDocumentation}}
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
 open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
 }
