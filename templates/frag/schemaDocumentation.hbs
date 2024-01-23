@@ -1,12 +1,12 @@
 {{#or description externalDocs}}
 /**
 {{#if description}}
- * {{#indent ' * '}}{{{md description}}}{{/indent}}
+ * {{#indent ' * '}}{{{description}}}{{/indent}}
 {{/if}}
 {{#if externalDocs}}
  * <p>External documentation: {{{externalDocs.url}}}</p>
 {{#if externalDocs.description}}
- * {{#indent ' * '}}{{{md externalDocs.description}}}{{/indent}}
+ * {{#indent ' * '}}{{{externalDocs.description}}}{{/indent}}
 {{/if}}
 {{/if}}
  */

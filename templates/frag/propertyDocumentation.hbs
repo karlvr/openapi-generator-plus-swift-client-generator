@@ -1,6 +1,6 @@
 {{#join '_description' '
 '}}
-{{{md description}}}
+{{#if description}}{{{description}}}{{/if}}
 {{#if (isNumeric schema)}}
 {{#if schema.minimum}}
 Minimum: {{schema.minimum}}

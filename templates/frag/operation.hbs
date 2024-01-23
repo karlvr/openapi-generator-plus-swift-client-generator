@@ -33,7 +33,7 @@ public enum {{className name}}Result {
     {{#ifneq code 401}}
     {{#if description}}
     /**
-     * {{#indent '     * '}}{{{md description}}}{{/indent}}
+     * {{#indent '     * '}}{{{description}}}{{/indent}}
      */
     {{/if}}
     case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
