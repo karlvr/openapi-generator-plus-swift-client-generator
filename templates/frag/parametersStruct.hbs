@@ -1,4 +1,4 @@
-public struct {{{className (concat name '_' 'request')}}}: Swift.Equatable, Swift.Hashable {
+public struct {{{className (concat name '_' 'request')}}}: {{group.name}}{{{className (concat name '_' 'requestable')}}}, Swift.Equatable, Swift.Hashable {
 {{#each parameters}}
     {{>frag/propertyDocumentation}}
     public var {{{name}}}: {{{nativeType}}}

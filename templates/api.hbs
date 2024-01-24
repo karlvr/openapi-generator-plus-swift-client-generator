@@ -39,3 +39,9 @@ open class {{name}}Api {
     {{>frag/operation group=..}}
 {{/each}}
 }
+
+{{#each operations}}
+{{#if (gt (count parameters) 1)}}
+{{>frag/parametersProtocol group=..}}
+{{/if}}
+{{/each}}

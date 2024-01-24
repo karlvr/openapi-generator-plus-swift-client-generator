@@ -1,0 +1,6 @@
+public protocol {{group.name}}{{{className (concat name '_' 'requestable')}}} {
+{{#each parameters}}
+    {{>frag/propertyDocumentation}}
+    var {{{name}}}: {{{nativeType}}} { get set }
+{{/each}}
+}
