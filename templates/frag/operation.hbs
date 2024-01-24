@@ -49,7 +49,7 @@ public enum {{className name}}Result {
 @available(*, deprecated)
 {{/if}}
 open func {{{name}}}(_ __request: {{group.name}}{{{className (concat name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
-    {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}}, responseQueue: responseQueue, completion: completion)
+    {{{name}}}({{{_requestCallParams}}}, responseQueue: responseQueue, completion: completion)
 }
 
 {{>frag/operationDocumentation}}
@@ -57,7 +57,7 @@ open func {{{name}}}(_ __request: {{group.name}}{{{className (concat name '_' 'r
 @available(*, deprecated)
 {{/if}}
 open func {{{name}}}(_ __request: {{group.name}}{{{className (concat name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
-    return try await {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}})
+    return try await {{{name}}}({{{_requestCallParams}}})
 }
 
 {{/if}}
