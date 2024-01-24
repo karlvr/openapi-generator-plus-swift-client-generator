@@ -1,0 +1,205 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+import OSLog
+
+@available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+private let logger = Logger(subsystem: "{{@root.info.title}}", category: "oauth")
+
+public typealias AccessTokenHandler = (_ accessToken: OAuthAccessToken) -> ()
+
+/** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
+actor OAuthAccessTokenManager {
+    
+    var accessToken: OAuthAccessToken? {
+        didSet {
+            restartRefreshTimer()
+        }
+    }
+    
+    private let clientId: String
+    private let clientSecret: String
+    private let refreshTokenURL: URL?
+    private let preemptiveAccessTokenRefresh: TimeInterval?
+    private var refreshTask: Task<(), Error>?
+    private var refreshTimer: Timer?
+    private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
+    private let accessTokenDidChange: AccessTokenHandler?
+    
+    init(clientId: String, clientSecret: String, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
+        self.prepareRequest = prepareRequest
+        self.refreshTokenURL = refreshTokenURL
+        self.accessTokenDidChange = accessTokenDidChange
+    }
+        
+    private func restartRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        
+        guard 
+            let autoTime = preemptiveAccessTokenRefresh,
+            let token = accessToken, 
+            let expiresIn = token.expiresIn,
+            expiresIn - autoTime > 0
+        else {
+            return
+        }
+        
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: expiresIn - autoTime, repeats: false, block: { t in
+            Task {
+                do {
+                    try await self.refreshToken()
+                } catch {
+                    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+                        logger.error("An error occurred in the automatic OAuth access token refresh:: \(error)")
+                    } else {
+                        print("{{@root.info.title}}: An error occurred in the automatic OAuth access token refresh:: \(error)")
+                    }
+                }
+            }
+        })
+    }
+    
+    func setAccessToken(_ token: OAuthAccessToken) async throws {
+        accessToken = token
+        accessTokenDidChange?(token)
+    }
+    
+    func refreshToken() async throws {
+        guard let refreshTokenURL = refreshTokenURL else {
+            throw APIError.notAuthenticated
+        }
+        guard let refreshToken = accessToken?.refreshToken else {
+            throw APIError.notAuthenticated
+        }
+        
+        // Wait for an existing refresh task, if there is one
+        if let t = refreshTask {
+            let _ = try await t.value
+            return
+        }
+        
+        // Clear out the refresh timer if active
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        
+        let t = Task {
+            // Do the refresh
+            let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
+            let requestDate = Date()
+            let result = try await URLSession.handleApiRequest(request)
+            switch result.response.statusCode {
+            case 200:
+                var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
+                resultData.createdAt = requestDate
+                self.accessToken = resultData
+                self.accessTokenDidChange?(resultData)
+            default:
+                throw APIError.authenticationFailed(result.response, data: result.data)
+            }
+        }
+        
+        refreshTask = t
+        try await t.value
+        refreshTask = nil
+    }
+
+    func refreshToken(failedRequest: URLRequest) async throws {
+        guard let token = accessToken?.accessToken else {
+            try await refreshToken()
+            return
+        }
+
+        if let authorizationHeader = failedRequest.value(forHTTPHeaderField: "Authorization") {
+            if authorizationHeader == self.authorizationHeader(token: token) {
+                // The failed request was using our current access token, so refresh
+                try await refreshToken()
+                return
+            }
+        }
+
+        // Wait for an existing refresh task, if there is one
+        if let t = refreshTask {
+            let _ = try await t.value
+            return
+        }
+
+        // Try again with the current access token (it's not the one that the failed request used)
+    }
+    
+    private func createRefreshRequest(_ token: String, url: URL) -> URLRequest {
+        return createOAuthRequest(url: url, params: [
+            "grant_type" : "refresh_token",
+            "refresh_token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+    }
+    
+    func authorize(request: inout URLRequest) async throws {
+        if accessToken?.accessToken == nil || accessToken?.isExpired == true {
+            try await refreshToken()
+        }
+        
+        guard let token = accessToken?.accessToken else {
+            throw APIError.notAuthenticated
+        }
+        
+        // Get the token and stick it on the URL Request
+        request.setValue(authorizationHeader(token: token), forHTTPHeaderField: "Authorization")
+    }
+
+    private func authorizationHeader(token: String) -> String {
+        "Bearer \(token)"
+    }
+
+    func revokeRefreshToken(url: URL) async throws {
+        guard let token = accessToken?.refreshToken else {
+            // There is no token to revoke
+            return
+        }
+        
+        var request = createOAuthRequest(url: url, params: [
+            "token_type_hint": "refresh_token",
+            "token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+        
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            self.accessToken?.refreshToken = nil
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+
+    func revokeAccessToken(url: URL) async throws {
+        guard let token = accessToken?.accessToken else {
+            // There is no token to revoke
+            return
+        }
+        
+        var request = createOAuthRequest(url: url, params: [
+            "token_type_hint": "access_token",
+            "token": token,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+        
+        let result = try await URLSession.handleApiRequest(request)
+        switch result.response.statusCode {
+        case 200:
+            self.accessToken?.accessToken = nil
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+    
+}

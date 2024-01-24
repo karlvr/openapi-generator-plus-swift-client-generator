@@ -1,0 +1,36 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/**
+ A protocol defining methods for handling security within API requests.
+ */
+public protocol SecurityClient {
+    /**
+     Handles reauthentication when an API request receives a 401 response.
+
+     - Parameters:
+        - failedRequest: The URLRequest that received an authentication failure response.
+        - securityScheme: The security scheme to be reauthenticated.
+        - scopes: Optional scopes associated with the reauthentication.
+
+     - Throws: An error if the reauthentication process encounters an issue.
+
+     - Note: If no errors are thrown the session will be reauthenticated and new requests should be attempted.
+     */
+    func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
+    
+    /**
+     Modify the request to authorise it for the required SecurityScheme and scopes.
+
+     - Parameters:
+        - request: The original URLRequest to be authorized.
+        - securityScheme: The security scheme to be used for authorization.
+        - scopes: Optional scopes associated with the authorization.
+
+     - Throws: An error if the authorization process encounters an issue.
+     */
+    func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
+}

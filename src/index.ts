@@ -440,22 +440,18 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				}
 			}
 
-			const files = await fs.readdir(path.resolve(__dirname, '..', 'templates', 'support'))
-			for (const file of files) {
+			/* Support */
+			for (const file of await fs.readdir(path.resolve(__dirname, '..', 'templates', 'support'))) {
 				const fileBase = path.basename(file, path.extname(file))
 				await emit(`support/${fileBase}`, path.join(outputPath, relativeSourceOutputPath, 'Support', fileBase),
 					{ ...rootContext }, true, hbs)
 			}
 
 			/* Security */
-			if (doc.securitySchemes?.length) {
-				await emit(
-					'security/SecurityScheme.swift',
-					path.join(outputPath, relativeSourceOutputPath, 'Security', 'SecurityScheme.swift'),
-					{ ...rootContext, securitySchemes: doc.securitySchemes },
-					true,
-					hbs
-				)
+			for (const file of await fs.readdir(path.resolve(__dirname, '..', 'templates', 'security'))) {
+				const fileBase = path.basename(file, path.extname(file))
+				await emit(`security/${fileBase}`, path.join(outputPath, relativeSourceOutputPath, 'Security', fileBase),
+					{ ...rootContext, securitySchemes: doc.securitySchemes }, true, hbs)
 			}
 
 			await emit('Package', path.join(outputPath, 'Package.swift'),

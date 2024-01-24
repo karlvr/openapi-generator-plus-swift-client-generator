@@ -1,0 +1,62 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/// A `SecurityClient` responsible for handling API Key authentication credentials.
+public class APIKeySecurityClient: SecurityClient {
+    
+    private let apiKey: String
+    private let paramName: String
+    
+    public enum Mode {
+        case header
+        case query
+        case cookie
+    }
+    
+    private let mode: Mode
+    
+    /// Initializes a `APIKeySecurityClient` instance with provided credentials.
+    ///
+    /// - Parameters:
+    ///   - apiKey: A string representing the username for authentication.
+    ///   - mode: A setting to configure the location of the API Key in the request.
+    ///   - paramName: The name of the parameter which will appear as the header or query name
+    public init(apiKey: String, mode: Mode, paramName: String) {
+        self.apiKey = apiKey
+        self.mode = mode
+        self.paramName = paramName
+    }
+    
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        
+    }
+    
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        switch mode {
+        case .header:
+            request.setValue(apiKey, forHTTPHeaderField: paramName)
+        case .query:
+            let url = request.url!
+            var components = URLComponents(string: url.absoluteString)
+            var queryItems = components?.queryItems ?? []
+            queryItems.append(URLQueryItem(name: paramName, value: apiKey))
+            components?.queryItems = queryItems
+            request.url = components?.url
+        case .cookie:
+            let cookieProperties: [HTTPCookiePropertyKey: Any] = [
+                HTTPCookiePropertyKey.name: paramName,
+                HTTPCookiePropertyKey.value: apiKey,
+            ]
+
+            if let cookie = HTTPCookie(properties: cookieProperties) {
+                let headers = HTTPCookie.requestHeaderFields(with: [cookie])
+                headers.forEach { key, value in
+                    request.addValue(value, forHTTPHeaderField: key)
+                }
+            }
+        }
+    }
+}

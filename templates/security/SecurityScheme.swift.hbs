@@ -1,6 +1,85 @@
-/** The security schemes declared by the API specification. */
-public enum SecurityScheme: String {
+//
+//  The security schemes declared by the API specification.
+//
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/// The security schemes documented in the API specification.
+public enum SecurityScheme: String, CustomDebugStringConvertible {
+{{#if securitySchemes}}
 {{#each securitySchemes}}
-    case {{identifier name}}: {{{stringLiteral name}}}
+    case {{identifier name}} = {{{stringLiteral name}}}
 {{/each}}
+{{else}}
+    /// No security schemes were specified. This case is a placeholder so the enum is valid.
+    case unspecified = "unspecified"
+{{/if}}
+
+    public var debugDescription: String {
+        return "SecurityScheme: \(rawValue)"
+    }
 }
+{{#each securitySchemes}}
+{{#if isOAuth}}
+{{#each flows}}
+
+{{#if tokenUrl}}
+{{#ifeq type 'password'}}
+extension OAuthPasswordFlowClient {
+    /**
+    Create an instance of `OAuthPasswordFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
+    */
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthPasswordFlowClient {
+        OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
+    }
+}
+{{/ifeq}}
+{{#ifeq type 'clientCredentials'}}
+extension OAuthClientCredentialsFlowClient {
+    /**
+    Create an instance of `OAuthClientCredentialsFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
+    */
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthClientCredentialsFlowClient {
+        OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
+    }
+}
+{{/ifeq}}
+{{#ifeq type 'authorizationCode'}}
+{{#if authorizationUrl}}
+extension OAuthAuthorizationCodeFlowClient {
+    /**
+    Create an instance of `OAuthAuthorizationCodeFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+
+    - Parameters:
+        - clientId: The client ID associated with the API.
+        - clientSecret: The client secret associated with the API.
+        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
+    */
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthAuthorizationCodeFlowClient {
+        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, accessTokenDidChange: accessTokenDidChange)
+    }
+}
+{{/if}}
+{{/ifeq}}
+{{#ifeq type 'implicit'}}
+// TODO: Generate the implicit flow client
+{{/ifeq}}
+{{/if}}
+{{/each}}
+{{/if}}
+{{/each}}

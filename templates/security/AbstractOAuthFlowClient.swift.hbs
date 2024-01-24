@@ -1,0 +1,88 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public class AbstractOAuthFlowClient: SecurityClient {
+    
+    let tokenManager: OAuthAccessTokenManager
+    
+    let clientId: String
+    let clientSecret: String
+    public var revocationURL: URL?
+    
+    public var refreshToken: String? {
+         get async {
+            return await tokenManager.accessToken?.refreshToken
+        }
+    }
+
+    public var accessToken: OAuthAccessToken? {
+         get async {
+            return await tokenManager.accessToken
+        }
+    }
+
+    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler?) {
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
+    }
+    
+    /// Authenticate the security client using a refresh token.
+    public func authenticate(refreshToken: String) async throws {
+        try await tokenManager.setAccessToken(OAuthAccessToken(refreshToken: refreshToken))
+        try await tokenManager.refreshToken()
+    }
+    
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        try await tokenManager.refreshToken(failedRequest: failedRequest)
+    }
+    
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        try await tokenManager.authorize(request: &request)
+    }
+
+    public func revokeRefreshToken() async throws {
+        guard let revocationURL = revocationURL else {
+            return
+        }
+        try await tokenManager.revokeRefreshToken(url: revocationURL)
+    }
+
+    public func revokeAccessToken() async throws {
+        guard let revocationURL = revocationURL else {
+            return
+        }
+        try await tokenManager.revokeAccessToken(url: revocationURL)
+    }
+}
+
+/**
+ Creates a URLRequest for OAuth authentication.
+
+ - Parameters:
+    - url: The URL for the request.
+    - params: A dictionary of key-value pairs for the request parameters.
+
+ - Returns: A URLRequest configured for OAuth authentication.
+ */
+func createOAuthRequest(url: URL, params: [String: String]) -> URLRequest {
+    var refreshRequest = URLRequest(url: url)
+    refreshRequest.httpMethod = "POST"
+    refreshRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    refreshRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+    
+    let queryString = params.map({ key, value in
+        let k = key.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        let v = value.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        return "\(k)=\(v)"
+    }).joined(separator: "&")
+    
+    let formData = queryString.data(using: .utf8)
+    
+    refreshRequest.httpBody = formData
+    
+    return refreshRequest
+}

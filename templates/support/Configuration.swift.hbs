@@ -4,63 +4,39 @@
 
 import Foundation
 
-public typealias ConfigurationAPIKeyBlock = ((_ name: String) -> String?)
-public typealias ConfigurationAuthorizationBlock = ((_ name: String, _ scopes: [String]?) -> String?)
-public typealias ConfigurationPrepareRequestBlock = ((_ request: inout URLRequest) -> Void)
+public typealias ConfigurationFinalizeRequestBlock = ((_ request: inout Foundation.URLRequest) -> Void)
 
 public struct Configuration {
-    /**
-     * Return the API key if using apiKey authentication.
-     */
-    public var apiKeyBlock: ConfigurationAPIKeyBlock?
 
-    /**
-     * The username if using basic authentication.
-     */
-    public var username: String?
-
-    /**
-     * The password if using basic authentication.
-     */
-    public var password: String?
-
-    /**
-     * Return the authorization value to use for the named security scheme and scopes.
-     */
-    public var authorizationBlock: ConfigurationAuthorizationBlock?
+    /** The handler for all security requests. */
+    public var securityClient: SecurityClient?
 
     /**
      * Override the default base path.
      */
-    public var basePath: String?
+    public var basePath: Swift.String?
 
-    public var cachePolicy: URLRequest.CachePolicy?
+    public var cachePolicy: Foundation.URLRequest.CachePolicy?
 
-    public var timeoutInterval: TimeInterval
+    public var timeoutInterval: Foundation.TimeInterval
 
-    public var responseQueue: DispatchQueue?
+    public var responseQueue: Dispatch.DispatchQueue?
 
-    public var prepareRequestBlock: ConfigurationPrepareRequestBlock?
+    public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
 
     public init(
-        username: String? = nil,
-        password: String? = nil,
-        basePath: String? = nil,
-        cachePolicy: URLRequest.CachePolicy? = nil,
-        timeoutInterval: TimeInterval = 30,
-        responseQueue: DispatchQueue? = nil,
-        apiKeyBlock: ConfigurationAPIKeyBlock? = nil,
-        authorizationBlock: ConfigurationAuthorizationBlock? = nil,
-        prepareRequestBlock: ConfigurationPrepareRequestBlock? = nil
+        basePath: Swift.String? = nil,
+        cachePolicy: Foundation.URLRequest.CachePolicy? = nil,
+        timeoutInterval: Foundation.TimeInterval = 30,
+        responseQueue: Dispatch.DispatchQueue? = nil,
+        securityClient: SecurityClient? = nil,
+        finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
     ) {
-        self.username = username
-        self.password = password
         self.basePath = basePath
         self.cachePolicy = cachePolicy
         self.timeoutInterval = timeoutInterval
         self.responseQueue = responseQueue
-        self.apiKeyBlock = apiKeyBlock
-        self.authorizationBlock = authorizationBlock
-        self.prepareRequestBlock = prepareRequestBlock
+        self.securityClient = securityClient
+        self.finalizeRequestBlock = finalizeRequestBlock
     }
 }

@@ -1,0 +1,45 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/**
+ Delegates security requirements to the appropriate SecurityClient. 
+
+ This controller serves as the default intended security client for any API configuration and can be safely shared by multiple API instances.
+
+ - Note: Specific `SecurityClient` objects can be inserted or replaced dynamically to accommodate user behavior changes, such as signing in or signing out.
+*/
+public class SecurityClientController: SecurityClient {
+
+    var clients: [SecurityScheme: SecurityClient] = [:]
+
+    public init(clients: [SecurityScheme : SecurityClient] = [:]) {
+        self.clients = clients
+    }
+
+    public func setClient(securityScheme: SecurityScheme, client: SecurityClient) {
+        self.clients[securityScheme] = client
+    }
+
+    public func getClient(securityScheme: SecurityScheme) -> SecurityClient? {
+        return clients[securityScheme]
+    }
+
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        if let client = clients[securityScheme] {
+            try await client.reauthenticate(failedRequest: failedRequest, securityScheme: securityScheme, scopes: scopes)
+        } else {
+            throw APIError.securitySchemeNotConfigured(securityScheme)
+        }
+    }
+
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        if let client = clients[securityScheme] {
+            try await client.authorize(request: &request, securityScheme: securityScheme, scopes: scopes)
+        } else {
+            throw APIError.securitySchemeNotConfigured(securityScheme)
+        }
+    }
+}

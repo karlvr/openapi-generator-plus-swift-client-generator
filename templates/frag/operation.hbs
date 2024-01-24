@@ -18,19 +18,27 @@
 {{/with}}
 {{/if}}
 {{/join}}
+{{#join '_requestCallParams' ', '}}
+{{#each parameters}}
+{{{name}}}: __request.{{{name}}}
+{{/each}}
+{{#if requestBody.nativeType}}
+{{#with requestBody}}
+{{{name}}}: {{{name}}}
+{{/with}}
+{{/if}}
+{{/join}}
 public enum {{className name}}Result {
 {{#each responses}}
+    {{#ifneq code 401}}
     {{#if description}}
     /**
-     * {{#indent '     * '}}{{{md description}}}{{/indent}}
+     * {{#indent '     * '}}{{{description}}}{{/indent}}
      */
     {{/if}}
     case _{{{code}}}{{#if defaultContent.nativeType}}(_ value: {{{defaultContent.nativeType}}}){{/if}}
+    {{/ifneq}}
 {{/each}}
-    /** An unexpected response */
-    case unexpected(response: HTTPURLResponse, data: Data?)
-    /** An error occurred in processing */
-    case error(_ error: Error)
 }
 
 {{#if (gt (count parameters) 1)}}
@@ -40,63 +48,100 @@ public enum {{className name}}Result {
 {{#if deprecated}}
 @available(*, deprecated)
 {{/if}}
-open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
-    {{{name}}}({{#each parameters}}{{{name}}}: __request.{{{name}}}, {{/each}}{{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.name}}}, {{/if}}responseQueue: responseQueue, completion: completion)
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
+    {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}}, responseQueue: responseQueue, completion: completion)
+}
+
+{{>frag/operationDocumentation}}
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
+open func {{{name}}}(_ __request: {{{className (concat name '_' 'request')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
+    return try await {{{name}}}({{{_requestCallParams}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.name}}}{{/if}})
 }
 
 {{/if}}
 {{>frag/operationDocumentation}}
-open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: {{className name}}Result) -> Void)) {
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
+open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
-    do {
-        let __request = try {{{name}}}Request({{{_callParams}}})
-        URLSession.handleApiRequest(__request) { response, data, error in
-            if let error = error {
-                responseQueue.asyncIfPresent {
-                    completion(.error(error))
-                }
-                return
+    Task {
+        do {
+            let result = try await {{{name}}}({{{_callParams}}})
+            responseQueue.asyncIfPresent {
+                completion(.success(result))
             }
-
-            switch response!.statusCode {
-{{#each responses}}
-            case {{{code}}}:
-                {{#if defaultContent.nativeType}}
-                if let data = data {
-                    do {
-                        let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
-                        responseQueue.asyncIfPresent {
-                            completion(._{{{code}}}(decodedData))
-                        }
-                    } catch let decodingError {
-                        responseQueue.asyncIfPresent {
-                            completion(.error(decodingError))
-                        }
-                    }
-                } else {
-                    responseQueue.asyncIfPresent {
-                        completion(.unexpected(response: response!, data: data))
-                    }
-                }
-                {{else}}
-                responseQueue.asyncIfPresent {
-                    completion(._{{{code}}})
-                }
-                {{/if}}
-{{/each}}
-            default:
-                responseQueue.asyncIfPresent {
-                    completion(.unexpected(response: response!, data: data))
-                }
+        } catch {
+            responseQueue.asyncIfPresent {
+                completion(.failure(error))
             }
         }
-    } catch let error {
-        completion(.error(error))
     }
 }
 
 {{>frag/operationDocumentation}}
-open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
+{{#if deprecated}}
+@available(*, deprecated)
+{{/if}}
+open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
+    return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
+}
+
+private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
+    let __request = try await {{{name}}}Request({{{_callParams}}})
+    let (response, data) = try await URLSession.handleApiRequest(__request)
+    switch response.statusCode {
+{{#each responses}}
+    {{#ifneq code 401}}
+    case {{{code}}}:
+    {{#if defaultContent.nativeType}}
+        do {
+            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+            return ._{{{code}}}(decodedData)
+        } catch {
+            throw APIError.invalidResponse(error, response: response, data: data)
+        }
+    {{else}}
+        return ._{{{code}}}
+    {{/if}}
+    {{/ifneq}}
+{{/each}}
+{{#if securityRequirements}}
+    case 401:
+        if allowsReauth, let securityClient = configuration.securityClient {
+            var didAuthenticate = false
+            var lastError: Error?
+            {{#each securityRequirements.requirements}}
+            if !didAuthenticate {
+                do {
+                    {{#each schemes}}
+                    try await securityClient.reauthenticate(failedRequest: __request, securityScheme: .{{{identifier scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+                    {{/each}}
+                    didAuthenticate = true
+                } catch (let error) {
+                    lastError = error
+                }
+            }
+            {{/each}}
+            {{#unless securityRequirements.optional}}
+            if !didAuthenticate {
+                throw lastError!
+            }
+            {{/unless}}
+            return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
+        } else {
+            throw APIError.authenticationFailed(response, data: data)
+        }
+{{/if}}
+    default:
+        throw APIError.unexpectedResponse(response, data: data)
+    }
+}
+
+{{>frag/operationDocumentation}}
+open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
     let localVarPath = "{{{group.path}}}{{{path}}}"
     {{#each pathParams}}
         .replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
@@ -118,8 +163,6 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
 {{/each}}
 
 {{/if}}
-    {{>frag/requestSecurity}}
-
     localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
 
     var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
@@ -147,13 +190,15 @@ open func {{{name}}}Request({{{_params}}}) throws -> URLRequest {
         {{>frag/requestBody}}
     }
     {{/if}}
-    
 {{/with}}
+
 {{/if}}
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 
-    if let localVarPrepareRequestBlock = self.configuration.prepareRequestBlock {
-        localVarPrepareRequestBlock(&localVarRequest)
+    {{>frag/requestSecurity}}
+
+    if let localVarFinalizeRequestBlock = self.configuration.finalizeRequestBlock {
+        localVarFinalizeRequestBlock(&localVarRequest)
     }
     return localVarRequest
 }

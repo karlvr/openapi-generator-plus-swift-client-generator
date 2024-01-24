@@ -1,0 +1,31 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/// A client for the OAuth 2.0 Authorization Code Flow
+public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
+    
+    private let tokenURL: URL
+    private let authorizationURL: URL
+    
+    public init(clientId: String,
+                clientSecret: String,
+                refreshURL: URL? = nil,
+                preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
+                tokenURL: URL,
+                authorizationURL: URL,
+                accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.tokenURL = tokenURL
+        self.authorizationURL = authorizationURL
+        
+        super.init(clientId: clientId, clientSecret: clientSecret, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
+    }
+
+    // TODO: Implement the authorization code client
+    // Provide a function to create a URL for the authorize request, including requested scopes, that the developer can use to open a web view
+    // Provide an authenticate function that takes an authorization code to obtain an access token
+    // Provide an authenticate function that takes a URL, extracts an authorization code from it and uses that to obtain an access token
+    
+}

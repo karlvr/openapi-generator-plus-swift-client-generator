@@ -8,7 +8,7 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
 
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)$", options: [])
 
-    enum DecoderError: Error {
+    enum DecoderError: Swift.Error {
         case invalidMatch(value: String)
     }
 
