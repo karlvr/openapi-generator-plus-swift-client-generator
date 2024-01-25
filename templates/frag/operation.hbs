@@ -56,7 +56,7 @@ open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' '
 {{#if deprecated}}
 @available(*, deprecated)
 {{/if}}
-open func {{{name}}}(_ __request: {{group.name}}{{{className (concat name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
+open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_requestCallParams}}})
 }
 
