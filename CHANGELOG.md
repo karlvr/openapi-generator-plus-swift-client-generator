@@ -1,5 +1,12 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.0.0
+
+### Major Changes
+
+- d922509: Add authorisation support with clients for OAuth flows, basic auth and API key auth
+- b1ba51f: Add SecurityScheme enum
+
 ## 0.3.3
 
 ### Patch Changes
