@@ -8,7 +8,12 @@ if !didAuthenticate {
     do {
         {{#each schemes}}
         if let securityClient = self.configuration.securityClient {
-            try await securityClient.authorize(request: &authedRequest, securityScheme: .{{{identifier scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+            do {
+                try await securityClient.authorize(request: &authedRequest, securityScheme: .{{{identifier scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+            } catch APIError.notAuthenticated {
+                try await securityClient.reauthenticate(failedRequest: authedRequest, securityScheme: .{{{identifier scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+                try await securityClient.authorize(request: &authedRequest, securityScheme: .{{{identifier scheme.name}}}, scopes: [{{#each scopes}}{{{stringLiteral name}}}{{#unless @last}}, {{/unless}}{{/each}}])
+            }
         }
         {{/each}}
         didAuthenticate = true
