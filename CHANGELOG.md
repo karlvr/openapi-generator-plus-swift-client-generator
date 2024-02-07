@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.0.1
+
+### Patch Changes
+
+- 2cba862: Fixes request authorization to include a reauthentication attempt if authorize fails
+
 ## 1.0.0
 
 ### Major Changes
