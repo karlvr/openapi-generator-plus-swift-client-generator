@@ -109,8 +109,10 @@ actor OAuthAccessTokenManager {
         }
         
         refreshTask = t
+        defer {
+            refreshTask = nil
+        }
         try await t.value
-        refreshTask = nil
     }
 
     func refreshToken(failedRequest: URLRequest) async throws {
