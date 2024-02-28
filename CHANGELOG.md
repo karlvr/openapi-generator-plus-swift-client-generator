@@ -1,5 +1,14 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.0.2
+
+### Patch Changes
+
+- 4137811: Clear token on 401 refresh response
+- f54aeba: Oauth Credentials Flow: prevent multiple simultaneous attempts to reauthenticate
+- 2fc926e: Add support for catch-all response codes
+- 6ccdf72: Ensure the refresh task is reset when errors are thrown
+
 ## 1.0.1
 
 ### Patch Changes
