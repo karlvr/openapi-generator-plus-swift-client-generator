@@ -95,7 +95,11 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     switch response.statusCode {
 {{#each responses}}
     {{#ifneq code 401}}
+    {{#unless isCatchAll}}
     case {{{code}}}:
+    {{else}}
+    default:
+    {{/unless}}
     {{#if defaultContent.nativeType}}
         do {
             let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
@@ -135,8 +139,10 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             throw APIError.authenticationFailed(response, data: data)
         }
 {{/if}}
+{{#unless catchAllResponse}}
     default:
         throw APIError.unexpectedResponse(response, data: data)
+{{/unless}}
     }
 }
 
