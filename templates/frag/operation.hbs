@@ -93,25 +93,6 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     let __request = try await {{{name}}}Request({{{_callParams}}})
     let (response, data) = try await URLSession.handleApiRequest(__request)
     switch response.statusCode {
-{{#each responses}}
-    {{#ifneq code 401}}
-    {{#unless isCatchAll}}
-    case {{{code}}}:
-    {{else}}
-    default:
-    {{/unless}}
-    {{#if defaultContent.nativeType}}
-        do {
-            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
-            return ._{{{code}}}(decodedData)
-        } catch {
-            throw APIError.invalidResponse(error, response: response, data: data)
-        }
-    {{else}}
-        return ._{{{code}}}
-    {{/if}}
-    {{/ifneq}}
-{{/each}}
 {{#if securityRequirements}}
     case 401:
         if allowsReauth, let securityClient = configuration.securityClient {
@@ -139,6 +120,25 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             throw APIError.authenticationFailed(response, data: data)
         }
 {{/if}}
+{{#each responses}}
+    {{#ifneq code 401}}
+    {{#unless isCatchAll}}
+    case {{{code}}}:
+    {{else}}
+    default:
+    {{/unless}}
+    {{#if defaultContent.nativeType}}
+        do {
+            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+            return ._{{{code}}}(decodedData)
+        } catch {
+            throw APIError.invalidResponse(error, response: response, data: data)
+        }
+    {{else}}
+        return ._{{{code}}}
+    {{/if}}
+    {{/ifneq}}
+{{/each}}
 {{#unless catchAllResponse}}
     default:
         throw APIError.unexpectedResponse(response, data: data)
