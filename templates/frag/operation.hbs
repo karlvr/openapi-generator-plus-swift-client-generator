@@ -124,9 +124,6 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     {{#ifneq code 401}}
     {{#unless isCatchAll}}
     case {{{code}}}:
-    {{else}}
-    default:
-    {{/unless}}
     {{#if defaultContent.nativeType}}
         do {
             let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
@@ -137,12 +134,24 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     {{else}}
         return ._{{{code}}}
     {{/if}}
+    {{/unless}}
     {{/ifneq}}
 {{/each}}
-{{#unless catchAllResponse}}
     default:
+{{#if catchAllResponse}}
+    {{#if catchAllResponse.defaultContent.nativeType}}
+        do {
+            let decodedData = try JSONDecoder().decode({{{catchAllResponse.defaultContent.nativeType.concreteType}}}.self, from: data)
+            return ._{{{catchAllResponse.code}}}(decodedData)
+        } catch {
+            throw APIError.invalidResponse(error, response: response, data: data)
+        }
+    {{else}}
+        return ._{{{catchAllResponse.code}}}
+    {{/if}}
+{{else}}
         throw APIError.unexpectedResponse(response, data: data)
-{{/unless}}
+{{/if}}
     }
 }
 
