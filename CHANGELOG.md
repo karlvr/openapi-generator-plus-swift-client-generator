@@ -1,5 +1,12 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.0.3
+
+### Patch Changes
+
+- a417df7: Check for 401 response before checking any other response code. Fixes issue with default case responses.
+- bb01ea0: Ensure that default case is always last no matter what order the responses are in the specification
+
 ## 1.0.2
 
 ### Patch Changes
