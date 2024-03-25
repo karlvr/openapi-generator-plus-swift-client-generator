@@ -29,11 +29,8 @@ public struct {{{name}}}: {{{_parents}}} {
 {{/each}}
     }
 
-{{#or properties discriminatorValues}}
+{{#if properties}}
     enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
-{{#each discriminatorValues}}
-        case {{{schema.discriminator.name}}}{{#ifeq schema.discriminator.name schema.discriminator.serializedName}}{{else}} = {{{stringLiteral schema.discriminator.serializedName}}}{{/ifeq}}
-{{/each}}
 {{#each properties}}
 {{#unless discriminators}}
         case {{{name}}}{{#ifeq name serializedName}}{{else}} = {{{stringLiteral serializedName}}}{{/ifeq}}
@@ -52,14 +49,11 @@ public struct {{{name}}}: {{{_parents}}} {
 
     public func encode(to encoder: Swift.Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-{{#each discriminatorValues}}
-        try container.encode({{{literalValue}}}, forKey: .{{{schema.discriminator.name}}})
-{{/each}}
 {{#each properties}}
         {{>frag/encode keyed=true}}
 {{/each}}
     }
 
-{{/or}}
+{{/if}}
     {{>frag/nestedSchemas}}
 }

@@ -18,19 +18,27 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
     }
 
     public func encode(to encoder: Swift.Encoder) throws {
+{{#if discriminator}}
+        var container = try encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+{{#each discriminator.references}}
+        case let .{{{camelCase schema.name}}}(value):
+            try container.encode({{{literalValue}}}, forKey: .{{{../discriminator.name}}})
+            try value.encode(to: encoder)
+{{/each}}
+        case let .unknown(discriminatorValue):
+            throw EncoderError.cannotEncodeUnknown(discriminatorValue)
+        }
+{{else}}
         switch self {
 {{#each composes}}
         case let .{{{camelCase name}}}(value):
             try value.encode(to: encoder)
 {{/each}}
-{{#if discriminator}}
-        case let .unknown(discriminatorValue):
-            throw EncoderError.cannotEncodeUnknown(discriminatorValue)
-{{else}}
         case .unknown:
             throw EncoderError.cannotEncodeUnknown
-{{/if}}
         }
+{{/if}}
     }
 
 {{#if discriminator}}
