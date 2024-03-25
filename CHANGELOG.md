@@ -1,5 +1,13 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.1.0
+
+### Minor Changes
+
+- 0622c5d: Discriminator values are now serialized by the enum container
+
+  This is because a single schema may be part of multiple oneOf hierarchies.
+
 ## 1.0.3
 
 ### Patch Changes
