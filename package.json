@@ -2,6 +2,10 @@
   "name": "@openapi-generator-plus/swift-client-generator",
   "version": "1.1.0",
   "description": "An OpenAPI Generator Plus template for a Swift API client",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
   "keywords": [
     "openapi-generator-plus",
     "openapi-generator-plus-generator",
