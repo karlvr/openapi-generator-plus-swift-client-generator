@@ -8,8 +8,7 @@ extension Foundation.CharacterSet {
 
     /// The character set for percent encoding x-www-form-urlencoded data.
     static let formUrlEncoded: Foundation.CharacterSet = {
-        var set = Foundation.CharacterSet.urlQueryAllowed
-        set.remove("+")
+        var set = Foundation.CharacterSet.alphanumerics
         return set
     }()
 }
