@@ -231,6 +231,8 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					return new context.NativeType('Bool')
 				case CodegenSchemaType.BINARY:
 					return new context.NativeType('Data')
+				case CodegenSchemaType.FILE:
+					return new context.NativeType('File')
 			}
 
 			throw new Error(`Unsupported schema type: ${schemaType}`)
