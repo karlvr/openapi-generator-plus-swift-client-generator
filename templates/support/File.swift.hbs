@@ -1,0 +1,13 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+/// A file that can be sent to an API, such as as part of FormData
+public struct File: Swift.Codable, Swift.Hashable {
+
+    var data: Data
+    var filename: String?
+    
+}

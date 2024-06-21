@@ -85,7 +85,7 @@ const RESERVED_WORDS = [
 	'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'nil', 'none', 'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
 	'protocol', 'public', 'repeat', 'required', 'rethrows', 'return', 'right', 'self', 'set', 'static', 'struct', 'subscript', 'super', 'switch', 'throw', 'throws', 'true',
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
-	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void',
+	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData',
 	'unknown', // for our enum cases
 ]
 
@@ -231,6 +231,8 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					return new context.NativeType('Bool')
 				case CodegenSchemaType.BINARY:
 					return new context.NativeType('Data')
+				case CodegenSchemaType.FILE:
+					return new context.NativeType('File')
 			}
 
 			throw new Error(`Unsupported schema type: ${schemaType}`)
@@ -275,7 +277,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		toSuggestedSchemaName: (name, options) => {
 			if (options.schemaType === CodegenSchemaType.ENUM) {
 				name = `${name}`
-			} else if (options.purpose === CodegenSchemaPurpose.EXTRACTED_INTERFACE) {
+			} else if (options.purpose === CodegenSchemaPurpose.INTERFACE) {
 				name = `${name}_protocol`
 			} else if (options.purpose === CodegenSchemaPurpose.ABSTRACT_IMPLEMENTATION) {
 				name = `abstract_${name}`
@@ -480,7 +482,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				/* oneOf schemas turn into an enum, so each member needs a `name` for our enum */
 				for (const comp of schema.composes) {
 					if (comp.name === null) {
-						comp.name = helper.uniqueName(suggestedNameForType(comp.nativeType), helper.scopeOf(schema), comp.schemaType)
+						comp.name = helper.uniqueName(suggestedNameForType(comp.nativeType), helper.scopeOf(schema), comp.schemaType, comp.purpose)
 					}
 				}
 			}

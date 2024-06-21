@@ -22,6 +22,10 @@ struct FormData {
         self.parts.append(.data(name: name, data: value, contentType: contentType, filename: filename))
     }
 
+    mutating func append(_ name: String, _ file: File, _ contentType: String?) {
+        self.parts.append(.data(name: name, data: file.data, contentType: contentType, filename: file.filename))
+    }
+
     var data: Data {
         var result = Data()
 

@@ -15,15 +15,25 @@ if let value = {{{propertyVar}}}.value { // nullable
     {{>frag/multipartProperty _handledNullable=true propertyVar='value'}}
 }
 {{else}}
+{{!-- Extract the valueSchema according to whether we're using `this` or the value property in `this --}}
+{{#if valueProperty}}
+{{#set '_valueSchema' valueProperty.schema}}
+{{/set}}
+{{else}}
+{{#set '_valueSchema' this.schemaUsage}}
+{{/set}}
+{{/if}}
 {{#set '_valueProperty'}}
 {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}
 {{/set}}
-{{#ifeq contentType 'application/json'}}
+{{#if (isFile _valueSchema)}}
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}}, {{{stringLiteral contentType}}})
+{{else ifeq contentType 'application/json'}}
 {{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{_valueProperty}}}), {{{stringLiteral contentType}}}, nil)
 {{else ifeq contentType 'application/octet-stream'}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}}, {{{stringLiteral contentType}}}{{#if filenameProperty}}, {{{propertyVar}}}.{{{filenameProperty.name}}}{{else}}, nil{{/if}})
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}}, {{{stringLiteral contentType}}}, nil)
 {{else}}
 {{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, String({{{_valueProperty}}}), {{{stringLiteral contentType}}})
-{{/ifeq}}
+{{/if}}
 {{/and}}
 {{/and}}
