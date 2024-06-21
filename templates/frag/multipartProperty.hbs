@@ -27,7 +27,7 @@ if let value = {{{propertyVar}}}.value { // nullable
 {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}
 {{/set}}
 {{#if (isFile _valueSchema)}}
-{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}})
+{{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, {{{_valueProperty}}}, {{{stringLiteral contentType}}})
 {{else ifeq contentType 'application/json'}}
 {{{bodyPartsVar}}}.append({{{stringLiteral property.serializedName}}}, try JSONEncoder().encode({{{_valueProperty}}}), {{{stringLiteral contentType}}}, nil)
 {{else ifeq contentType 'application/octet-stream'}}
