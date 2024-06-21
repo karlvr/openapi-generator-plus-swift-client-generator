@@ -1,5 +1,17 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.2.0
+
+### Minor Changes
+
+- b051e86: Update core
+- b403bee: Add support for File type as part of multipart/form-data
+
+### Patch Changes
+
+- db66719: Treat any 4XX response on a token refresh as an invalid token
+- 5c46d74: Restrict allowed characters in form encoding to alphanumerics
+
 ## 1.1.0
 
 ### Minor Changes
