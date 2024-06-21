@@ -32,4 +32,9 @@ describe('compile test cases', () => {
 	if (fs.existsSync(sharedBasePath)) {
 		compileFiles(sharedBasePath, fs.readdirSync(sharedBasePath))
 	}
+
+	const ciSharedBasePath = path.join(__dirname, '../../test-input/__tests__/specs')
+	if (fs.existsSync(ciSharedBasePath)) {
+		compileFiles(ciSharedBasePath, fs.readdirSync(ciSharedBasePath))
+	}
 })
