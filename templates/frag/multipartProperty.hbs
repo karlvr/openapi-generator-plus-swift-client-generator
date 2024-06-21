@@ -17,9 +17,11 @@ if let value = {{{propertyVar}}}.value { // nullable
 {{else}}
 {{!-- Extract the valueSchema according to whether we're using `this` or the value property in `this --}}
 {{#if valueProperty}}
-{{set '_valueSchema' valueProperty.schema}}
+{{#set '_valueSchema' valueProperty.schema}}
+{{/set}}
 {{else}}
-{{set '_valueSchema' this.schemaUsage}}
+{{#set '_valueSchema' this.schemaUsage}}
+{{/set}}
 {{/if}}
 {{#set '_valueProperty'}}
 {{{propertyVar}}}{{#if valueProperty}}.{{identifier valueProperty.name}}{{/if}}
