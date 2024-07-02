@@ -46,7 +46,7 @@ public enum {{className name}}Result {
 
 {{>frag/operationDocumentation}}
 {{#if deprecated}}
-@available(*, deprecated)
+@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     {{{name}}}({{{_requestCallParams}}}, responseQueue: responseQueue, completion: completion)
@@ -54,7 +54,7 @@ open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' '
 
 {{>frag/operationDocumentation}}
 {{#if deprecated}}
-@available(*, deprecated)
+@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_requestCallParams}}})
@@ -63,7 +63,7 @@ open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' '
 {{/if}}
 {{>frag/operationDocumentation}}
 {{#if deprecated}}
-@available(*, deprecated)
+@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
@@ -83,7 +83,7 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 
 {{>frag/operationDocumentation}}
 {{#if deprecated}}
-@available(*, deprecated)
+@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)

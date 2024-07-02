@@ -1,6 +1,6 @@
 {{>frag/schemaDocumentation}}
 {{#if deprecated}}
-@available(*, deprecated)
+@available(*, deprecated, message: "This object is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 {{#join '_parents' ', '}}
 Swift.Codable
@@ -13,7 +13,7 @@ public struct {{{name}}}: {{{_parents}}} {
 {{#each properties}}
     {{>frag/propertyDocumentation}}
     {{#if deprecated}}
-    @available(*, deprecated)
+    @available(*, deprecated, message: "This property is deprecated. Please refer to the provider of the API specification for further instructions.")
     {{/if}}
     public var {{{name}}}: {{{nativeType}}}
 {{/each}}
