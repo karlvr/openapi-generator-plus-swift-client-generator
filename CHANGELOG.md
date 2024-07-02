@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.2.1
+
+### Patch Changes
+
+- 83ab687: fix deprecation mark in Xcode
+
 ## 1.2.0
 
 ### Minor Changes
