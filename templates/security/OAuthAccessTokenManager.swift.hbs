@@ -99,12 +99,12 @@ actor OAuthAccessTokenManager {
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
                 self.accessTokenDidChange?(resultData)
-            case 400...499:
+            case 400...428, 430...500:
                 self.accessToken = nil
                 self.accessTokenDidChange?(nil)
                 throw APIError.authenticationFailed(result.response, data: result.data)
             default:
-                throw APIError.authenticationFailed(result.response, data: result.data)
+                throw APIError.unexpectedResponse(result.response, data: result.data)
             }
         }
         
