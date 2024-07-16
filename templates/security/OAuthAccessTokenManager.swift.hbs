@@ -111,7 +111,8 @@ actor OAuthAccessTokenManager {
         }
         
         refreshTask = t
-        defer {            refreshTask = nil
+        defer {
+            refreshTask = nil
         }
         try await t.value
     }
