@@ -9,10 +9,10 @@ extension Foundation.URLSession {
     static var apiSession = Foundation.URLSession(configuration: .default)
 
     @available(*, renamed: "handleApiRequest(_:)")
-    static func handleApiRequest(_ request: Foundation.URLRequest, completion: @escaping ((_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
+    static func handleApiRequest(_ request: Foundation.URLRequest, configuration: RetryConfiguration?, completion: @escaping ((_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
         Task {
             do {
-                let result = try await handleApiRequest(request)
+                let result = try await handleApiRequest(request, configuration: configuration)
                 completion(result.response, result.data, nil)
             } catch {
                 completion(nil, nil, error)
@@ -20,11 +20,29 @@ extension Foundation.URLSession {
         }
     }
     
-    static func handleApiRequest(_ request: Foundation.URLRequest) async throws -> (response: HTTPURLResponse, data: Data) {
+    static func handleApiRequest(_ request: Foundation.URLRequest, attemptsTried: Int = 0, configuration: RetryConfiguration?) async throws -> URLSessionResponse {
         let (data, response) = try await apiSession.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unexpectedResponse(response, data: data)
         }
-        return (response: httpResponse, data: data)
+
+        let nanosecondsPerSecond: Double = 1_000_000_000
+
+        let result = URLSessionResponse(response: httpResponse, data: data)
+        guard let configuration = configuration else {
+            return result
+        }
+
+        if (configuration.retryStatusCodes.contains(result.response.statusCode) && attemptsTried < configuration.maxAttempts) {
+            let delay = pow(configuration.scaleFactor, Double(attemptsTried)) * configuration.delay
+            try await Task.sleep(nanoseconds: UInt64(delay * nanosecondsPerSecond))
+            return try await URLSession.handleApiRequest(request, attemptsTried: attemptsTried + 1, configuration: configuration)
+        }
+        return result
     }
+}
+
+struct URLSessionResponse {
+    let response: HTTPURLResponse
+    let data: Data
 }

@@ -1,0 +1,19 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public struct RetryConfiguration {
+    let maxAttempts: Int
+    let delay: TimeInterval
+    let scaleFactor: Double
+    let retryStatusCodes: Set<Int>
+
+    public init(maxAttempts: Int = 4, delay: TimeInterval = 2.0, scaleFactor: Double = 2.0, retryStatusCodes: Set<Int> = [429]) {
+        self.maxAttempts = maxAttempts
+        self.delay = delay
+        self.scaleFactor = scaleFactor
+        self.retryStatusCodes = retryStatusCodes
+    }
+}
