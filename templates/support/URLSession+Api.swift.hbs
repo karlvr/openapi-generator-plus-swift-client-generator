@@ -9,10 +9,10 @@ extension Foundation.URLSession {
     static var apiSession = Foundation.URLSession(configuration: .default)
 
     @available(*, renamed: "handleApiRequest(_:)")
-    static func handleApiRequest(_ request: Foundation.URLRequest, configuration: RetryConfiguration?, completion: @escaping ((_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
+    static func handleApiRequest(_ request: Foundation.URLRequest, retryConfiguration: RetryConfiguration?, completion: @escaping ((_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void)) {
         Task {
             do {
-                let result = try await handleApiRequest(request, configuration: configuration)
+                let result = try await handleApiRequest(request, retryConfiguration: retryConfiguration)
                 completion(result.response, result.data, nil)
             } catch {
                 completion(nil, nil, error)
@@ -20,7 +20,7 @@ extension Foundation.URLSession {
         }
     }
     
-    static func handleApiRequest(_ request: Foundation.URLRequest, attemptsTried: Int = 0, configuration: RetryConfiguration?) async throws -> URLSessionResponse {
+    static func handleApiRequest(_ request: Foundation.URLRequest, attemptsTried: Int = 0, retryConfiguration: RetryConfiguration?) async throws -> URLSessionResponse {
         let (data, response) = try await apiSession.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unexpectedResponse(response, data: data)
@@ -29,16 +29,22 @@ extension Foundation.URLSession {
         let nanosecondsPerSecond: Double = 1_000_000_000
 
         let result = URLSessionResponse(response: httpResponse, data: data)
-        guard let configuration = configuration else {
+        guard let retryConfiguration = retryConfiguration else {
             return result
         }
 
-        if (configuration.retryStatusCodes.contains(result.response.statusCode) && attemptsTried < configuration.maxAttempts) {
-            let delay = pow(configuration.scaleFactor, Double(attemptsTried)) * configuration.delay
-            try await Task.sleep(nanoseconds: UInt64(delay * nanosecondsPerSecond))
-            return try await URLSession.handleApiRequest(request, attemptsTried: attemptsTried + 1, configuration: configuration)
+        guard attemptsTried < retryConfiguration.maxAttempts else {
+            return result
         }
-        return result
+
+        switch result.response.statusCode {
+            case 429{{#each @root.customRetryStatusCodes}}{{#ifneq this 429}}, {{this}}{{/ifneq}}{{/each}}:
+                let delay = pow(retryConfiguration.scaleFactor, Double(attemptsTried)) * retryConfiguration.delay
+                try await Task.sleep(nanoseconds: UInt64(delay * nanosecondsPerSecond))
+                return try await URLSession.handleApiRequest(request, attemptsTried: attemptsTried + 1, retryConfiguration: retryConfiguration)
+            default:
+                return result
+        }
     }
 }
 

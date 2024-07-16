@@ -4,7 +4,7 @@ import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
-import { commonGenerator, configBoolean, configObject, configString, debugStringify } from '@openapi-generator-plus/generator-common'
+import { commonGenerator, configBoolean, configObject, configString, configStringArray, debugStringify } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
@@ -87,6 +87,7 @@ const RESERVED_WORDS = [
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
 	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData',
 	'unknown', // for our enum cases
+	'RetryConfiguration',
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {
@@ -102,6 +103,7 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 		relativeSourceOutputPath,
 		customTemplatesPath: customTemplates ? computeCustomTemplatesPath(config.configPath, customTemplates) : null,
 		hideGenerationTimestamp: configBoolean(config, 'hideGenerationTimestamp', false),
+		customRetryStatusCodes: configStringArray(config, 'customRetryStatusCodes', []),
 		package: {
 			name: packageName,
 		},

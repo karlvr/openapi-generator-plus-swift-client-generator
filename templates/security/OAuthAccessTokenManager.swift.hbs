@@ -94,7 +94,7 @@ actor OAuthAccessTokenManager {
             // Do the refresh
             let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
             let requestDate = Date()
-            let result = try await URLSession.handleApiRequest(request, configuration: retryConfiguration)
+            let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
             switch result.response.statusCode {
             case 200:
                 var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
@@ -111,8 +111,7 @@ actor OAuthAccessTokenManager {
         }
         
         refreshTask = t
-        defer {
-            refreshTask = nil
+        defer {            refreshTask = nil
         }
         try await t.value
     }
@@ -179,7 +178,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request, configuration: retryConfiguration)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.refreshToken = nil
@@ -201,7 +200,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request, configuration: retryConfiguration)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.accessToken = nil

@@ -7,6 +7,7 @@ export interface CodegenOptionsSwift extends JavaLikeOptions {
 	relativeSourceOutputPath: string
 	customTemplatesPath: string | null
 	hideGenerationTimestamp: boolean
+	customRetryStatusCodes: string[]
 	package: {
 		name: string
 	}
