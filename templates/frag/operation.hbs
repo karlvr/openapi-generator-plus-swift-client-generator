@@ -91,7 +91,7 @@ open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
 
 private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
     let __request = try await {{{name}}}Request({{{_callParams}}})
-    let result = try await URLSession.handleApiRequest(__request, configuration: configuration.retryConfiguration)
+    let result = try await URLSession.handleApiRequest(__request, retryConfiguration: configuration.retryConfiguration)
     switch result.response.statusCode {
 {{#if securityRequirements}}
     case 401:
