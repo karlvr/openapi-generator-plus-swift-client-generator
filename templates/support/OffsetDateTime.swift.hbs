@@ -5,7 +5,7 @@
 import Foundation
 
 public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
-    private static let regex = try! Foundation.NSRegularExpression(pattern: "^([0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(-?[0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)(?:(Z)|(([+-][0-9]{2}):?([0-9]{2})?))?$", options: [])
 
     enum DecoderError: Error {
         case invalidMatch(value: String)
