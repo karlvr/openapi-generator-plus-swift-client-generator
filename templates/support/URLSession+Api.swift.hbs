@@ -33,12 +33,11 @@ extension Foundation.URLSession {
             return result
         }
 
-        guard attemptsTried < retryConfiguration.maxAttempts else {
-            return result
-        }
-
         switch result.response.statusCode {
             case 429{{#each @root.additionalRetryStatusCodes}}{{#ifneq this 429}}, {{this}}{{/ifneq}}{{/each}}:
+                if attemptsTried >= retryConfiguration.maxAttempts {
+                    throw APIError.unexpectedResponse(response, data: data)
+                }
                 let delay = pow(retryConfiguration.scaleFactor, Double(attemptsTried)) * retryConfiguration.delay
                 try await Task.sleep(nanoseconds: UInt64(delay * nanosecondsPerSecond))
                 return try await URLSession.handleApiRequest(request, attemptsTried: attemptsTried + 1, retryConfiguration: retryConfiguration)
