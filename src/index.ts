@@ -87,7 +87,9 @@ const RESERVED_WORDS = [
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
 	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData',
 	'unknown', // for our enum cases
-	'RetryConfiguration',
+	'RetryConfiguration', 'Configuration',
+	'SecurityClient', 'SecurityClientController', 'SecurityScheme', 'OAuthPasswordFlowClient', 'OAuthClientCredentialsFlowClient', 'OAuthAuthorizationCodeFlowClient', 
+	'OAuthAccessTokenManager', 'AccessTokenHandler', 'OAuthAccessToken', 'BasicAuthenticationSecurityClient', 'APIKeySecurityClient', 'AbstractOAuthFlowClient',
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {
