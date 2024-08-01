@@ -15,14 +15,12 @@ public struct RetryConfiguration {
     /// The factor by which to scale the delay between attempts (exponential backoff)
     let scaleFactor: Double
 
-    /**
-    * Initialize a new RetryConfiguration
-    *
-    * - Parameters:
-    *   - maxAttempts: The maximum number of attempts to make
-    *   - delay: The minimum delay between attempts
-    *   - scaleFactor: The factor by which to scale the delay between attempts (exponential backoff)
-    */
+    /// Initialize a new RetryConfiguration
+    /// 
+    /// - Parameters:
+    ///   - maxAttempts: The maximum number of attempts to make
+    ///   - delay: The minimum delay between attempts
+    ///   - scaleFactor: The factor by which to scale the delay between attempts (exponential backoff)
     public init(maxAttempts: Int = 4, delay: TimeInterval = 2.0, scaleFactor: Double = 2.0) {
         self.maxAttempts = maxAttempts
         self.delay = delay
