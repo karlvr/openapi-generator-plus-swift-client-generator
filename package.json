@@ -32,26 +32,26 @@
   },
   "homepage": "https://github.com/karlvr/openapi-generator-plus-swift-client-generator#readme",
   "dependencies": {
-    "@openapi-generator-plus/generator-common": "^1.4.1",
-    "@openapi-generator-plus/handlebars-templates": "^1.5.1",
+    "@openapi-generator-plus/generator-common": "^1.5.0",
+    "@openapi-generator-plus/handlebars-templates": "^1.7.0",
     "@openapi-generator-plus/indexed-type": "^1.0.0",
-    "@openapi-generator-plus/java-like-generator-helper": "^2.2.1",
+    "@openapi-generator-plus/java-like-generator-helper": "^2.3.0",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.5",
-    "@openapi-generator-plus/testing": "^2.16.0",
-    "@openapi-generator-plus/types": "^2.14.0",
+    "@changesets/cli": "^2.27.7",
+    "@openapi-generator-plus/testing": "^2.18.0",
+    "@openapi-generator-plus/types": "^2.16.0",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.7",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "eslint": "^9.5.0",
+    "@types/node": "^22.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.8.0",
     "eslint-plugin-jest": "^28.6.0",
     "jest": "^29.7.0",
-    "rimraf": "^5.0.7",
-    "ts-jest": "^29.1.5",
-    "typescript": "^5.5.2"
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.2.3",
+    "typescript": "^5.5.4"
   },
   "publishConfig": {
     "access": "public"
