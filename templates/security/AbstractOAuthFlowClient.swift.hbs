@@ -11,6 +11,7 @@ public class AbstractOAuthFlowClient: SecurityClient {
     let clientId: String
     let clientSecret: String
     public var revocationURL: URL?
+    let retryConfiguration: RetryConfiguration?
     
     public var refreshToken: String? {
          get async {
@@ -24,10 +25,11 @@ public class AbstractOAuthFlowClient: SecurityClient {
         }
     }
 
-    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, accessTokenDidChange: AccessTokenHandler?) {
+    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, accessTokenDidChange: AccessTokenHandler?) {
         self.clientId = clientId
         self.clientSecret = clientSecret
-        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, accessTokenDidChange: accessTokenDidChange)
+        self.retryConfiguration = retryConfiguration
+        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
     }
     
     /// Authenticate the security client using a refresh token.

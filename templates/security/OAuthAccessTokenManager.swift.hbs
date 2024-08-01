@@ -1,3 +1,8 @@
+{{#join '_additionalTokenFailureStatusCodes' ', '}}
+{{#each @root.additionalTokenFailureStatusCodes}}
+{{this}}
+{{/each}}
+{{/join}}
 //  
 //  {{>frag/generatedBy}}
 //
@@ -27,14 +32,16 @@ actor OAuthAccessTokenManager {
     private var refreshTimer: Timer?
     private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
     private let accessTokenDidChange: AccessTokenHandler?
+    private let retryConfiguration: RetryConfiguration?
     
-    init(clientId: String, clientSecret: String, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+    init(clientId: String, clientSecret: String, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
         self.prepareRequest = prepareRequest
         self.refreshTokenURL = refreshTokenURL
         self.accessTokenDidChange = accessTokenDidChange
+        self.retryConfiguration = retryConfiguration
     }
         
     private func restartRefreshTimer() {
@@ -92,19 +99,19 @@ actor OAuthAccessTokenManager {
             // Do the refresh
             let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
             let requestDate = Date()
-            let result = try await URLSession.handleApiRequest(request)
+            let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
             switch result.response.statusCode {
             case 200:
                 var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
                 self.accessTokenDidChange?(resultData)
-            case 400...499:
+            case 400...499{{#if _additionalTokenFailureStatusCodes}}, {{{_additionalTokenFailureStatusCodes}}}{{/if}}: /// These status codes indicate a problem with the client's request which we believe are reasonable to treat as meaning that the current refresh token is no longer viable.
                 self.accessToken = nil
                 self.accessTokenDidChange?(nil)
                 throw APIError.authenticationFailed(result.response, data: result.data)
             default:
-                throw APIError.authenticationFailed(result.response, data: result.data)
+                throw APIError.unexpectedResponse(result.response, data: result.data)
             }
         }
         
@@ -177,7 +184,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.refreshToken = nil
@@ -199,7 +206,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.accessToken = nil

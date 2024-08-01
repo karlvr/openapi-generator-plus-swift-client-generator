@@ -91,8 +91,8 @@ open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
 
 private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
     let __request = try await {{{name}}}Request({{{_callParams}}})
-    let (response, data) = try await URLSession.handleApiRequest(__request)
-    switch response.statusCode {
+    let result = try await URLSession.handleApiRequest(__request, retryConfiguration: configuration.retryConfiguration)
+    switch result.response.statusCode {
 {{#if securityRequirements}}
     case 401:
         if allowsReauth, let securityClient = configuration.securityClient {
@@ -117,7 +117,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             {{/unless}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
-            throw APIError.authenticationFailed(response, data: data)
+            throw APIError.authenticationFailed(result.response, data: result.data)
         }
 {{/if}}
 {{#each responses}}
@@ -126,10 +126,10 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     case {{{code}}}:
     {{#if defaultContent.nativeType}}
         do {
-            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: data)
+            let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: result.data)
             return ._{{{code}}}(decodedData)
         } catch {
-            throw APIError.invalidResponse(error, response: response, data: data)
+            throw APIError.invalidResponse(error, response: result.response, data: result.data)
         }
     {{else}}
         return ._{{{code}}}
@@ -141,16 +141,16 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
 {{#if catchAllResponse}}
     {{#if catchAllResponse.defaultContent.nativeType}}
         do {
-            let decodedData = try JSONDecoder().decode({{{catchAllResponse.defaultContent.nativeType.concreteType}}}.self, from: data)
+            let decodedData = try JSONDecoder().decode({{{catchAllResponse.defaultContent.nativeType.concreteType}}}.self, from: result.data)
             return ._{{{catchAllResponse.code}}}(decodedData)
         } catch {
-            throw APIError.invalidResponse(error, response: response, data: data)
+            throw APIError.invalidResponse(error, response: result.response, data: result.data)
         }
     {{else}}
         return ._{{{catchAllResponse.code}}}
     {{/if}}
 {{else}}
-        throw APIError.unexpectedResponse(response, data: data)
+        throw APIError.unexpectedResponse(result.response, data: result.data)
 {{/if}}
     }
 }

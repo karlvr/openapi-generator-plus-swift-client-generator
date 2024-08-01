@@ -24,6 +24,8 @@ public struct Configuration {
 
     public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
 
+    public var retryConfiguration: RetryConfiguration?
+
     public init(
         basePath: Swift.String? = nil,
         cachePolicy: Foundation.URLRequest.CachePolicy? = nil,
