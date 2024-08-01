@@ -1,3 +1,8 @@
+{{#join '_additionalTokenFailureStatusCodes' ', '}}
+{{#each @root.additionalTokenFailureStatusCodes}}
+{{this}}
+{{/each}}
+{{/join}}
 //  
 //  {{>frag/generatedBy}}
 //
@@ -101,7 +106,7 @@ actor OAuthAccessTokenManager {
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
                 self.accessTokenDidChange?(resultData)
-            case 400...428, 430...500: /// These status codes indicate a problem with the client's request, or an internal server error, which together we believe are reasonable to treat as meaning that the current refresh token is no longer viable.
+            case 400...499{{#if _additionalTokenFailureStatusCodes}}, {{{_additionalTokenFailureStatusCodes}}}{{/if}}: /// These status codes indicate a problem with the client's request which we believe are reasonable to treat as meaning that the current refresh token is no longer viable.
                 self.accessToken = nil
                 self.accessTokenDidChange?(nil)
                 throw APIError.authenticationFailed(result.response, data: result.data)

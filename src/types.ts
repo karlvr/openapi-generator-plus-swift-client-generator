@@ -9,6 +9,8 @@ export interface CodegenOptionsSwift extends JavaLikeOptions {
 	hideGenerationTimestamp: boolean
 	/** Additional HTTP response status codes that will trigger an automatic retry. 429 Too Many Requests is always automatically retried. */
 	additionalRetryStatusCodes: string[]
+	/** Additional HTTP response status codes that will be considered to be an authentication failure. 400 - 499 already result in authentication failure */
+	additionalTokenFailureStatusCodes: string[]
 	package: {
 		name: string
 	}

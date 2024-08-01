@@ -106,6 +106,7 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 		customTemplatesPath: customTemplates ? computeCustomTemplatesPath(config.configPath, customTemplates) : null,
 		hideGenerationTimestamp: configBoolean(config, 'hideGenerationTimestamp', false),
 		additionalRetryStatusCodes: configStringArray(config, 'additionalRetryStatusCodes', []),
+		additionalTokenFailureStatusCodes: configStringArray(config, 'additionalTokenFailureStatusCodes', []),
 		package: {
 			name: packageName,
 		},
