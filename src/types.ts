@@ -7,7 +7,8 @@ export interface CodegenOptionsSwift extends JavaLikeOptions {
 	relativeSourceOutputPath: string
 	customTemplatesPath: string | null
 	hideGenerationTimestamp: boolean
-	customRetryStatusCodes: string[]
+	/** Additional HTTP response status codes that will trigger an automatic retry. 429 Too Many Requests is always automatically retried. */
+	additionalRetryStatusCodes: string[]
 	package: {
 		name: string
 	}
