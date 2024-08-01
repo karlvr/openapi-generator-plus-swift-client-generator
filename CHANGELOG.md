@@ -1,5 +1,17 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.3.0
+
+### Minor Changes
+
+- 61d3d51: Added retry handling for 429 responses
+- 48c3965: Update core and other dependencies
+
+### Patch Changes
+
+- 04dd670: Refined refresh token handling of error responses to distinguish between failed authentication and simply an unexpected response
+- b454068: Support for negative years in LocalDate and OffsetDateTime
+
 ## 1.2.1
 
 ### Patch Changes
