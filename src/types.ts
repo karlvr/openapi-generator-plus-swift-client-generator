@@ -14,4 +14,8 @@ export interface CodegenOptionsSwift extends JavaLikeOptions {
 	package: {
 		name: string
 	}
+	logging: {
+		enabled: boolean
+		subsystem: string
+	}
 }
