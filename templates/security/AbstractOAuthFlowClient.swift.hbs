@@ -25,11 +25,11 @@ public class AbstractOAuthFlowClient: SecurityClient {
         }
     }
 
-    init(clientId: String, clientSecret: String, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, accessTokenDidChange: AccessTokenHandler?) {
+    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshURL: URL?, preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, accessTokenDidChange: AccessTokenHandler?) {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.retryConfiguration = retryConfiguration
-        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
+        self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, token: token, refreshTokenURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
     }
     
     /// Authenticate the security client using a refresh token.

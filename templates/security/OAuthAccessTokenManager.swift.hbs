@@ -34,7 +34,7 @@ actor OAuthAccessTokenManager {
     private let accessTokenDidChange: AccessTokenHandler?
     private let retryConfiguration: RetryConfiguration?
     
-    init(clientId: String, clientSecret: String, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
@@ -42,6 +42,7 @@ actor OAuthAccessTokenManager {
         self.refreshTokenURL = refreshTokenURL
         self.accessTokenDidChange = accessTokenDidChange
         self.retryConfiguration = retryConfiguration
+        self.accessToken = token
     }
         
     private func restartRefreshTimer() {

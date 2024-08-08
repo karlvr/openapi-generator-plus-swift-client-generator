@@ -37,8 +37,8 @@ extension OAuthPasswordFlowClient {
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
         - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
     */
-    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthPasswordFlowClient {
-        OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken? = nil, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthPasswordFlowClient {
+        OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/ifeq}}
@@ -53,8 +53,8 @@ extension OAuthClientCredentialsFlowClient {
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
         - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
     */
-    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthClientCredentialsFlowClient {
-        OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken? = nil, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthClientCredentialsFlowClient {
+        OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/ifeq}}
@@ -70,8 +70,8 @@ extension OAuthAuthorizationCodeFlowClient {
         - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
         - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
     */
-    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthAuthorizationCodeFlowClient {
-        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken?, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = RetryConfiguration(), accessTokenDidChange: AccessTokenHandler? = nil) -> OAuthAuthorizationCodeFlowClient {
+        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, preemptiveAccessTokenRefresh: preemptiveAccessTokenRefresh, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
     }
 }
 {{/if}}
