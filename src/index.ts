@@ -100,6 +100,8 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 	const relativeSourceOutputPath = configString(config, 'relativeSourceOutputPath', defaultRelativeSourceOutputPath)
 	const customTemplates = configString(config, 'customTemplates', undefined)
 
+	const logging = configObject(config, 'logging', {})
+
 	const options: CodegenOptionsSwift = {
 		...javaLikeOptions(config, createJavaLikeContext(context)),
 		relativeSourceOutputPath,
@@ -109,6 +111,11 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 		additionalTokenFailureStatusCodes: configStringArray(config, 'additionalTokenFailureStatusCodes', []),
 		package: {
 			name: packageName,
+		},
+		logging: {
+			enabled: configBoolean(logging, 'enabled', false, 'logging.'),
+			subsystem: configString(logging, 'subsystem', "openapi.generator.plus", 'logging.'),
+			category: configString(logging, 'category', "openapi", 'logging.'),
 		},
 	}
 

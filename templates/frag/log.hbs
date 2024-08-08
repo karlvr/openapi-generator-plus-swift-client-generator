@@ -1,0 +1,7 @@
+{{#if @root.logging.enabled}}
+if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+    logger.{{{level}}}("{{{var}}}")
+} else {
+    print("[{{@root.logging.subsystem}}] [{{{level}}}]: {{{var}}}")
+}
+{{/if}}
