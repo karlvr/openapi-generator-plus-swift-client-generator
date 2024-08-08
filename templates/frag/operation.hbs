@@ -96,6 +96,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
 {{#if securityRequirements}}
     case 401:
         if allowsReauth, let securityClient = configuration.securityClient {
+            {{>frag/log level="debug" msg="\(__request) Received 401 response, attempting to reauthenticate"}}
             var didAuthenticate = false
             var lastError: Error?
             {{#each securityRequirements.requirements}}
@@ -117,6 +118,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
             {{/unless}}
             return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
         } else {
+            {{>frag/log level="debug" msg="\(__request) Received 401 response, throwing APIError.authenticationFailed"}}
             throw APIError.authenticationFailed(result.response, data: result.data)
         }
 {{/if}}
@@ -124,6 +126,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     {{#ifneq code 401}}
     {{#unless isCatchAll}}
     case {{{code}}}:
+        {{>frag/log level="debug" msg=(concat "\(__request) Received " code " response")}}
     {{#if defaultContent.nativeType}}
         do {
             let decodedData = try JSONDecoder().decode({{{defaultContent.nativeType.concreteType}}}.self, from: result.data)
@@ -138,6 +141,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
     {{/ifneq}}
 {{/each}}
     default:
+        {{>frag/log level="debug" msg=(concat "\(__request) Received unexpected response \(result.response.statusCode)")}}
 {{#if catchAllResponse}}
     {{#if catchAllResponse.defaultContent.nativeType}}
         do {
@@ -182,6 +186,8 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
 
     var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
     localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
+
+    {{>frag/log level="debug" msg="Requesting \(localVarRequest)"}}
 
 {{#each headerParams}}
     {{>frag/requestParameter dest='localVarHeaderParameter' var=(identifier name) encoding=encoding}}
