@@ -8,6 +8,7 @@
 //
 
 import Foundation
+{{>frag/logHeader category='oauth'}}
 
 public typealias AccessTokenHandler = (_ accessToken: OAuthAccessToken?) -> ()
 
@@ -59,7 +60,7 @@ actor OAuthAccessTokenManager {
                 do {
                     try await self.refreshToken()
                 } catch {
-                    {{>frag/log level='error' var='An error occurred in the automatic OAuth access token refresh:: \(error)'}}
+                    {{>frag/log level='error' msg='An error occurred in the automatic OAuth access token refresh:: \(error)'}}
                 }
             }
         })
@@ -71,21 +72,21 @@ actor OAuthAccessTokenManager {
     }
     
     func refreshToken() async throws {
-        {{>frag/log level='debug' var='Refreshing token'}}
+        {{>frag/log level='debug' msg='Refreshing token'}}
         guard let refreshTokenURL = refreshTokenURL else {
-            {{>frag/log level='error' var='There is no refreshTokenURL configured'}}
+            {{>frag/log level='error' msg='There is no refreshTokenURL configured'}}
             throw APIError.notAuthenticated
         }
         guard let refreshToken = accessToken?.refreshToken else {
-            {{>frag/log level='error' var='There is no refreshToken to use in order to refresh'}}
+            {{>frag/log level='error' msg='There is no refreshToken to use in order to refresh'}}
             throw APIError.notAuthenticated
         }
         
         // Wait for an existing refresh task, if there is one
         if let t = refreshTask {
-            {{>frag/log level='debug' var='Awaiting existing refresh task'}}
+            {{>frag/log level='debug' msg='Awaiting existing refresh task'}}
             let _ = try await t.value
-            {{>frag/log level='debug' var='Awaited refresh task complete'}}
+            {{>frag/log level='debug' msg='Awaited refresh task complete'}}
             return
         }
         
@@ -95,24 +96,24 @@ actor OAuthAccessTokenManager {
         
         let t = Task {
             // Do the refresh
-            {{>frag/log level='debug' var='Performing refresh request'}}
+            {{>frag/log level='debug' msg='Performing refresh request'}}
             let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
             let requestDate = Date()
             let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
             switch result.response.statusCode {
             case 200:
-                {{>frag/log level='debug' var='Refresh request succeeded'}}
+                {{>frag/log level='debug' msg='Refresh request succeeded'}}
                 var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
                 self.accessTokenDidChange?(resultData)
             case 400...499{{#if _additionalTokenFailureStatusCodes}}, {{{_additionalTokenFailureStatusCodes}}}{{/if}}: /// These status codes indicate a problem with the client's request which we believe are reasonable to treat as meaning that the current refresh token is no longer viable.
-                {{>frag/log level='error' var='Refresh request failed with status code \(result.response.statusCode)'}}
+                {{>frag/log level='error' msg='Refresh request failed with status code \(result.response.statusCode)'}}
                 self.accessToken = nil
                 self.accessTokenDidChange?(nil)
                 throw APIError.authenticationFailed(result.response, data: result.data)
             default:
-                {{>frag/log level='error' var='Refresh request had unexpected response with status code \(result.response.statusCode)'}}
+                {{>frag/log level='error' msg='Refresh request had unexpected response with status code \(result.response.statusCode)'}}
                 throw APIError.unexpectedResponse(result.response, data: result.data)
             }
         }
@@ -162,7 +163,7 @@ actor OAuthAccessTokenManager {
         }
         
         guard let token = accessToken?.accessToken else {
-            {{>frag/log level='error' var='No access token available for authorization'}}
+            {{>frag/log level='error' msg='No access token available for authorization'}}
             throw APIError.notAuthenticated
         }
         
@@ -180,7 +181,7 @@ actor OAuthAccessTokenManager {
             return
         }
         
-        {{>frag/log level='debug' var='Revoking refresh token'}}
+        {{>frag/log level='debug' msg='Revoking refresh token'}}
 
         let request = createOAuthRequest(url: url, params: [
             "token_type_hint": "refresh_token",
@@ -204,7 +205,7 @@ actor OAuthAccessTokenManager {
             return
         }
 
-        {{>frag/log level='debug' var='Revoking access token'}}
+        {{>frag/log level='debug' msg='Revoking access token'}}
         
         let request = createOAuthRequest(url: url, params: [
             "token_type_hint": "access_token",

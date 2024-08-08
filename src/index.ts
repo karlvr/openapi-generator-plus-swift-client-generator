@@ -114,8 +114,7 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 		},
 		logging: {
 			enabled: configBoolean(logging, 'enabled', false, 'logging.'),
-			subsystem: configString(logging, 'subsystem', "openapi.generator.plus", 'logging.'),
-			category: configString(logging, 'category', "openapi", 'logging.'),
+			subsystem: configString(logging, 'subsystem', packageName, 'logging.'),
 		},
 	}
 
