@@ -1,5 +1,15 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.4.0
+
+### Minor changes
+
+- 30c8d18: Added configuration for enabling logging
+
+### Patch Changes
+
+- fc1a678: Added token to constructor of OAuth clients
+
 ## 1.3.0
 
 ### Minor Changes
