@@ -26,12 +26,15 @@ public struct Configuration {
 
     public var retryConfiguration: RetryConfiguration?
 
+    public var loggingEnabled: Bool
+
     public init(
         basePath: Swift.String? = nil,
         cachePolicy: Foundation.URLRequest.CachePolicy? = nil,
         timeoutInterval: Foundation.TimeInterval = 30,
         responseQueue: Dispatch.DispatchQueue? = nil,
         securityClient: SecurityClient? = nil,
+        loggingEnabled: Bool = false,
         finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
     ) {
         self.basePath = basePath
@@ -39,6 +42,7 @@ public struct Configuration {
         self.timeoutInterval = timeoutInterval
         self.responseQueue = responseQueue
         self.securityClient = securityClient
+        self.loggingEnabled = loggingEnabled
         self.finalizeRequestBlock = finalizeRequestBlock
     }
 }
