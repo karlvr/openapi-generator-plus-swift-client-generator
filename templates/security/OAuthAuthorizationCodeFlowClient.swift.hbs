@@ -14,15 +14,13 @@ public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
                 clientSecret: String,
                 token: OAuthAccessToken? = nil,
                 refreshURL: URL? = nil,
-                preemptiveAccessTokenRefresh autoRefreshInterval: TimeInterval? = nil,
                 tokenURL: URL,
                 authorizationURL: URL,
-                retryConfiguration: RetryConfiguration?,
-                accessTokenDidChange: AccessTokenHandler? = nil) {
+                configuration: OAuthConfiguration = OAuthConfiguration()) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
         
-        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, preemptiveAccessTokenRefresh: autoRefreshInterval, retryConfiguration: retryConfiguration, accessTokenDidChange: accessTokenDidChange)
+        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, configuration: configuration)
     }
 
     // TODO: Implement the authorization code client

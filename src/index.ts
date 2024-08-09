@@ -113,7 +113,6 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 			name: packageName,
 		},
 		logging: {
-			enabled: configBoolean(logging, 'enabled', false, 'logging.'),
 			subsystem: configString(logging, 'subsystem', packageName, 'logging.'),
 		},
 	}
