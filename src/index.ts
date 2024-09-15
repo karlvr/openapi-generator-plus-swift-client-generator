@@ -3,7 +3,7 @@ import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
 import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
-import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions } from '@openapi-generator-plus/java-like-generator-helper'
+import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions, EnumMemberStyle } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator, configBoolean, configObject, configString, configStringArray, debugStringify } from '@openapi-generator-plus/generator-common'
 import { promises as fs } from 'fs'
 
@@ -126,6 +126,7 @@ function createJavaLikeContext(context: SwiftGeneratorContext): JavaLikeContext 
 		...context,
 		reservedWords: () => RESERVED_WORDS,
 		defaultConstantStyle: ConstantStyle.camelCase,
+		defaultEnumMemberStyle: EnumMemberStyle.constant,
 	}
 	return javaLikeContext
 }
