@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.5.1
+
+### Patch Changes
+
+- 4600a68: Tidy whitespace around logging fragments
+
 ## 1.5.0
 
 ### Minor Changes
