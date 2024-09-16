@@ -186,7 +186,6 @@ open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
 
     var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
     localVarRequest.httpMethod = {{{stringLiteral httpMethod}}}
-
     {{>frag/log level="debug" msg="Requesting \(localVarRequest)"}}
 
 {{#each headerParams}}

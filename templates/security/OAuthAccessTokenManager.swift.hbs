@@ -182,7 +182,6 @@ actor OAuthAccessTokenManager {
         }
         
         {{>frag/log level='debug' msg='Revoking refresh token'}}
-
         let request = createOAuthRequest(url: url, params: [
             "token_type_hint": "refresh_token",
             "token": token,
@@ -206,7 +205,6 @@ actor OAuthAccessTokenManager {
         }
 
         {{>frag/log level='debug' msg='Revoking access token'}}
-        
         let request = createOAuthRequest(url: url, params: [
             "token_type_hint": "access_token",
             "token": token,
