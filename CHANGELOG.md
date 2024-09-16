@@ -1,5 +1,17 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.5.0
+
+### Minor Changes
+
+- 93cd9d7: Update core
+
+### Patch Changes
+
+- bc71e14: Support an API type named Result or Decimal or String being present
+- 34ce270: Added logging to the APIs
+- 02a22a5: Fix support for URL parameters
+
 ## 1.4.0
 
 ### Minor changes
