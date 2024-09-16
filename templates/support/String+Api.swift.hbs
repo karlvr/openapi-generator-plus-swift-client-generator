@@ -8,4 +8,8 @@ extension Swift.String {
     init(_ decimal: Foundation.Decimal) {
         self.init("\(decimal)")
     }
+
+    init(_ url: Foundation.URL) {
+        self.init(url.absoluteString)
+    }
 }
