@@ -129,7 +129,7 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
     ///     print(timezone.secondsFromGMT())  // Outputs: -900
     /// }
     /// ```
-    private func timeZone(from timezoneString: String) -> TimeZone? {
+    private func timeZone(from timezoneString: String) -> Foundation.TimeZone? {
         var mutableTimezoneString = timezoneString
         guard let ordinal = mutableTimezoneString.first else { return nil }
         mutableTimezoneString.removeFirst()
@@ -155,7 +155,7 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
         let signedSeconds = ordinal == "-" ? -secondsFromGMT : secondsFromGMT
         
         // Return the TimeZone object
-        return TimeZone(secondsFromGMT: signedSeconds)
+        return Foundation.TimeZone(secondsFromGMT: signedSeconds)
     }
 
     public static func < (lhs: OffsetDateTime, rhs: OffsetDateTime) -> Bool {
