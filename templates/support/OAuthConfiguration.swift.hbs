@@ -1,0 +1,25 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public struct OAuthConfiguration {
+    var preemptiveAccessTokenRefresh: TimeInterval?
+    var retryConfiguration: RetryConfiguration?
+    var loggingEnabled: Bool
+    var accessTokenDidChange: AccessTokenHandler?
+    
+    /// Initialize a new OAuthConfiguration
+    /// - Parameters:
+    ///   - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
+    ///   - retryConfiguration: A configuration for retrying requests
+    ///   - loggingEnabled: A flag to enable or disable logging
+    ///   - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
+    public init(preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, loggingEnabled: Bool = false, accessTokenDidChangeHandler accessTokenDidChange: AccessTokenHandler? = nil) {
+        self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
+        self.retryConfiguration = retryConfiguration
+        self.accessTokenDidChange = accessTokenDidChange
+        self.loggingEnabled = loggingEnabled
+    }
+}

@@ -24,22 +24,16 @@ actor OAuthAccessTokenManager {
     private let clientId: String
     private let clientSecret: String
     private let refreshTokenURL: URL?
-    private let preemptiveAccessTokenRefresh: TimeInterval?
     private var refreshTask: Task<(), Error>?
     private var refreshTimer: Timer?
-    private let prepareRequest: ((_ request: URLRequest) -> URLRequest)?
-    private let accessTokenDidChange: AccessTokenHandler?
-    private let retryConfiguration: RetryConfiguration?
+    private let configuration: OAuthConfiguration
     
-    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshTokenURL: URL?, preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, prepareRequest: ((_: URLRequest) -> URLRequest)? = nil, accessTokenDidChange: AccessTokenHandler? = nil) {
+    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshTokenURL: URL?, configuration: OAuthConfiguration) {
         self.clientId = clientId
         self.clientSecret = clientSecret
-        self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
-        self.prepareRequest = prepareRequest
         self.refreshTokenURL = refreshTokenURL
-        self.accessTokenDidChange = accessTokenDidChange
-        self.retryConfiguration = retryConfiguration
         self.accessToken = token
+        self.configuration = configuration
     }
         
     private func restartRefreshTimer() {
@@ -47,7 +41,7 @@ actor OAuthAccessTokenManager {
         refreshTimer = nil
         
         guard 
-            let autoTime = preemptiveAccessTokenRefresh,
+            let autoTime = configuration.preemptiveAccessTokenRefresh,
             let token = accessToken, 
             let expiresIn = token.expiresIn,
             expiresIn - autoTime > 0
@@ -60,7 +54,7 @@ actor OAuthAccessTokenManager {
                 do {
                     try await self.refreshToken()
                 } catch {
-                    {{>frag/log level='error' msg='An error occurred in the automatic OAuth access token refresh:: \(error)'}}
+                    {{>frag/log condition='self.configuration.loggingEnabled' level='error' msg='An error occurred in the automatic OAuth access token refresh:: \(error)'}}
                 }
             }
         })
@@ -68,7 +62,7 @@ actor OAuthAccessTokenManager {
     
     func setAccessToken(_ token: OAuthAccessToken) async throws {
         accessToken = token
-        accessTokenDidChange?(token)
+        configuration.accessTokenDidChange?(token)
     }
     
     func refreshToken() async throws {
@@ -99,18 +93,18 @@ actor OAuthAccessTokenManager {
             {{>frag/log level='debug' msg='Performing refresh request'}}
             let request = createRefreshRequest(refreshToken, url: refreshTokenURL)
             let requestDate = Date()
-            let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
+            let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
             switch result.response.statusCode {
             case 200:
                 {{>frag/log level='debug' msg='Refresh request succeeded'}}
                 var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
                 resultData.createdAt = requestDate
                 self.accessToken = resultData
-                self.accessTokenDidChange?(resultData)
+                self.configuration.accessTokenDidChange?(resultData)
             case 400...499{{#if _additionalTokenFailureStatusCodes}}, {{{_additionalTokenFailureStatusCodes}}}{{/if}}: /// These status codes indicate a problem with the client's request which we believe are reasonable to treat as meaning that the current refresh token is no longer viable.
                 {{>frag/log level='error' msg='Refresh request failed with status code \(result.response.statusCode)'}}
                 self.accessToken = nil
-                self.accessTokenDidChange?(nil)
+                self.configuration.accessTokenDidChange?(nil)
                 throw APIError.authenticationFailed(result.response, data: result.data)
             default:
                 {{>frag/log level='error' msg='Refresh request had unexpected response with status code \(result.response.statusCode)'}}
@@ -189,7 +183,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.refreshToken = nil
@@ -212,7 +206,7 @@ actor OAuthAccessTokenManager {
             "client_secret": clientSecret
         ])
         
-        let result = try await URLSession.handleApiRequest(request, retryConfiguration: retryConfiguration)
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
         switch result.response.statusCode {
         case 200:
             self.accessToken?.accessToken = nil
