@@ -1,5 +1,17 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.6.0
+
+### Minor Changes
+
+- 5d8bc35: Added configurations for OAuth flows
+
+### Patch Changes
+
+- 5d8bc35: Increased the version number of supported operating systems
+- f7152b9: Addresses an issue with decoding timezones that have offsets
+- 5d8bc35: Use a logging flag for controlling logging at runtime
+
 ## 1.5.1
 
 ### Patch Changes
