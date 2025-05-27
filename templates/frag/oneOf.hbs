@@ -86,6 +86,13 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{/if}}
 {{/if}}
     }
-
     {{>frag/nestedSchemas}}
 }
+{{#ifdef interface }}
+
+public extension Sequence where Element == {{{name}}} {
+    var knownEntities: [any {{{interface.nativeType}}}] {
+        self.compactMap { $0.entity }
+    }
+}
+{{/ifdef}}
