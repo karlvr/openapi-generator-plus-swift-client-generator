@@ -8,6 +8,17 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{else}}
     case unknown
 {{/if}}
+{{#ifdef interface }}
+
+    var entity: (any {{{interface.nativeType}}})? {
+        switch self {
+{{#each composes}}
+        case let .{{{camelCase name}}}(entity): return entity
+{{/each}}
+        case .unknown: return nil
+        }
+    }
+{{/ifdef}}
 
     enum EncoderError: Error {
 {{#if discriminator}}
