@@ -1,0 +1,59 @@
+{{>frag/schemaDocumentation}}
+extension {{{name}}} {
+
+    /// A convenience helper type for the `{{{name}}}` schema.
+    /// `{{{name}}}.Required` can be used to filter out the unknown case for cleaner logic on the client side.
+    public enum Required: Swift.Codable, Swift.Hashable {
+    {{#each composes}}
+        case {{{camelCase name}}}(_ value: {{{nativeType}}})
+    {{/each}}
+    {{#ifdef interface }}
+
+        public var entity: any {{{interface.nativeType}}} {
+            switch self {
+    {{#each composes}}
+            case let .{{{camelCase name}}}(entity): return entity
+    {{/each}}
+            }
+        }
+    {{/ifdef}}
+
+        public init?(_ value: {{{name}}}) {
+            switch value {
+            {{#each composes}}
+            case let .{{{camelCase name}}}(value): self = .{{{camelCase name}}}(value)
+            {{/each}}
+            case .unknown: return nil
+            }
+        }
+    }
+
+    public init(_ value: {{{name}}}.Required) {
+        switch value {
+        {{#each composes}}
+        case let .{{{camelCase name}}}(value): self = .{{{camelCase name}}}(value)
+        {{/each}}
+        }
+    }
+}
+
+public extension Sequence where Element == {{{name}}} {
+    public var compactMapRequired: [{{{name}}}.Required] {
+        self.compactMap { .init($0) }
+    }
+}
+
+public extension Sequence where Element == {{{name}}}.Required {
+    public var map{{{name}}}: [{{{name}}}] {
+        self.map { .init($0) }
+    }
+}
+{{#ifdef interface }}
+
+public extension Sequence where Element == {{{name}}}.Required {
+    public var map{{{interface.name}}}: [any {{{interface.nativeType}}}] {
+        self.map { $0.entity }
+    }
+}
+{{/ifdef}}
+
