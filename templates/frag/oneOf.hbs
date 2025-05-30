@@ -91,7 +91,7 @@ public enum {{{name}}}: Swift.Codable, Swift.Hashable {
 {{#ifdef interface }}
 
 public extension Sequence where Element == {{{name}}} {
-    public var compactMap{{{interface.name}}}: [any {{{interface.nativeType}}}] {
+    public func compactMap{{{interface.name}}}() -> [any {{{interface.nativeType}}}] {
         self.compactMap { $0.entity }
     }
 }

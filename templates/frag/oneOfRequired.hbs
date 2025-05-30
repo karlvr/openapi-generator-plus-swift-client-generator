@@ -38,20 +38,20 @@ extension {{{name}}} {
 }
 
 public extension Sequence where Element == {{{name}}} {
-    public var compactMapRequired: [{{{name}}}.Required] {
+    public func compactMapRequired() -> [{{{name}}}.Required] {
         self.compactMap { .init($0) }
     }
 }
 
 public extension Sequence where Element == {{{name}}}.Required {
-    public var map{{{name}}}: [{{{name}}}] {
+    public func map{{{name}}}() -> [{{{name}}}] {
         self.map { .init($0) }
     }
 }
 {{#ifdef interface }}
 
 public extension Sequence where Element == {{{name}}}.Required {
-    public var map{{{interface.name}}}: [any {{{interface.nativeType}}}] {
+    public func map{{{interface.name}}}() -> [any {{{interface.nativeType}}}] {
         self.map { $0.entity }
     }
 }
