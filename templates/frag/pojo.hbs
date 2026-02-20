@@ -12,6 +12,7 @@ Swift.Sendable
 {{/join}}
 public struct {{{name}}}: {{{_parents}}} {
 {{#each properties}}
+
     {{>frag/propertyDocumentation}}
     {{#if deprecated}}
     @available(*, deprecated, message: "This property is deprecated. Please refer to the provider of the API specification for further instructions.")
