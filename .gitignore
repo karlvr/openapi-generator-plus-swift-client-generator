@@ -2,3 +2,5 @@
 /node_modules
 /pnpm-global
 /test-output
+/__tests__
+.DS_Store

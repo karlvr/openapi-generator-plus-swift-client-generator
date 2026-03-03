@@ -6,7 +6,7 @@ import Foundation
 
 public typealias ConfigurationFinalizeRequestBlock = ((_ request: inout Foundation.URLRequest) -> Void)
 
-public struct Configuration {
+public struct Configuration: Swift.Sendable {
 
     /** The handler for all security requests. */
     public var securityClient: SecurityClient?

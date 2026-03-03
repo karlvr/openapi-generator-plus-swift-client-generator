@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable {
+public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable, Swift.Sendable {
 
     private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\d*):)?(?:(\\d*):)(\\d*\\.?\\d*)$", options: [])
 

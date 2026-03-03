@@ -7,7 +7,7 @@
 import Foundation
 {{>frag/logHeader category=(concat name "Api")}}
 
-open class {{name}}Api {
+public struct {{name}}Api: Swift.Sendable {
 
     var configuration: Configuration
     var basePath: String
@@ -44,5 +44,6 @@ open class {{name}}Api {
 {{#each operations}}
 {{#if (gt (count parameters) 1)}}
 {{>frag/parametersProtocol group=..}}
+
 {{/if}}
 {{/each}}

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct OAuthConfiguration {
+public struct OAuthConfiguration: Swift.Sendable {
     var preemptiveAccessTokenRefresh: TimeInterval?
     var retryConfiguration: RetryConfiguration?
     var loggingEnabled: Bool

@@ -1,5 +1,5 @@
 {{>frag/schemaDocumentation}}
-public enum {{{name}}}: Swift.Codable, Swift.Hashable {
+public enum {{{name}}}: Swift.Codable, Swift.Hashable, Swift.Sendable {
 {{#each composes}}
     case {{{camelCase name}}}(_ value: {{{nativeType}}})
 {{/each}}

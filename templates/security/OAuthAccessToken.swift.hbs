@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct OAuthAccessToken : Decodable, Equatable {
+public struct OAuthAccessToken : Swift.Decodable, Swift.Equatable, Swift.Sendable {
     public var accessToken: String?
     public var tokenType: String?
     public var refreshToken: String?

@@ -7,7 +7,7 @@ import Foundation
 /**
  * Contains a value that may be explicitly set to `null` when sent via the API.
  */
-public enum Nullable<T>: Swift.Codable, Swift.Hashable where T: Swift.Codable, T: Swift.Hashable {
+public enum Nullable<T>: Swift.Codable, Swift.Hashable, Swift.Sendable where T: Swift.Codable, T: Swift.Hashable, T: Swift.Sendable {
 
     case some(_ value: T)
     case null

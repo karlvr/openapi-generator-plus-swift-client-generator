@@ -1,5 +1,5 @@
 {{>frag/schemaDocumentation}}
-public enum {{{name}}} : Swift.Codable, Swift.Hashable, Swift.CaseIterable, Swift.Equatable, Swift.LosslessStringConvertible {
+public enum {{{name}}} : Swift.Codable, Swift.Hashable, Swift.CaseIterable, Swift.Equatable, Swift.LosslessStringConvertible, Swift.Sendable {
     case unknown(value: String)
 {{#each enumValues}}
     case {{{name}}}

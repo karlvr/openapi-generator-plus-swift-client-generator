@@ -5,7 +5,7 @@
 import Foundation
 
 /// A configuration for retrying requests
-public struct RetryConfiguration {
+public struct RetryConfiguration: Swift.Sendable {
     /// The maximum number of attempts to make
     let maxAttempts: Int
 

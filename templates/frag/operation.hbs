@@ -28,7 +28,7 @@
 {{/with}}
 {{/if}}
 {{/join}}
-public enum {{className name}}Result {
+public enum {{className name}}Result: Swift.Sendable {
 {{#each responses}}
     {{#ifneq code 401}}
     {{#if description}}
@@ -48,7 +48,7 @@ public enum {{className name}}Result {
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
+public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
     {{{name}}}({{{_requestCallParams}}}, responseQueue: responseQueue, completion: completion)
 }
 
@@ -56,7 +56,7 @@ open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' '
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
+public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_requestCallParams}}})
 }
 
@@ -65,7 +65,7 @@ open func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' '
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
+public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping ((_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
     Task {
         do {
@@ -85,7 +85,7 @@ open func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispatc
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-open func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
+public func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
     return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
 }
 
@@ -160,7 +160,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
 }
 
 {{>frag/operationDocumentation}}
-open func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
+public func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
     let localVarPath = "{{{group.path}}}{{{path}}}"
     {{#each pathParams}}
         .replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)

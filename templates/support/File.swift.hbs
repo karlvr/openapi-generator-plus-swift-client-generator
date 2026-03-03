@@ -5,7 +5,7 @@
 import Foundation
 
 /// A file that can be sent to an API, such as as part of FormData
-public struct File: Swift.Codable, Swift.Hashable {
+public struct File: Swift.Codable, Swift.Hashable, Swift.Sendable {
 
     var data: Data
     var filename: String?
