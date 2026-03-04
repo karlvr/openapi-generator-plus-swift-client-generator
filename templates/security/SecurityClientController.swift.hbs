@@ -13,7 +13,7 @@ import Foundation
 */
 public actor SecurityClientController: SecurityClient {
 
-    var clients: [SecurityScheme: any SecurityClient] = [:]
+    private var clients: [SecurityScheme: any SecurityClient] = [:]
 
     public init(clients: [SecurityScheme : any SecurityClient] = [:]) {
         self.clients = clients
