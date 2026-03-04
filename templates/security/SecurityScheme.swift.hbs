@@ -7,7 +7,7 @@
 import Foundation
 
 /// The security schemes documented in the API specification.
-public enum SecurityScheme: String, CustomDebugStringConvertible {
+public enum SecurityScheme: String, CustomDebugStringConvertible, Swift.Sendable {
 {{#if securitySchemes}}
 {{#each securitySchemes}}
     case {{identifier name}} = {{{stringLiteral name}}}

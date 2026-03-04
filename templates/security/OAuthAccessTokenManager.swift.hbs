@@ -10,7 +10,7 @@
 import Foundation
 {{>frag/logHeader category='oauth'}}
 
-public typealias AccessTokenHandler = (_ accessToken: OAuthAccessToken?) -> ()
+public typealias AccessTokenHandler = @Sendable (_ accessToken: OAuthAccessToken?) -> ()
 
 /** An OAuth access token manager that manages using and refreshing the access token, including handling concurrent requests and refreshes. */
 actor OAuthAccessTokenManager {

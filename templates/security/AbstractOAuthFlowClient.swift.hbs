@@ -4,7 +4,7 @@
 
 import Foundation
 
-public class AbstractOAuthFlowClient: SecurityClient {
+public class AbstractOAuthFlowClient: SecurityClient, @unchecked Sendable {
     
     let tokenManager: OAuthAccessTokenManager
     
@@ -14,13 +14,13 @@ public class AbstractOAuthFlowClient: SecurityClient {
     let configuration: OAuthConfiguration
     
     public var refreshToken: String? {
-         get async {
+        get async {
             return await tokenManager.accessToken?.refreshToken
         }
     }
 
     public var accessToken: OAuthAccessToken? {
-         get async {
+        get async {
             return await tokenManager.accessToken
         }
     }

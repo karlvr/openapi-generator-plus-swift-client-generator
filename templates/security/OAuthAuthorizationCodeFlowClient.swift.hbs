@@ -5,7 +5,7 @@
 import Foundation
 
 /// A client for the OAuth 2.0 Authorization Code Flow
-public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
+public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
     
     private let tokenURL: URL
     private let authorizationURL: URL
