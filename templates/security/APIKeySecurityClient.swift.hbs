@@ -5,12 +5,12 @@
 import Foundation
 
 /// A `SecurityClient` responsible for handling API Key authentication credentials.
-public final class APIKeySecurityClient: SecurityClient, Sendable {
+public final class APIKeySecurityClient: SecurityClient, Swift.Sendable {
     
     private let apiKey: String
     private let paramName: String
     
-    public enum Mode: Sendable {
+    public enum Mode: Swift.Sendable {
         case header
         case query
         case cookie
