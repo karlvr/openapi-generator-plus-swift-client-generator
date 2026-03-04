@@ -61,15 +61,11 @@ public class AbstractOAuthFlowClient: SecurityClient, Swift.Sendable {
     }
 }
 
-/**
- Creates a URLRequest for OAuth authentication.
-
- - Parameters:
-    - url: The URL for the request.
-    - params: A dictionary of key-value pairs for the request parameters.
-
- - Returns: A URLRequest configured for OAuth authentication.
- */
+/// Creates a URLRequest for OAuth authentication.
+/// - Parameters:
+///   - url: The URL for the request.
+///   - params: A dictionary of key-value pairs for the request parameters.
+/// - Returns: A URLRequest configured for OAuth authentication.
 func createOAuthRequest(url: URL, params: [String: String]) -> URLRequest {
     var refreshRequest = URLRequest(url: url)
     refreshRequest.httpMethod = "POST"
