@@ -20,6 +20,7 @@ export async function build(basePath: string): Promise<void> {
 			'swift build',
 			{
 				cwd: basePath,
+				maxBuffer: 1024 * 1024 * 32,
 			},
 			function(error, stdout, stderr) {
 				if (error) {
