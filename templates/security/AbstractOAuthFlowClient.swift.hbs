@@ -10,7 +10,7 @@ public class AbstractOAuthFlowClient: SecurityClient, Swift.Sendable {
     
     let clientId: String
     let clientSecret: String
-    public var revocationURL: URL?
+    let revocationURL: URL?
     let configuration: OAuthConfiguration
     
     public var refreshToken: String? {
@@ -25,10 +25,11 @@ public class AbstractOAuthFlowClient: SecurityClient, Swift.Sendable {
         }
     }
 
-    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshURL: URL?, configuration: OAuthConfiguration = OAuthConfiguration()) {
+    init(clientId: String, clientSecret: String, token: OAuthAccessToken?, refreshURL: URL?, revocationURL: URL?, configuration: OAuthConfiguration = OAuthConfiguration()) {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.configuration = configuration
+        self.revocationURL = revocationURL
         self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, token: token, refreshTokenURL: refreshURL, configuration: configuration)
     }
     
