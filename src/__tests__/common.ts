@@ -17,7 +17,7 @@ export async function prepare(spec: string, config?: CodegenConfig): Promise<Cod
 export async function build(basePath: string): Promise<void> {
 	return new Promise(function(resolve, reject) {
 		exec(
-			'swift build',
+			'swift build -Xswiftc "-swift-version" -Xswiftc "6"',
 			{
 				cwd: basePath,
 				maxBuffer: 1024 * 1024 * 32,
