@@ -7,7 +7,7 @@
 import Foundation
 
 /// The security schemes documented in the API specification.
-public enum SecurityScheme: String, CustomDebugStringConvertible {
+public enum SecurityScheme: String, CustomDebugStringConvertible, Swift.Sendable {
 {{#if securitySchemes}}
 {{#each securitySchemes}}
     case {{identifier name}} = {{{stringLiteral name}}}
@@ -28,31 +28,28 @@ public enum SecurityScheme: String, CustomDebugStringConvertible {
 {{#if tokenUrl}}
 {{#ifeq type 'password'}}
 extension OAuthPasswordFlowClient {
-    /**
-    Create an instance of `OAuthPasswordFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
-
-    - Parameters:
-        - clientId: The client ID associated with the API.
-        - clientSecret: The client secret associated with the API.
-        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
-        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
-    */
-    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthPasswordFlowClient {
-        OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, tokenURL: URL(string: "{{{tokenUrl}}}")!, configuration: configuration)
+    /// Create an instance of `OAuthPasswordFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+    /// - Parameters:
+    ///   - clientId: The client ID associated with the API.
+    ///   - clientSecret: The client secret associated with the API.
+    ///   - token: An optional `OAuthAccessToken` to initialize the client with. If not provided, the client will need to authenticate before making authorized requests.
+    ///   - revocationURL: An optional URL for revoking the access token. If not provided, the client will not be able to revoke tokens.
+    ///   - configuration: An optional `OAuthConfiguration` to customize the client's behavior. Defaults to a new instance of `OAuthConfiguration`.
+    /// - Returns: An instance of `OAuthPasswordFlowClient` initialized with the provided parameters.
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken? = nil, revocationURL: URL? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthPasswordFlowClient {
+        OAuthPasswordFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, revocationURL: revocationURL, tokenURL: URL(string: "{{{tokenUrl}}}")!, configuration: configuration)
     }
 }
 {{/ifeq}}
 {{#ifeq type 'clientCredentials'}}
 extension OAuthClientCredentialsFlowClient {
-    /**
-    Create an instance of `OAuthClientCredentialsFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
-
-    - Parameters:
-        - clientId: The client ID associated with the API.
-        - clientSecret: The client secret associated with the API.
-        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
-        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
-    */
+    /// Create an instance of `OAuthClientCredentialsFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+    /// - Parameters:
+    ///   - clientId: The client ID associated with the API.
+    ///   - clientSecret: The client secret associated with the API.
+    ///   - token: An optional `OAuthAccessToken` to initialize the client with.
+    ///   - configuration: An optional `OAuthConfiguration` to customize the client's behavior. Defaults to a new instance of `OAuthConfiguration`.
+    /// - Returns: An instance of `OAuthClientCredentialsFlowClient` initialized with the provided parameters.
     public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthClientCredentialsFlowClient {
         OAuthClientCredentialsFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, tokenURL: URL(string: "{{{tokenUrl}}}")!, configuration: configuration)
     }
@@ -61,17 +58,16 @@ extension OAuthClientCredentialsFlowClient {
 {{#ifeq type 'authorizationCode'}}
 {{#if authorizationUrl}}
 extension OAuthAuthorizationCodeFlowClient {
-    /**
-    Create an instance of `OAuthAuthorizationCodeFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
-
-    - Parameters:
-        - clientId: The client ID associated with the API.
-        - clientSecret: The client secret associated with the API.
-        - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
-        - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to `nil`.
-    */
-    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken?, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthAuthorizationCodeFlowClient {
-        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, configuration: configuration)
+    /// Create an instance of `OAuthAuthorizationCodeFlowClient` with provided authentication credentials, using endpoint URLs from the API specification.
+    /// - Parameters:
+    ///   - clientId: The client ID associated with the API.
+    ///   - clientSecret: The client secret associated with the API.
+    ///   - token: An optional `OAuthAccessToken` to initialize the client with.
+    ///   - revocationURL: An optional URL for revoking the access token. If not provided, the client will not be able to revoke tokens.
+    ///   - configuration: An optional `OAuthConfiguration` to customize the client's behavior. Defaults to a new instance of `OAuthConfiguration`.
+    /// - Returns: An instance of `OAuthAuthorizationCodeFlowClient` initialized with the provided parameters.
+    public static func {{identifier ../name}}Client(clientId: String, clientSecret: String, token: OAuthAccessToken?, revocationURL: URL? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthAuthorizationCodeFlowClient {
+        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret{{#if refreshUrl}}, token: token, refreshURL: URL(string: "{{{refreshUrl}}}"){{/if}}, revocationURL: revocationURL, tokenURL: URL(string: "{{{tokenUrl}}}")!, authorizationURL: URL(string: "{{{authorizationUrl}}}")!, configuration: configuration)
     }
 }
 {{/if}}

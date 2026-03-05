@@ -5,22 +5,24 @@
 import Foundation
 
 /// A client for the OAuth 2.0 Authorization Code Flow
-public class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient {
+public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
     
     private let tokenURL: URL
     private let authorizationURL: URL
     
-    public init(clientId: String,
-                clientSecret: String,
-                token: OAuthAccessToken? = nil,
-                refreshURL: URL? = nil,
-                tokenURL: URL,
-                authorizationURL: URL,
-                configuration: OAuthConfiguration = OAuthConfiguration()) {
+    public init(
+        clientId: String,
+        clientSecret: String,
+        token: OAuthAccessToken? = nil,
+        refreshURL: URL? = nil,
+        revocationURL: URL? = nil,
+        tokenURL: URL,
+        authorizationURL: URL,
+        configuration: OAuthConfiguration = OAuthConfiguration()
+    ) {
         self.tokenURL = tokenURL
         self.authorizationURL = authorizationURL
-        
-        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, configuration: configuration)
+        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, revocationURL: revocationURL, configuration: configuration)
     }
 
     // TODO: Implement the authorization code client

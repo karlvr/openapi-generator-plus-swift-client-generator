@@ -7,7 +7,7 @@ import Foundation
 /**
  A protocol defining methods for handling security within API requests.
  */
-public protocol SecurityClient {
+public protocol SecurityClient: Swift.Sendable {
     /**
      Handles reauthentication when an API request receives a 401 response.
 

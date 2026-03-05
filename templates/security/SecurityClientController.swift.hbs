@@ -11,19 +11,19 @@ import Foundation
 
  - Note: Specific `SecurityClient` objects can be inserted or replaced dynamically to accommodate user behavior changes, such as signing in or signing out.
 */
-public class SecurityClientController: SecurityClient {
+public actor SecurityClientController: SecurityClient {
 
-    var clients: [SecurityScheme: SecurityClient] = [:]
+    private var clients: [SecurityScheme: any SecurityClient] = [:]
 
-    public init(clients: [SecurityScheme : SecurityClient] = [:]) {
+    public init(clients: [SecurityScheme : any SecurityClient] = [:]) {
         self.clients = clients
     }
 
-    public func setClient(securityScheme: SecurityScheme, client: SecurityClient) {
+    public func setClient(securityScheme: SecurityScheme, client: any SecurityClient) {
         self.clients[securityScheme] = client
     }
 
-    public func getClient(securityScheme: SecurityScheme) -> SecurityClient? {
+    public func getClient(securityScheme: SecurityScheme) -> (any SecurityClient)? {
         return clients[securityScheme]
     }
 
