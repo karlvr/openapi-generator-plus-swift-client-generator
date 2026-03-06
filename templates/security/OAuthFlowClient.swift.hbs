@@ -1,0 +1,21 @@
+//  
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public protocol OAuthFlowClient: SecurityClient, Swift.Sendable {
+    var clientId: String { get }
+    var clientSecret: String { get }
+    var revocationURL: URL? { get }
+
+    var refreshToken: String? { get async }
+    var accessToken: OAuthAccessToken? { get async }
+    
+    /// Authenticate the security client using a refresh token.
+    func authenticate(refreshToken: String) async throws
+    func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
+    func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws
+    func revokeRefreshToken() async throws
+    func revokeAccessToken() async throws
+}

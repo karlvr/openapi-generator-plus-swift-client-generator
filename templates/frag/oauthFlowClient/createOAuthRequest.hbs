@@ -1,0 +1,23 @@
+/// Creates a URLRequest for OAuth authentication.
+/// - Parameters:
+///   - url: The URL for the request.
+///   - params: A dictionary of key-value pairs for the request parameters.
+/// - Returns: A URLRequest configured for OAuth authentication.
+private func createOAuthRequest(url: URL, params: [String: String]) -> URLRequest {
+    var refreshRequest = URLRequest(url: url)
+    refreshRequest.httpMethod = "POST"
+    refreshRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    refreshRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+    
+    let queryString = params.map({ key, value in
+        let k = key.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        let v = value.addingPercentEncoding(withAllowedCharacters: .formUrlEncoded)!
+        return "\(k)=\(v)"
+    }).joined(separator: "&")
+    
+    let formData = queryString.data(using: .utf8)
+    
+    refreshRequest.httpBody = formData
+    
+    return refreshRequest
+}

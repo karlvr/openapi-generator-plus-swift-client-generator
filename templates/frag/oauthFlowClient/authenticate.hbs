@@ -1,0 +1,5 @@
+/// Authenticate the security client using a refresh token.
+public func authenticate(refreshToken: String) async throws {
+    try await tokenManager.setAccessToken(OAuthAccessToken(refreshToken: refreshToken))
+    try await tokenManager.refreshToken()
+}
