@@ -4,7 +4,7 @@
 
 import Foundation
 
-public protocol OAuthFlowClient: SecurityClient {
+public protocol OAuthFlowClient: SecurityClient, Swift.Sendable {
     var clientId: String { get }
     var clientSecret: String { get }
     var revocationURL: URL? { get }
