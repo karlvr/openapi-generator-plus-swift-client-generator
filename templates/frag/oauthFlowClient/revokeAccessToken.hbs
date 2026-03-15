@@ -1,4 +1,0 @@
-public func revokeAccessToken() async throws {
-    guard let revocationURL = revocationURL else { return }
-    try await tokenManager.revokeAccessToken(url: revocationURL)
-}

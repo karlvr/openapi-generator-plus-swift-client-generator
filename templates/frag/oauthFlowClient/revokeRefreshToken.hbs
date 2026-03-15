@@ -1,4 +1,0 @@
-public func revokeRefreshToken() async throws {
-    guard let revocationURL = revocationURL else { return }
-    try await tokenManager.revokeRefreshToken(url: revocationURL)
-}
