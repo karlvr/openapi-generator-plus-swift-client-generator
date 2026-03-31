@@ -1,15 +1,16 @@
-//  
+//
 //  {{>frag/generatedBy}}
 //
 
+import AuthenticationServices
 import Foundation
 
 /// A client for the OAuth 2.0 Authorization Code Flow
 public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
-    
+
     private let tokenURL: URL
     private let authorizationURL: URL
-    
+
     public init(
         clientId: String,
         clientSecret: String,
@@ -25,9 +26,97 @@ public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Sw
         super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, revocationURL: revocationURL, configuration: configuration)
     }
 
-    // TODO: Implement the authorization code client
-    // Provide a function to create a URL for the authorize request, including requested scopes, that the developer can use to open a web view
-    // Provide an authenticate function that takes an authorization code to obtain an access token
-    // Provide an authenticate function that takes a URL, extracts an authorization code from it and uses that to obtain an access token
-    
+    /// Creates a URL to open in a web view or browser to begin authorization.
+    /// - Parameters:
+    ///   - scopes: The scopes to request.
+    ///   - redirectURI: The URI to redirect to after authorization.
+    ///   - state: A value for CSRF protection. A random UUID string is used if not provided.
+    /// - Returns: A tuple of the authorization URL and the state value. Pass the state to `authenticate(redirectURL:redirectURI:expectedState:)` to verify the callback.
+    public func authorizationRequestURL(scopes: [String]?, redirectURI: URL, state: String = UUID().uuidString) -> (url: URL, state: String) {
+        var components = URLComponents(url: authorizationURL, resolvingAgainstBaseURL: false)!
+        var queryItems = [
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "client_id", value: clientId),
+            URLQueryItem(name: "redirect_uri", value: redirectURI.absoluteString),
+            URLQueryItem(name: "state", value: state)
+        ]
+        if let scopes = scopes {
+            queryItems.append(URLQueryItem(name: "scope", value: scopes.joined(separator: " ")))
+        }
+        components.queryItems = queryItems
+        return (url: components.url!, state: state)
+    }
+
+    /// Authenticate by presenting a web sign-in sheet and exchanging the resulting authorization code.
+    ///
+    /// Uses `ASWebAuthenticationSession` to open the authorization URL in a system web view, waits for the
+    /// redirect callback, then exchanges the authorization code for an access token.
+    /// - Parameters:
+    ///   - scopes: The scopes to request.
+    ///   - redirectURI: The URI registered with the authorization server. Its scheme is used to detect the callback.
+    ///   - presentationContextProvider: The context in which to present the authentication session.
+    @MainActor
+    public func authenticate(scopes: [String]?, redirectURI: URL, presentationContextProvider: any ASWebAuthenticationPresentationContextProviding) async throws {
+        let (authURL, state) = authorizationRequestURL(scopes: scopes, redirectURI: redirectURI)
+
+        let callbackURL: URL = try await withCheckedThrowingContinuation { continuation in
+            let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: redirectURI.scheme) { url, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let url = url {
+                    continuation.resume(returning: url)
+                } else {
+                    continuation.resume(throwing: APIError.notAuthenticated)
+                }
+            }
+            session.presentationContextProvider = presentationContextProvider
+            session.start()
+        }
+
+        try await authenticate(redirectURL: callbackURL, redirectURI: redirectURI, expectedState: state)
+    }
+
+    /// Authenticate using an authorization code obtained from the authorization server.
+    /// - Parameters:
+    ///   - code: The authorization code.
+    ///   - redirectURI: The redirect URI used in the original authorization request.
+    public func authenticate(code: String, redirectURI: URL) async throws {
+        let request = createOAuthRequest(url: tokenURL, params: [
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": redirectURI.absoluteString,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ])
+
+        let requestDate = Date()
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
+        switch result.response.statusCode {
+        case 200:
+            var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
+            resultData.createdAt = requestDate
+            try await tokenManager.setAccessToken(resultData)
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+
+    /// Authenticate by extracting an authorization code from a redirect URL.
+    /// - Parameters:
+    ///   - redirectURL: The URL that the authorization server redirected to after authorization.
+    ///   - redirectURI: The redirect URI used in the original authorization request.
+    ///   - expectedState: The state value from `authorizationRequestURL` to verify against.
+    public func authenticate(redirectURL: URL, redirectURI: URL, expectedState: String? = nil) async throws {
+        guard let components = URLComponents(url: redirectURL, resolvingAgainstBaseURL: false),
+              let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
+            throw APIError.notAuthenticated
+        }
+        if let expectedState = expectedState {
+            let returnedState = components.queryItems?.first(where: { $0.name == "state" })?.value
+            guard returnedState == expectedState else {
+                throw APIError.notAuthenticated
+            }
+        }
+        try await authenticate(code: code, redirectURI: redirectURI)
+    }
 }
