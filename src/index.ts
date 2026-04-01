@@ -85,7 +85,7 @@ const RESERVED_WORDS = [
 	'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'nil', 'none', 'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
 	'protocol', 'public', 'repeat', 'required', 'rethrows', 'return', 'right', 'self', 'set', 'static', 'struct', 'subscript', 'super', 'switch', 'throw', 'throws', 'true',
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
-	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData',
+	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData', 'JSONValue',
 	'unknown', // for our enum cases
 	'RetryConfiguration', 'Configuration',
 	'SecurityClient', 'SecurityClientController', 'SecurityScheme', 'OAuthPasswordFlowClient', 'OAuthClientCredentialsFlowClient', 'OAuthAuthorizationCodeFlowClient', 
@@ -246,7 +246,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 				case CodegenSchemaType.FILE:
 					return new context.NativeType('File')
 				case CodegenSchemaType.ANY:
-					return new context.NativeType('Any')
+					return new context.NativeType('JSONValue')
 			}
 
 			throw new Error(`Unsupported schema type: ${schemaType}`)

@@ -1,0 +1,247 @@
+//
+//  {{>frag/generatedBy}}
+//
+
+import Foundation
+
+public enum JSONValue: Swift.Codable, Swift.Hashable, Swift.Sendable {
+    case string(Swift.String)
+    case number(Swift.Double)
+    case int(Swift.Int)
+    case boolean(Swift.Bool)
+    case array([JSONValue])
+    case object([Swift.String: JSONValue])
+    case null
+
+    // MARK: Decoding Logic
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let stringValue = try? container.decode(Swift.String.self) {
+            self = .string(stringValue)
+        } else if let doubleValue = try? container.decode(Swift.Double.self) {
+            self = .number(doubleValue)
+        } else if let intValue = try? container.decode(Swift.Int.self) {
+            self = .int(intValue)
+        } else if let booleanValue = try? container.decode(Swift.Bool.self) {
+            self = .boolean(boolValue)
+        } else if let arrayValue = try? container.decode([JSONValue].self) {
+            self = .array(arrayValue)
+        } else if let dictionaryValue = try? container.decode([Swift.String: JSONValue].self) {
+            self = .object(dictionaryValue)
+        } else if container.decodeNil() {
+            self = .null
+        } else {
+            throw Swift.DecodingError.dataCorruptedError(in: container, debugDescription: "Unknown JSON value")
+        }
+    }
+
+    // MARK: Encoding Logic
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        switch self {
+        case .string(let value):
+            try container.encode(value)
+        case .int(let value):
+            try container.encode(value)
+        case .number(let value):
+            try container.encode(value)
+        case .boolean(let value):
+            try container.encode(value)
+        case .array(let value):
+            try container.encode(value)
+        case .object(let value):
+            try container.encode(value)
+        case .null:
+            try container.encodeNil()
+        }
+    }
+}
+
+// MARK: - Initializers for Common Types
+extension JSONValue {
+    public init(_ value: Swift.String) {
+        self = .string(value)
+    }
+
+    public init(_ value: Swift.Int) {
+        self = .int(value)
+    }
+
+    public init(_ value: Swift.Double) {
+        self = .number(value)
+    }
+
+    public init(_ value: Swift.Bool) {
+        self = .boolean(value)
+    }
+
+    public init(_ value: [JSONValue]) {
+        self = .array(value)
+    }
+
+    public init(_ value: [Swift.String: JSONValue]) {
+        self = .object(value)
+    }
+
+    public init<T: Swift.Codable>(_ codable: T) throws {
+        let encoder = Foundation.JSONEncoder()
+        let encodedData = try encoder.encode(codable)
+        let decoder = Foundation.JSONDecoder()
+
+        let decodedValue = try decoder.decode(JSONValue.self, from: encodedData)
+        self = decodedValue
+    }
+}
+
+// MARK: - Subscript Access
+extension JSONValue {
+    public subscript(key: Swift.String) -> JSONValue? {
+        return dictionaryValue?[key]
+    }
+
+    public subscript(index: Swift.Int) -> JSONValue? {
+        guard case let .array(array) = self, index >= 0 && index < array.count else {
+            return nil
+        }
+        return array[index]
+    }
+}
+
+// MARK: - Type Checking and Value Extraction
+extension JSONValue {
+    public var isString: Swift.Bool {
+        if case .string = self { return true }
+        return false
+    }
+
+    public var isInt: Swift.Bool {
+        if case .int = self { return true }
+        return false
+    }
+
+    public var isDouble: Swift.Bool {
+        if case .number = self { return true }
+        return false
+    }
+
+    public var isBool: Swift.Bool {
+        if case .boolean = self { return true }
+        return false
+    }
+
+    public var isArray: Swift.Bool {
+        if case .array = self { return true }
+        return false
+    }
+
+    public var isDictionary: Swift.Bool {
+        if case .object = self { return true }
+        return false
+    }
+
+    public var isNull: Swift.Bool {
+        return self == .null
+    }
+
+}
+
+extension JSONValue {
+    public var stringValue: Swift.String? {
+        switch self {
+        case .string(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var intValue: Swift.Int? {
+        switch self {
+        case .int(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var doubleValue: Swift.Double? {
+        switch self {
+        case .number(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var boolValue: Swift.Bool? {
+        switch self {
+        case .boolean(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var arrayValue: [JSONValue]? {
+        if case let .array(value) = self {
+            return value
+        }
+        return nil
+    }
+
+    public var dictionaryValue: [Swift.String: JSONValue]? {
+        if case let .object(value) = self {
+            return value
+        }
+        return nil
+    }
+}
+
+// MARK: - ExpressibleBy...Literal Conformances
+extension JSONValue: Swift.ExpressibleByStringLiteral, Swift.ExpressibleByStringInterpolation {
+    public init(stringLiteral value: Swift.StringLiteralType) {
+        self = .string(value)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Swift.IntegerLiteralType) {
+        self = .int(value)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByFloatLiteral {
+    public init(floatLiteral value: Swift.FloatLiteralType) {
+        self = .number(value)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Swift.BooleanLiteralType) {
+        self = .boolean(value)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: JSONValue...) {
+        self = .array(elements)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByDictionaryLiteral {
+    public init(dictionaryLiteral elements: (Swift.String, JSONValue)...) {
+        var dict: [Swift.String: JSONValue] = [:]
+        for (key, value) in elements {
+            dict[key] = value
+        }
+        self = .object(dict)
+    }
+}
+
+extension JSONValue: Swift.ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self = .null
+    }
+}
