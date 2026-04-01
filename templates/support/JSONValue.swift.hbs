@@ -19,10 +19,10 @@ public enum JSONValue: Swift.Codable, Swift.Hashable, Swift.Sendable {
 
         if let stringValue = try? container.decode(Swift.String.self) {
             self = .string(stringValue)
-        } else if let doubleValue = try? container.decode(Swift.Double.self) {
-            self = .number(doubleValue)
-        } else if let intValue = try? container.decode(Swift.Int.self) {
+        } else if let intValue = try? container.decode(Swift.Int.self) {    // decode int first to avoid decoding integers as doubles
             self = .int(intValue)
+        } else if let numberValue = try? container.decode(Swift.Double.self) {
+            self = .number(numberValue)
         } else if let booleanValue = try? container.decode(Swift.Bool.self) {
             self = .boolean(boolValue)
         } else if let arrayValue = try? container.decode([JSONValue].self) {
