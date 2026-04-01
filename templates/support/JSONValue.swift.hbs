@@ -149,52 +149,32 @@ extension JSONValue {
 
 extension JSONValue {
     public var stringValue: Swift.String? {
-        switch self {
-        case .string(let value):
-            return value
-        default:
-            return nil
-        }
+        if case let .string(value) = self { return value }
+        return nil
     }
 
     public var intValue: Swift.Int? {
-        switch self {
-        case .int(let value):
-            return value
-        default:
-            return nil
-        }
+        if case let .int(value) = self { return value }
+        return nil
     }
 
     public var numberValue: Swift.Double? {
-        switch self {
-        case .number(let value):
-            return value
-        default:
-            return nil
-        }
+        if case let .number(value) = self { return value }
+        return nil
     }
 
     public var boolValue: Swift.Bool? {
-        switch self {
-        case .boolean(let value):
-            return value
-        default:
-            return nil
-        }
+        if case let .boolean(value) = self { return value }
+        return nil
     }
 
     public var arrayValue: [JSONValue]? {
-        if case let .array(value) = self {
-            return value
-        }
+        if case let .array(value) = self { return value }
         return nil
     }
 
     public var objectValue: [Swift.String: JSONValue]? {
-        if case let .object(value) = self {
-            return value
-        }
+        if case let .object(value) = self { return value }
         return nil
     }
 }
