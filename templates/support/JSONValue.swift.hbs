@@ -24,11 +24,11 @@ public enum JSONValue: Swift.Codable, Swift.Hashable, Swift.Sendable {
         } else if let numberValue = try? container.decode(Swift.Double.self) {
             self = .number(numberValue)
         } else if let booleanValue = try? container.decode(Swift.Bool.self) {
-            self = .boolean(boolValue)
+            self = .boolean(booleanValue)
         } else if let arrayValue = try? container.decode([JSONValue].self) {
             self = .array(arrayValue)
-        } else if let dictionaryValue = try? container.decode([Swift.String: JSONValue].self) {
-            self = .object(dictionaryValue)
+        } else if let objectValue = try? container.decode([Swift.String: JSONValue].self) {
+            self = .object(objectValue)
         } else if container.decodeNil() {
             self = .null
         } else {
@@ -98,7 +98,7 @@ extension JSONValue {
 // MARK: - Subscript Access
 extension JSONValue {
     public subscript(key: Swift.String) -> JSONValue? {
-        return dictionaryValue?[key]
+        return objectValue?[key]
     }
 
     public subscript(index: Swift.Int) -> JSONValue? {
@@ -121,7 +121,7 @@ extension JSONValue {
         return false
     }
 
-    public var isDouble: Swift.Bool {
+    public var isNumber: Swift.Bool {
         if case .number = self { return true }
         return false
     }
@@ -136,7 +136,7 @@ extension JSONValue {
         return false
     }
 
-    public var isDictionary: Swift.Bool {
+    public var isObject: Swift.Bool {
         if case .object = self { return true }
         return false
     }
@@ -166,7 +166,7 @@ extension JSONValue {
         }
     }
 
-    public var doubleValue: Swift.Double? {
+    public var numberValue: Swift.Double? {
         switch self {
         case .number(let value):
             return value
@@ -191,7 +191,7 @@ extension JSONValue {
         return nil
     }
 
-    public var dictionaryValue: [Swift.String: JSONValue]? {
+    public var objectValue: [Swift.String: JSONValue]? {
         if case let .object(value) = self {
             return value
         }
