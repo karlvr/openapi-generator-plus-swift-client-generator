@@ -17,20 +17,20 @@ public enum JSONValue: Swift.Codable, Swift.Hashable, Swift.Sendable {
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        if let stringValue = try? container.decode(Swift.String.self) {
-            self = .string(stringValue)
-        } else if let intValue = try? container.decode(Swift.Int.self) {    // decode int first to avoid decoding integers as doubles
+        if container.decodeNil() {
+            self = .null
+        } else if let booleanValue = try? container.decode(Swift.Bool.self) {
+            self = .boolean(booleanValue)
+        } else if let intValue = try? container.decode(Swift.Int.self) {
             self = .int(intValue)
         } else if let numberValue = try? container.decode(Swift.Double.self) {
             self = .number(numberValue)
-        } else if let booleanValue = try? container.decode(Swift.Bool.self) {
-            self = .boolean(booleanValue)
+        } else if let stringValue = try? container.decode(Swift.String.self) {
+            self = .string(stringValue)
         } else if let arrayValue = try? container.decode([JSONValue].self) {
             self = .array(arrayValue)
         } else if let objectValue = try? container.decode([Swift.String: JSONValue].self) {
             self = .object(objectValue)
-        } else if container.decodeNil() {
-            self = .null
         } else {
             throw Swift.DecodingError.dataCorruptedError(in: container, debugDescription: "Unknown JSON value")
         }
