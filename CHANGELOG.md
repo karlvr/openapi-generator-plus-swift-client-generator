@@ -1,5 +1,16 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.7.0
+
+### Minor Changes
+
+- 417e50c: Prepare for Swift 6 by ensuring immutability on OAuthPasswordFlowClient and Swift 6 build on testing.
+- aa9f6b3: Added Sendable conformance.
+
+  This means that Api calling classes have changed to structs.
+
+- 5849ad2: use JSONValue for any type
+
 ## 1.6.0
 
 ### Minor Changes
