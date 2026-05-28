@@ -20,4 +20,7 @@ public enum APIError: Swift.Error {
 
     /// An response was received with an undocumented status code
     case unexpectedResponse(_ response: Foundation.URLResponse, data: Foundation.Data)
+
+    /// An error thrown by URLSession. Can be `Foundation.URLError`, `Swift.CancellationError`, or something unknown.
+    case urlSessionError(_ error: Swift.Error, request: Foundation.URLRequest)
 }

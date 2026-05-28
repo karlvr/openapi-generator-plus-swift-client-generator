@@ -86,7 +86,12 @@ public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispa
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
 public func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
-    return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
+    do {
+        return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
+    } catch let error as APIError {
+        configuration.onError?(error)
+        throw error
+    }
 }
 
 private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
