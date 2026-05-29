@@ -1,5 +1,11 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 1.8.0
+
+### Minor Changes
+
+- 7d7a547: Adds an on APIError closure in configuration
+
 ## 1.7.0
 
 ### Minor Changes
