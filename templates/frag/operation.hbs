@@ -48,16 +48,16 @@ public enum {{className name}}Result: Swift.Sendable {
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping (@Sendable (_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
-    {{{name}}}({{{_requestCallParams}}}, responseQueue: responseQueue, completion: completion)
+public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}, {{#if requestBody.nativeType}}{{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}, {{/if}}modifyRequest: ModifyRequestBlock? = nil, responseQueue: DispatchQueue? = nil, completion: @escaping (@Sendable (_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
+    {{{name}}}({{{_requestCallParams}}}, modifyRequest: modifyRequest, responseQueue: responseQueue, completion: completion)
 }
 
 {{>frag/operationDocumentation}}
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}) async throws -> {{className name}}Result {
-    return try await {{{name}}}({{{_requestCallParams}}})
+public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_' 'requestable')}}}{{#if requestBody.nativeType}}, {{{requestBody.name}}}: {{{requestBody.nativeType}}}{{#unless requestBody.required}} = nil{{/unless}}{{/if}}, modifyRequest: ModifyRequestBlock? = nil) async throws -> {{className name}}Result {
+    return try await {{{name}}}({{{_requestCallParams}}}, modifyRequest: modifyRequest)
 }
 
 {{/if}}
@@ -65,11 +65,11 @@ public func {{{name}}}(_ __request: {{{className (concat group.name '_' name '_'
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: DispatchQueue? = nil, completion: @escaping (@Sendable (_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
+public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}modifyRequest: ModifyRequestBlock? = nil, responseQueue: DispatchQueue? = nil, completion: @escaping (@Sendable (_ result: Swift.Result<{{className name}}Result, Error>) -> Void)) {
     let responseQueue = responseQueue ?? configuration.responseQueue
     Task {
         do {
-            let result = try await {{{name}}}({{{_callParams}}})
+            let result = try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}modifyRequest: modifyRequest)
             responseQueue.asyncIfPresent {
                 completion(.success(result))
             }
@@ -85,17 +85,17 @@ public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}responseQueue: Dispa
 {{#if deprecated}}
 @available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")
 {{/if}}
-public func {{{name}}}({{{_params}}}) async throws -> {{className name}}Result {
+public func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}modifyRequest: ModifyRequestBlock? = nil) async throws -> {{className name}}Result {
     do {
-        return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}allowsReauth: true)
+        return try await {{{name}}}({{{_callParams}}}{{#if _params}}, {{/if}}modifyRequest: modifyRequest, allowsReauth: true)
     } catch let error as APIError {
         configuration.onError?(error)
         throw error
     }
 }
 
-private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool) async throws -> {{className name}}Result {
-    let __request = try await {{{name}}}Request({{{_callParams}}})
+private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}modifyRequest: ModifyRequestBlock?, allowsReauth: Bool) async throws -> {{className name}}Result {
+    let __request = try await {{{name}}}Request({{{_callParams}}}{{#if _callParams}}, {{/if}}modifyRequest: modifyRequest)
     let result = try await URLSession.handleApiRequest(__request, retryConfiguration: configuration.retryConfiguration)
     switch result.response.statusCode {
 {{#if securityRequirements}}
@@ -121,7 +121,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
                 throw lastError!
             }
             {{/unless}}
-            return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}allowsReauth: false)
+            return try await {{{name}}}({{{_callParams}}}{{#if _callParams}}, {{/if}}modifyRequest: modifyRequest, allowsReauth: false)
         } else {
             {{>frag/log level="debug" msg="\(__request) Received 401 response, throwing APIError.authenticationFailed"}}
             throw APIError.authenticationFailed(result.response, data: result.data)
@@ -165,7 +165,7 @@ private func {{{name}}}({{{_params}}}{{#if _params}}, {{/if}}allowsReauth: Bool)
 }
 
 {{>frag/operationDocumentation}}
-public func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
+public func {{{name}}}Request({{{_params}}}{{#if _params}}, {{/if}}modifyRequest: ModifyRequestBlock? = nil) async throws -> URLRequest {
     let localVarPath = "{{{group.path}}}{{{path}}}"
     {{#each pathParams}}
         .replacingOccurrences(of: "{{safe '{'}}{{{serializedName}}}{{safe '}'}}", with: String({{identifier name}}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)
@@ -219,6 +219,8 @@ public func {{{name}}}Request({{{_params}}}) async throws -> URLRequest {
 
 {{/if}}
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
+
+    modifyRequest?(&localVarRequest)
 
     {{>frag/requestSecurity}}
 

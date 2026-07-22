@@ -87,6 +87,7 @@ const RESERVED_WORDS = [
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
 	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData', 'JSONValue',
 	'unknown', // for our enum cases
+	'modifyRequest', // for the request method's modifyRequest parameter
 	'RetryConfiguration', 'Configuration',
 	'SecurityClient', 'SecurityClientController', 'SecurityScheme', 'OAuthPasswordFlowClient', 'OAuthClientCredentialsFlowClient', 'OAuthAuthorizationCodeFlowClient', 
 	'OAuthAccessTokenManager', 'AccessTokenHandler', 'OAuthAccessToken', 'BasicAuthenticationSecurityClient', 'APIKeySecurityClient', 'AbstractOAuthFlowClient',

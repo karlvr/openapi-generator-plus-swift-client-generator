@@ -7,6 +7,10 @@ import Foundation
 public typealias ConfigurationFinalizeRequestBlock = @Sendable (_ request: inout Foundation.URLRequest) -> Void
 public typealias OnErrorBlock = @Sendable (_ error: APIError) -> Void
 
+/// A block that is given the opportunity to modify the request after the path, query
+/// and header parameters have been applied, but before any authentication is added.
+public typealias ModifyRequestBlock = @Sendable (_ request: inout Foundation.URLRequest) -> Void
+
 public struct Configuration: Swift.Sendable {
 
     /// The handler for all security requests.
