@@ -23,4 +23,8 @@ public enum APIError: Swift.Error {
 
     /// An error thrown by URLSession. Can be `Foundation.URLError`, `Swift.CancellationError`, or something unknown.
     case urlSessionError(_ error: Swift.Error, request: Foundation.URLRequest)
+
+    /// A required query parameter was absent from (or could not be parsed from) a query parameter map
+    /// when constructing an operation's parameters via its `init(…, query:)` initializer.
+    case missingRequiredQueryParameter(name: Swift.String)
 }

@@ -14,4 +14,89 @@ public struct {{{className (concat name '_' 'request')}}}: {{{className (concat 
         self.{{{name}}} = {{{name}}}
 {{/each}}
     }
+{{#if queryParams}}
+
+    /// The query parameters serialized as a `[String: [String]]`, keyed by their API names.
+    ///
+    /// Array parameters produce one entry per element and absent optionals are omitted, matching what
+    /// is sent on the wire. Only query parameters whose values can be reconstructed from a `String` are
+    /// included; object-typed query parameters are excluded.
+    public func toQueryMap() -> [Swift.String: [Swift.String]] {
+        var result = [Swift.String: [Swift.String]]()
+{{#each queryParams}}
+{{#if (isQueryParamFromMap this)}}
+{{#if (isArray)}}
+{{#if required}}
+        self.{{{name}}}.forEach { result["{{{serializedName}}}", default: []].append({{>frag/schemaToString schema.component value='$0' parameter=. indent='            '}}) }
+{{else}}
+        self.{{{name}}}?.forEach { result["{{{serializedName}}}", default: []].append({{>frag/schemaToString schema.component value='$0' parameter=. indent='            '}}) }
+{{/if}}
+{{else}}
+{{#if required}}
+        result["{{{serializedName}}}", default: []].append({{>frag/schemaToString value=(concat 'self.' name) parameter=. indent='        '}})
+{{else}}
+        if let {{{name}}} = self.{{{name}}} {
+            result["{{{serializedName}}}", default: []].append({{>frag/schemaToString value=name parameter=. indent='            '}})
+        }
+{{/if}}
+{{/if}}
+{{/if}}
+{{/each}}
+        return result
+    }
+
+    /// Returns a copy of these parameters with the query parameters overridden by `query`.
+    ///
+    /// Query keys absent from `query` keep their current value (a present-but-empty value does not clear
+    /// the parameter). Object-typed query parameters are left unchanged.
+    public func withQuery(_ query: [Swift.String: [Swift.String]]) -> Self {
+        var copy = self
+{{#each queryParams}}
+{{#if (isQueryParamFromMap this)}}
+        copy.{{{name}}} = {{{queryFromMap this "query"}}}
+{{/if}}
+{{/each}}
+        return copy
+    }
+{{#if (hasQueryParamFromMap queryParams)}}
+{{#join '_mapInitParams' ', '}}
+{{#each parameters}}
+{{#unless (isQueryParamFromMap this)}}
+{{{name}}}: {{{nativeType}}}{{#unless required}} = {{{undefinedValueLiteral schema}}}{{/unless}}
+{{/unless}}
+{{/each}}
+query: [Swift.String: [Swift.String]]
+{{/join}}
+
+    /// Builds these parameters from the non-query arguments plus a `query` parameter map.
+    ///
+    /// Optional query parameters fall back to `nil` when absent from `query`.
+{{#if (hasRequiredQueryParamFromMap queryParams)}}
+    ///
+    /// - Throws: `APIError.missingRequiredQueryParameter` if a required query parameter is absent from
+    ///   `query` (or its value cannot be parsed).
+    public init({{{_mapInitParams}}}) throws {
+{{else}}
+    public init({{{_mapInitParams}}}) {
+{{/if}}
+{{#each parameters}}
+{{#unless (isQueryParamFromMap this)}}
+        self.{{{name}}} = {{{name}}}
+{{/unless}}
+{{/each}}
+{{#each parameters}}
+{{#if (isQueryParamFromMap this)}}
+{{#if required}}
+        guard let {{{name}}} = {{{queryMapAccess this "query"}}} else {
+            throw APIError.missingRequiredQueryParameter(name: "{{{serializedName}}}")
+        }
+        self.{{{name}}} = {{{name}}}
+{{else}}
+        self.{{{name}}} = {{{queryMapAccess this "query"}}}
+{{/if}}
+{{/if}}
+{{/each}}
+    }
+{{/if}}
+{{/if}}
 }

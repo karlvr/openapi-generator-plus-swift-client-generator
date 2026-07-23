@@ -1,4 +1,4 @@
-import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema, CodegenNativeType } from '@openapi-generator-plus/types'
+import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema, CodegenNativeType, CodegenParameter, CodegenSchema, isCodegenArraySchema } from '@openapi-generator-plus/types'
 import { CodegenOptionsSwift } from './types'
 import path from 'path'
 import Handlebars from 'handlebars'
@@ -32,6 +32,93 @@ function computeCustomTemplatesPath(configPath: string | undefined, customTempla
 
 function toSafeTypeForComposing(nativeType: string): string {
 	return nativeType
+}
+
+/**
+ * How a value of a given schema can be parsed back from a `String`.
+ * - `identity`: the value already is a `String`, so the parse expression is the string itself.
+ * - `total`: the concrete type has a non-failable `init(_: String)` (our generated enums).
+ * - `failable`: the concrete type has a failable `init?(_: String)` (`Int`, `Double`, `Bool`,
+ *   `LocalDate`, …), so the parse expression yields an optional.
+ *
+ * Returns `null` when values of the schema cannot round-trip through a `String`, so the parameter is
+ * excluded from the query-map helpers. This mirrors `toNativeType`: object/map/oneOf/anyOf, binary and
+ * `Any` are not representable as a string, and neither `Decimal` (bare `number`) nor `URL` (`string`
+ * with `format: url`) conform to `LosslessStringConvertible`, so `String(value)` would not compile.
+ */
+type QueryParamParseKind = 'identity' | 'total' | 'failable'
+
+function queryParamParseKind(schema: CodegenSchema): QueryParamParseKind | null {
+	switch (schema.schemaType) {
+		case CodegenSchemaType.STRING:
+			/* `url` maps to `URL`, which is not `LosslessStringConvertible`, so exclude it. */
+			return schema.format === 'url' ? null : 'identity'
+		case CodegenSchemaType.ENUM:
+			return 'total'
+		case CodegenSchemaType.INTEGER:
+		case CodegenSchemaType.BOOLEAN:
+		case CodegenSchemaType.DATE:
+		case CodegenSchemaType.TIME:
+		case CodegenSchemaType.DATETIME:
+			return 'failable'
+		case CodegenSchemaType.NUMBER:
+			/* Bare `number` maps to `Decimal`, which is not `LosslessStringConvertible`; only float/double round-trip. */
+			return (schema.format === 'float' || schema.format === 'double') ? 'failable' : null
+		default:
+			return null
+	}
+}
+
+/** The scalar schema/native type a query parameter carries: its array component, or the parameter itself. */
+function queryParamValueUsage(param: CodegenParameter): { schema: CodegenSchema; nativeType: CodegenNativeType } {
+	if (isCodegenArraySchema(param.schema) && param.schema.component) {
+		return { schema: param.schema.component.schema, nativeType: param.schema.component.nativeType }
+	}
+	return { schema: param.schema, nativeType: param.nativeType }
+}
+
+/** Whether a query parameter's value can be reconstructed from a `[String: [String]]` map (see {@link queryParamParseKind}). */
+function isQueryParamFromMap(param: CodegenParameter): boolean {
+	return param.isQueryParam && queryParamParseKind(queryParamValueUsage(param).schema) !== null
+}
+
+/** Returns a Swift expression parsing the `String` expression `varExpr` into `concreteType`, mirroring `toNativeType`. */
+function parseFromStringExpression(kind: QueryParamParseKind, concreteType: string, varExpr: string): string {
+	if (kind === 'identity') {
+		return varExpr
+	}
+	return `${concreteType}(${varExpr})`
+}
+
+/**
+ * Returns a Swift expression of optional type that reads a query parameter from the `[String: [String]]`
+ * named `mapVar` and parses it to the parameter's value type, or `nil` when the key is absent. Malformed
+ * scalars become `nil`; malformed array elements are dropped (`compactMap`).
+ */
+function queryMapAccessExpression(param: CodegenParameter, mapVar: string): string {
+	const key = JSON.stringify(param.serializedName)
+	const value = queryParamValueUsage(param)
+	const kind = queryParamParseKind(value.schema)!
+	const concreteType = value.nativeType.concreteType
+	/* Closures are parenthesised (not trailing) so the expression is also valid inside a `guard` condition. */
+	if (isCodegenArraySchema(param.schema)) {
+		switch (kind) {
+			case 'identity':
+				return `${mapVar}[${key}]`
+			case 'total':
+				return `${mapVar}[${key}]?.map({ ${parseFromStringExpression(kind, concreteType, '$0')} })`
+			case 'failable':
+				return `${mapVar}[${key}]?.compactMap({ ${parseFromStringExpression(kind, concreteType, '$0')} })`
+		}
+	}
+	switch (kind) {
+		case 'identity':
+			return `${mapVar}[${key}]?.first`
+		case 'total':
+			return `${mapVar}[${key}]?.first.map({ ${parseFromStringExpression(kind, concreteType, '$0')} })`
+		case 'failable':
+			return `${mapVar}[${key}]?.first.flatMap({ ${parseFromStringExpression(kind, concreteType, '$0')} })`
+	}
 }
 
 export interface SwiftGeneratorContext extends CodegenGeneratorContext {
@@ -410,6 +497,51 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			const hbs = Handlebars.create()
 
 			registerStandardHelpers(hbs, context)
+
+			/** Whether a query parameter can be serialized to / reconstructed from a `[String: [String]]` map. */
+			hbs.registerHelper('isQueryParamFromMap', function(param: CodegenParameter) {
+				return isQueryParamFromMap(param)
+			})
+
+			/** Whether any of the given query parameters can be reconstructed from a string map. */
+			hbs.registerHelper('hasQueryParamFromMap', function(params: unknown) {
+				if (!params) {
+					return false
+				}
+				for (const param of context.utils.values(params as never)) {
+					if (isQueryParamFromMap(param as CodegenParameter)) {
+						return true
+					}
+				}
+				return false
+			})
+
+			/**
+			 * Whether any of the given query parameters is both required and map-constructable, i.e. whether the
+			 * map initializer can throw (a required parameter can be absent/unparseable). Optional-only maps never throw.
+			 */
+			hbs.registerHelper('hasRequiredQueryParamFromMap', function(params: unknown) {
+				if (!params) {
+					return false
+				}
+				for (const param of context.utils.values(params as never)) {
+					const queryParam = param as CodegenParameter
+					if (queryParam.required && isQueryParamFromMap(queryParam)) {
+						return true
+					}
+				}
+				return false
+			})
+
+			/** An optional Swift expression reading a query parameter from the map `mapVar`, or `nil` when absent. */
+			hbs.registerHelper('queryMapAccess', function(param: CodegenParameter, mapVar: string) {
+				return queryMapAccessExpression(param, mapVar)
+			})
+
+			/** The right-hand side of a `withQuery` assignment: the map value, falling back to the current value. */
+			hbs.registerHelper('queryFromMap', function(param: CodegenParameter, mapVar: string) {
+				return `${queryMapAccessExpression(param, mapVar)} ?? self.${param.name}`
+			})
 
 			await loadTemplates(path.resolve(__dirname, '..', 'templates'), hbs)
 			if (context.loadAdditionalTemplates) {
