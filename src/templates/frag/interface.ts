@@ -11,9 +11,9 @@ export function interfaceContents(schema: CodegenInterfaceSchema, ctx: SwiftCont
 	return ts`
 ${schemaDocumentation(schema)}
 public protocol ${schema.name} {
-${each(values(schema.properties), property => ts`
-    ${propertyDocumentation(property)}
-    var ${property.name}: ${property.nativeType} { ${property.readOnly ? 'get' : 'get set'} }`, '\n')}
+    ${each(values(schema.properties), property => ts`
+${propertyDocumentation(property)}
+var ${property.name}: ${property.nativeType} { ${property.readOnly ? 'get' : 'get set'} }`, '\n')}
 
     ${nestedSchemas(schema, ctx)}
 }`

@@ -10,8 +10,8 @@ export function parametersProtocol(operation: CodegenOperation, group: CodegenOp
 
 	return ts`
 public protocol ${group.name}${className(generator, `${operation.name}_requestable`)}: Swift.Sendable {
-${each(values(operation.parameters), parameter => ts`
-    ${propertyDocumentation(parameter)}
-    var ${parameter.name}: ${parameter.nativeType} { get set }`, '\n')}
+    ${each(values(operation.parameters), parameter => ts`
+${propertyDocumentation(parameter)}
+var ${parameter.name}: ${parameter.nativeType} { get set }`, '\n')}
 }`
 }

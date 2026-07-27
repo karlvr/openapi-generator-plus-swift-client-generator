@@ -12,11 +12,11 @@ export function enumContents(schema: CodegenEnumSchema): string {
 ${schemaDocumentation(schema)}
 public enum ${name} : Swift.Codable, Swift.Hashable, Swift.CaseIterable, Swift.Equatable, Swift.LosslessStringConvertible, Swift.Sendable {
     case unknown(value: String)
-${each(enumValues, value => `    case ${value.name}`, '\n')}
+    ${each(enumValues, value => `case ${value.name}`, '\n')}
 
     public init(_ rawValue: String) {
         switch rawValue {
-${each(enumValues, value => `        case ${value.literalValue}: self = .${value.name}`, '\n')}
+        ${each(enumValues, value => `case ${value.literalValue}: self = .${value.name}`, '\n')}
         default: self = .unknown(value: rawValue)
         }
     }
@@ -24,7 +24,7 @@ ${each(enumValues, value => `        case ${value.literalValue}: self = .${value
     public var value: String {
         switch self {
         case let .unknown(value): return value
-${each(enumValues, value => `        case .${value.name}: return ${value.literalValue}`, '\n')}
+        ${each(enumValues, value => `case .${value.name}: return ${value.literalValue}`, '\n')}
         }
     }
 

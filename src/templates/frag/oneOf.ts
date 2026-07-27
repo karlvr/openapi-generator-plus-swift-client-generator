@@ -8,47 +8,47 @@ import { nestedSchemas } from './nestedSchemas'
 function encodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null, ctx: SwiftContext): string {
 	if (discriminator) {
 		return ts`
-        var container = try encoder.container(keyedBy: CodingKeys.self)
-        switch self {
+var container = try encoder.container(keyedBy: CodingKeys.self)
+switch self {
 ${each(discriminator.references, reference => ts`
-        case let .${camelCase(reference.schema.name)}(value):
-            try container.encode(${stringLiteral(ctx.generatorContext, reference.value)}, forKey: .${discriminator.name})
-            try value.encode(to: encoder)`, '\n')}
-        case let .unknown(discriminatorValue):
-            throw EncoderError.cannotEncodeUnknown(discriminatorValue)
-        }`
+case let .${camelCase(reference.schema.name)}(value):
+    try container.encode(${stringLiteral(ctx.generatorContext, reference.value)}, forKey: .${discriminator.name})
+    try value.encode(to: encoder)`, '\n')}
+case let .unknown(discriminatorValue):
+    throw EncoderError.cannotEncodeUnknown(discriminatorValue)
+}`
 	}
 	return ts`
-        switch self {
+switch self {
 ${each(schema.composes, compose => ts`
-        case let .${camelCase(compose.name)}(value):
-            try value.encode(to: encoder)`, '\n')}
-        case .unknown:
-            throw EncoderError.cannotEncodeUnknown
-        }`
+case let .${camelCase(compose.name)}(value):
+    try value.encode(to: encoder)`, '\n')}
+case .unknown:
+    throw EncoderError.cannotEncodeUnknown
+}`
 }
 
 /** The `init(from:)` body: switch on the discriminator, or try each composed schema in turn. */
 function decodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null, ctx: SwiftContext): string {
 	if (discriminator) {
 		return ts`
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let discriminator = try container.decode(String.self, forKey: .${discriminator.name})
-        switch discriminator {
-${each(discriminator.references, reference => ts`
-            case ${stringLiteral(ctx.generatorContext, reference.value)}:
-                self = .${camelCase(reference.schema.name)}(try ${reference.schema.nativeType.concreteType}(from: decoder))`, '\n')}
-            default:
-                self = .unknown(discriminator)
-        }`
+let container = try decoder.container(keyedBy: CodingKeys.self)
+let discriminator = try container.decode(String.self, forKey: .${discriminator.name})
+switch discriminator {
+    ${each(discriminator.references, reference => ts`
+case ${stringLiteral(ctx.generatorContext, reference.value)}:
+    self = .${camelCase(reference.schema.name)}(try ${reference.schema.nativeType.concreteType}(from: decoder))`, '\n')}
+    default:
+        self = .unknown(discriminator)
+}`
 	}
 	return ts`
 ${each(schema.composes, compose => ts`
-        do {
-            self = .${camelCase(compose.name)}(try ${compose.nativeType.concreteType}(from: decoder))
-            return
-        } catch {}`, '\n')}
-        self = .unknown`
+do {
+    self = .${camelCase(compose.name)}(try ${compose.nativeType.concreteType}(from: decoder))
+    return
+} catch {}`, '\n')}
+self = .unknown`
 }
 
 /**
@@ -61,24 +61,24 @@ export function oneOfContents(schema: CodegenOneOfSchema | CodegenHierarchySchem
 	return ts`
 ${schemaDocumentation(schema)}
 public enum ${schema.name}: Swift.Codable, Swift.Hashable, Swift.Sendable {
-${each(schema.composes, compose => `    case ${camelCase(compose.name)}(_ value: ${compose.nativeType})`, '\n')}
-${discriminator ? '    case unknown(_ discriminatorValue: String)' : '    case unknown'}
+    ${each(schema.composes, compose => `case ${camelCase(compose.name)}(_ value: ${compose.nativeType})`, '\n')}
+    ${discriminator ? 'case unknown(_ discriminatorValue: String)' : 'case unknown'}
 
     enum EncoderError: Error {
-${discriminator ? '        case cannotEncodeUnknown(_ discriminatorValue: String)' : '        case cannotEncodeUnknown'}
+        ${discriminator ? 'case cannotEncodeUnknown(_ discriminatorValue: String)' : 'case cannotEncodeUnknown'}
     }
 
     public func encode(to encoder: Swift.Encoder) throws {
-${encodeBody(schema, discriminator, ctx)}
+        ${encodeBody(schema, discriminator, ctx)}
     }
 
-${when(discriminator, () => ts`
-    enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
-        case ${discriminator!.name}${discriminator!.name === discriminator!.serializedName ? '' : ` = ${stringLiteral(ctx.generatorContext, discriminator!.serializedName)}`}
-    }
+    ${when(discriminator, () => ts`
+enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
+    case ${discriminator!.name}${discriminator!.name === discriminator!.serializedName ? '' : ` = ${stringLiteral(ctx.generatorContext, discriminator!.serializedName)}`}
+}
 `)}
     public init(from decoder: Swift.Decoder) throws {
-${decodeBody(schema, discriminator, ctx)}
+        ${decodeBody(schema, discriminator, ctx)}
     }
 
     ${nestedSchemas(schema, ctx)}

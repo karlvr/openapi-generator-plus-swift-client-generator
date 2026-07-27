@@ -33,9 +33,9 @@ export function initParameter(property: CodegenProperty, ctx: SwiftContext): str
 /** The coding key case for a property, quoting the serialized name when it differs from the Swift name. */
 function codingKey(property: CodegenProperty, ctx: SwiftContext): string {
 	if (property.name === property.serializedName) {
-		return `        case ${property.name}`
+		return `case ${property.name}`
 	}
-	return `        case ${property.name} = ${stringLiteral(ctx.generatorContext, property.serializedName)}`
+	return `case ${property.name} = ${stringLiteral(ctx.generatorContext, property.serializedName)}`
 }
 
 /** The body of a Swift struct for an object schema. */
@@ -46,32 +46,32 @@ export function pojoContents(schema: CodegenObjectSchema, ctx: SwiftContext): st
 ${schemaDocumentation(schema)}
 ${when(schema.deprecated, DEPRECATED_OBJECT)}
 public struct ${schema.name}: ${structConformances(schema)} {
-${each(properties, property => ts`
+    ${each(properties, property => ts`
 
-    ${propertyDocumentation(property)}
-    ${when(property.deprecated, DEPRECATED_PROPERTY)}
-    public var ${property.name}: ${property.nativeType}`, '\n')}
+${propertyDocumentation(property)}
+${when(property.deprecated, DEPRECATED_PROPERTY)}
+public var ${property.name}: ${property.nativeType}`, '\n')}
 
     public init(${properties.map(property => initParameter(property, ctx)).join(', ')}) {
-${each(properties, property => `        self.${property.name} = ${property.name}`, '\n')}
+        ${each(properties, property => `self.${property.name} = ${property.name}`, '\n')}
     }
 
-${when(properties.length, () => ts`
-    enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
-${each(properties, property => when(!property.discriminators, () => codingKey(property, ctx)), '\n')}
-    }
+    ${when(properties.length, () => ts`
+enum CodingKeys: String, Swift.CodingKey, Swift.CaseIterable {
+    ${each(properties, property => when(!property.discriminators, () => codingKey(property, ctx)), '\n')}
+}
 
-    // Encodable protocol methods
+// Encodable protocol methods
 
-    public init(from decoder: Swift.Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-${each(properties, property => `        ${decode(property, true)}`, '\n')}
-    }
+public init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    ${each(properties, property => decode(property, true), '\n')}
+}
 
-    public func encode(to encoder: Swift.Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-${each(properties, property => `        ${encode(property, true)}`, '\n')}
-    }
+public func encode(to encoder: Swift.Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    ${each(properties, property => encode(property, true), '\n')}
+}
 `)}
     ${nestedSchemas(schema, ctx)}
 }`

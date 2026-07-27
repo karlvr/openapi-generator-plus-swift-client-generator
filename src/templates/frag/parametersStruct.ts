@@ -16,12 +16,12 @@ export function parametersStruct(operation: CodegenOperation, group: CodegenOper
 
 	return ts`
 public struct ${className(generator, `${operation.name}_request`)}: ${className(generator, `${group.name}_${operation.name}_requestable`)}, Swift.Equatable, Swift.Hashable, Swift.Sendable {
-${each(parameters, parameter => ts`
-    ${propertyDocumentation(parameter)}
-    public var ${parameter.name}: ${parameter.nativeType}`, '\n')}
+    ${each(parameters, parameter => ts`
+${propertyDocumentation(parameter)}
+public var ${parameter.name}: ${parameter.nativeType}`, '\n')}
 
     public init(${initParameters}) {
-${each(parameters, parameter => `        self.${parameter.name} = ${parameter.name}`, '\n')}
+        ${each(parameters, parameter => `self.${parameter.name} = ${parameter.name}`, '\n')}
     }
 }`
 }

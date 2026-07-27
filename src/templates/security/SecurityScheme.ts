@@ -77,10 +77,10 @@ export function securityScheme(securitySchemes: CodegenSecurityScheme[] | null, 
 	const generator = ctx.generatorContext.generator()
 
 	const cases = securitySchemes && securitySchemes.length
-		? securitySchemes.map(scheme => `    case ${identifier(generator, scheme.name)} = ${stringLiteral(ctx.generatorContext, scheme.name)}`).join('\n')
+		? securitySchemes.map(scheme => `case ${identifier(generator, scheme.name)} = ${stringLiteral(ctx.generatorContext, scheme.name)}`).join('\n')
 		: ts`
-    /// No security schemes were specified. This case is a placeholder so the enum is valid.
-    case unspecified = "unspecified"`
+/// No security schemes were specified. This case is a placeholder so the enum is valid.
+case unspecified = "unspecified"`
 
 	let extensions = ''
 	for (const scheme of securitySchemes || []) {
@@ -107,7 +107,7 @@ import Foundation
 
 /// The security schemes documented in the API specification.
 public enum SecurityScheme: String, CustomDebugStringConvertible, Swift.Sendable {
-${cases}
+    ${cases}
 
     public var debugDescription: String {
         return "SecurityScheme: \\(rawValue)"

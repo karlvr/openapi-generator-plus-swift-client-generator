@@ -15,33 +15,33 @@ const DEPRECATED_FUNCTION = '@available(*, deprecated, message: "This function i
 function resultCase(response: CodegenResponse): string {
 	return ts`
 ${maybe(response.description, description => ts`
-    /**
-     * ${indentLines(description, '     * ')}
-     */`)}
-    case _${String(response.code)}${response.defaultContent?.nativeType ? `(_ value: ${response.defaultContent.nativeType})` : ''}`
+/**
+ * ${indentLines(description, ' * ')}
+ */`)}
+case _${String(response.code)}${response.defaultContent?.nativeType ? `(_ value: ${response.defaultContent.nativeType})` : ''}`
 }
 
 /** The `case` of the response switch that decodes and returns a response. */
 function responseCase(response: CodegenResponse): string {
 	return ts`
-    case ${String(response.code)}:
-        ${log({ level: 'debug', msg: `\\(__request) Received ${String(response.code)} response` })}
-${responseResult(response, '        ')}`
+case ${String(response.code)}:
+    ${log({ level: 'debug', msg: `\\(__request) Received ${String(response.code)} response` })}
+    ${responseResult(response)}`
 }
 
 /** The statements that turn a decoded response into the operation's result. */
-function responseResult(response: CodegenResponse, indent: string): string {
+function responseResult(response: CodegenResponse): string {
 	const content = response.defaultContent
 	if (!content?.nativeType) {
-		return `${indent}return ._${String(response.code)}`
+		return `return ._${String(response.code)}`
 	}
 	return ts`
-${indent}do {
-${indent}    let decodedData = try JSONDecoder().decode(${content.nativeType.concreteType}.self, from: result.data)
-${indent}    return ._${String(response.code)}(decodedData)
-${indent}} catch {
-${indent}    throw APIError.invalidResponse(error, response: result.response, data: result.data)
-${indent}}`
+do {
+    let decodedData = try JSONDecoder().decode(${content.nativeType.concreteType}.self, from: result.data)
+    return ._${String(response.code)}(decodedData)
+} catch {
+    throw APIError.invalidResponse(error, response: result.response, data: result.data)
+}`
 }
 
 /** The `case 401:` branch that reauthenticates and retries the request. */
@@ -53,29 +53,29 @@ function unauthorizedCase(operation: CodegenOperation, callParams: string, ctx: 
 	const generator = ctx.generatorContext.generator()
 
 	return ts`
-    case 401:
-        if allowsReauth, let securityClient = configuration.securityClient {
-            ${log({ level: 'debug', msg: '\\(__request) Received 401 response, attempting to reauthenticate' })}
-            var didAuthenticate = false
-            var lastError: Error?
-${each(securityRequirements.requirements, requirement => ts`
-            if !didAuthenticate {
-                do {
-${each(requirement.schemes, scheme => `                    try await securityClient.reauthenticate(failedRequest: __request, securityScheme: .${identifier(generator, scheme.scheme.name)}, scopes: ${scopesLiteral(scheme.scopes, ctx)})`, '\n')}
-                    didAuthenticate = true
-                } catch (let error) {
-                    lastError = error
-                }
-            }`, '\n')}
-${when(!securityRequirements.optional, () => ts`
-            if !didAuthenticate {
-                throw lastError!
-            }`)}
-            return try await ${operation.name}(${callParams}${callParams ? ', ' : ''}allowsReauth: false)
-        } else {
-            ${log({ level: 'debug', msg: '\\(__request) Received 401 response, throwing APIError.authenticationFailed' })}
-            throw APIError.authenticationFailed(result.response, data: result.data)
-        }`
+case 401:
+    if allowsReauth, let securityClient = configuration.securityClient {
+        ${log({ level: 'debug', msg: '\\(__request) Received 401 response, attempting to reauthenticate' })}
+        var didAuthenticate = false
+        var lastError: Error?
+        ${each(securityRequirements.requirements, requirement => ts`
+if !didAuthenticate {
+    do {
+        ${each(requirement.schemes, scheme => `try await securityClient.reauthenticate(failedRequest: __request, securityScheme: .${identifier(generator, scheme.scheme.name)}, scopes: ${scopesLiteral(scheme.scopes, ctx)})`, '\n')}
+        didAuthenticate = true
+    } catch (let error) {
+        lastError = error
+    }
+}`, '\n')}
+        ${when(!securityRequirements.optional, () => ts`
+if !didAuthenticate {
+    throw lastError!
+}`)}
+        return try await ${operation.name}(${callParams}${callParams ? ', ' : ''}allowsReauth: false)
+    } else {
+        ${log({ level: 'debug', msg: '\\(__request) Received 401 response, throwing APIError.authenticationFailed' })}
+        throw APIError.authenticationFailed(result.response, data: result.data)
+    }`
 }
 
 /**
@@ -112,7 +112,7 @@ export function operation(operation: CodegenOperation, group: CodegenOperationGr
 
 	return ts`
 public enum ${resultType}: Swift.Sendable {
-${each(responses, response => when(response.code !== 401, () => resultCase(response)), '\n')}
+    ${each(responses, response => when(response.code !== 401, () => resultCase(response)), '\n')}
 }
 
 ${when(parameterCount(operation.parameters) > 1, () => ts`
@@ -163,18 +163,18 @@ private func ${operation.name}(${params}${params ? ', ' : ''}allowsReauth: Bool)
     let __request = try await ${operation.name}Request(${callParams})
     let result = try await URLSession.handleApiRequest(__request, retryConfiguration: configuration.retryConfiguration)
     switch result.response.statusCode {
-${maybe(unauthorizedCase(operation, callParams, ctx))}
-${each(responses, response => when(response.code !== 401 && !response.isCatchAll, () => responseCase(response)), '\n')}
+    ${maybe(unauthorizedCase(operation, callParams, ctx))}
+    ${each(responses, response => when(response.code !== 401 && !response.isCatchAll, () => responseCase(response)), '\n')}
     default:
         ${log({ level: 'debug', msg: '\\(__request) Received unexpected response \\(result.response.statusCode)' })}
-${catchAllResponse ? responseResult(catchAllResponse, '        ') : '        throw APIError.unexpectedResponse(result.response, data: result.data)'}
+        ${catchAllResponse ? responseResult(catchAllResponse) : 'throw APIError.unexpectedResponse(result.response, data: result.data)'}
     }
 }
 
 ${operationDocumentation(operation)}
 public func ${operation.name}Request(${params}) async throws -> URLRequest {
     let localVarPath = "${group.path}${operation.path}"
-${each(values(operation.pathParams), parameter => `        .replacingOccurrences(of: "{${parameter.serializedName}}", with: String(${identifier(generator, parameter.name)}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)`, '\n')}
+        ${each(values(operation.pathParams), parameter => `.replacingOccurrences(of: "{${parameter.serializedName}}", with: String(${identifier(generator, parameter.name)}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)`, '\n')}
 
     var localVarHeaderParameter = [NameValuePair]()
     localVarHeaderParameter.removeAll()
@@ -185,9 +185,8 @@ ${each(values(operation.pathParams), parameter => `        .replacingOccurrences
         localVarQueryParameter.append(queryItems: localVarExistingQueryItems)
     }
 
-${when(parameterCount(operation.queryParams), () => ts`
-${each(values(operation.queryParams), parameter => ts`
-    ${requestParameter(parameter, { dest: 'localVarQueryParameter', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx)}`, '\n')}
+    ${when(parameterCount(operation.queryParams), () => ts`
+${each(values(operation.queryParams), parameter => requestParameter(parameter, { dest: 'localVarQueryParameter', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx), '\n')}
 `)}
     localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
 
@@ -195,22 +194,22 @@ ${each(values(operation.queryParams), parameter => ts`
     localVarRequest.httpMethod = ${stringLiteral(ctx.generatorContext, operation.httpMethod)}
     ${log({ level: 'debug', msg: 'Requesting \\(localVarRequest)' })}
 
-${each(values(operation.headerParams), parameter => ts`
-    ${requestParameter(parameter, { dest: 'localVarHeaderParameter', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx)}
+    ${each(values(operation.headerParams), parameter => ts`
+${requestParameter(parameter, { dest: 'localVarHeaderParameter', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx)}
 `, '\n')}
-${when(parameterCount(operation.cookieParams), () => ts`
-    var localVarCookieParams = [NameValuePair]()
+    ${when(parameterCount(operation.cookieParams), () => ts`
+var localVarCookieParams = [NameValuePair]()
 ${each(values(operation.cookieParams), parameter => ts`
-    ${requestParameter(parameter, { dest: 'localVarCookieParams', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx)}
+${requestParameter(parameter, { dest: 'localVarCookieParams', value: identifier(generator, parameter.name), encoding: parameter.encoding }, ctx)}
 `, '\n')}
-    localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
+localVarHeaderParameter.set("Cookie", localVarCookieParams.toString(separator: "; "))
 `)}
-${when(request, () => request!.required ? ts`
-    ${requestBody(request!, ctx)}
+    ${when(request, () => request!.required ? ts`
+${requestBody(request!, ctx)}
 ` : ts`
-    if let ${request!.name} = ${request!.name} {
-        ${requestBody(request!, ctx)}
-    }
+if let ${request!.name} = ${request!.name} {
+    ${requestBody(request!, ctx)}
+}
 `)}
     localVarHeaderParameter.forEach { item in localVarRequest.addValue(item.value!, forHTTPHeaderField: item.name) }
 

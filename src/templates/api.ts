@@ -33,8 +33,8 @@ public struct ${group.name}Api: Swift.Sendable {
         if let basePath = configuration.basePath {
             self.basePath = basePath
         } else {
-${when(firstServer, () => `            self.basePath = ${stringLiteral(ctx.generatorContext, firstServer!.url)}.replacingOccurrences(of: "/", with: "", options: [.anchored, .backwards], range: nil)`)}
-${when(!firstServer, '            self.basePath = ""')}
+            ${when(firstServer, () => `self.basePath = ${stringLiteral(ctx.generatorContext, firstServer!.url)}.replacingOccurrences(of: "/", with: "", options: [.anchored, .backwards], range: nil)`)}
+            ${when(!firstServer, 'self.basePath = ""')}
         }
         if let cachePolicy = configuration.cachePolicy {
             self.cachePolicy = cachePolicy
