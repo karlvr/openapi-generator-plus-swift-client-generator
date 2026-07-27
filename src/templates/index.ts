@@ -7,6 +7,7 @@ import { configuration } from './support/Configuration'
 import { dispatchQueueApi } from './support/DispatchQueueApi'
 import { file } from './support/File'
 import { formData } from './support/FormData'
+import { jsonNull } from './support/JSONNull'
 import { jsonValue } from './support/JSONValue'
 import { localDate } from './support/LocalDate'
 import { localTime } from './support/LocalTime'
@@ -51,6 +52,7 @@ export const supportTemplates: Record<string, (ctx: SwiftContext) => string> = {
 	'DispatchQueue+Api.swift': ctx => dispatchQueueApi(ctx.root),
 	'File.swift': ctx => file(ctx.root),
 	'FormData.swift': ctx => formData(ctx.root),
+	'JSONNull.swift': ctx => jsonNull(ctx.root),
 	'JSONValue.swift': ctx => jsonValue(ctx.root),
 	'LocalDate.swift': ctx => localDate(ctx.root),
 	'LocalTime.swift': ctx => localTime(ctx.root),

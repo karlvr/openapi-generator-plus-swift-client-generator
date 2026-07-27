@@ -67,7 +67,7 @@ const RESERVED_WORDS = [
 	'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'nil', 'none', 'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
 	'protocol', 'public', 'repeat', 'required', 'rethrows', 'return', 'right', 'self', 'set', 'static', 'struct', 'subscript', 'super', 'switch', 'throw', 'throws', 'true',
 	'try', 'typealias', 'unowned', 'var', 'weak', 'where', 'while', 'willSet',
-	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData', 'JSONValue',
+	'LocalDate', 'LocalTime', 'OffsetDateTime', 'Decimal', 'String', 'Void', 'File', 'FormData', 'JSONValue', 'JSONNull',
 	'unknown', // for our enum cases
 	'RetryConfiguration', 'Configuration',
 	'SecurityClient', 'SecurityClientController', 'SecurityScheme', 'OAuthPasswordFlowClient', 'OAuthClientCredentialsFlowClient', 'OAuthAuthorizationCodeFlowClient', 
@@ -231,6 +231,9 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					return new context.NativeType('File')
 				case CodegenSchemaType.ANY:
 					return new context.NativeType('JSONValue')
+				case CodegenSchemaType.NULL:
+					/* The JSON Schema null type permits exactly one value, so we use a type that can only hold that value */
+					return new context.NativeType('JSONNull')
 			}
 
 			throw new Error(`Unsupported schema type: ${schemaType}`)
