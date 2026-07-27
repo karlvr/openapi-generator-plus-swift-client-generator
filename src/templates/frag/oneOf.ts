@@ -5,14 +5,14 @@ import { schemaDocumentation } from './schemaDocumentation'
 import { nestedSchemas } from './nestedSchemas'
 
 /** The `encode(to:)` body, which dispatches on the discriminator when there is one. */
-function encodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null): string {
+function encodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null, ctx: SwiftContext): string {
 	if (discriminator) {
 		return ts`
         var container = try encoder.container(keyedBy: CodingKeys.self)
         switch self {
 ${each(discriminator.references, reference => ts`
         case let .${camelCase(reference.schema.name)}(value):
-            try container.encode(${reference.literalValue}, forKey: .${discriminator.name})
+            try container.encode(${stringLiteral(ctx.generatorContext, reference.value)}, forKey: .${discriminator.name})
             try value.encode(to: encoder)`, '\n')}
         case let .unknown(discriminatorValue):
             throw EncoderError.cannotEncodeUnknown(discriminatorValue)
@@ -29,14 +29,14 @@ ${each(schema.composes, compose => ts`
 }
 
 /** The `init(from:)` body: switch on the discriminator, or try each composed schema in turn. */
-function decodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null): string {
+function decodeBody(schema: CodegenOneOfSchema | CodegenHierarchySchema, discriminator: CodegenDiscriminator | null, ctx: SwiftContext): string {
 	if (discriminator) {
 		return ts`
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let discriminator = try container.decode(${discriminator.nativeType.concreteType}.self, forKey: .${discriminator.name})
+        let discriminator = try container.decode(String.self, forKey: .${discriminator.name})
         switch discriminator {
 ${each(discriminator.references, reference => ts`
-            case ${reference.literalValue}:
+            case ${stringLiteral(ctx.generatorContext, reference.value)}:
                 self = .${camelCase(reference.schema.name)}(try ${reference.schema.nativeType.concreteType}(from: decoder))`, '\n')}
             default:
                 self = .unknown(discriminator)
@@ -62,14 +62,14 @@ export function oneOfContents(schema: CodegenOneOfSchema | CodegenHierarchySchem
 ${schemaDocumentation(schema)}
 public enum ${schema.name}: Swift.Codable, Swift.Hashable, Swift.Sendable {
 ${each(schema.composes, compose => `    case ${camelCase(compose.name)}(_ value: ${compose.nativeType})`, '\n')}
-${discriminator ? `    case unknown(_ discriminatorValue: ${discriminator.nativeType})` : '    case unknown'}
+${discriminator ? '    case unknown(_ discriminatorValue: String)' : '    case unknown'}
 
     enum EncoderError: Error {
-${discriminator ? `        case cannotEncodeUnknown(_ discriminatorValue: ${discriminator.nativeType})` : '        case cannotEncodeUnknown'}
+${discriminator ? '        case cannotEncodeUnknown(_ discriminatorValue: String)' : '        case cannotEncodeUnknown'}
     }
 
     public func encode(to encoder: Swift.Encoder) throws {
-${encodeBody(schema, discriminator)}
+${encodeBody(schema, discriminator, ctx)}
     }
 
 ${when(discriminator, () => ts`
@@ -78,7 +78,7 @@ ${when(discriminator, () => ts`
     }
 `)}
     public init(from decoder: Swift.Decoder) throws {
-${decodeBody(schema, discriminator)}
+${decodeBody(schema, discriminator, ctx)}
     }
 
     ${nestedSchemas(schema, ctx)}
