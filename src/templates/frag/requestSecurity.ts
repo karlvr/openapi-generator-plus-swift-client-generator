@@ -27,9 +27,9 @@ if !didAuthenticate {
     var authedRequest = localVarRequest
     do {
 ${each(requirement.schemes, scheme => {
-		const name = identifier(generator, scheme.scheme.name)
-		const scopes = scopesLiteral(scheme.scopes, ctx)
-		return ts`
+	const name = identifier(generator, scheme.scheme.name)
+	const scopes = scopesLiteral(scheme.scopes, ctx)
+	return ts`
         if let securityClient = self.configuration.securityClient {
             do {
                 try await securityClient.authorize(request: &authedRequest, securityScheme: .${name}, scopes: ${scopes})
@@ -38,7 +38,7 @@ ${each(requirement.schemes, scheme => {
                 try await securityClient.authorize(request: &authedRequest, securityScheme: .${name}, scopes: ${scopes})
             }
         }`
-	}, '\n')}
+}, '\n')}
         didAuthenticate = true
         localVarRequest = authedRequest
     } catch (let error) {

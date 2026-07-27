@@ -44,7 +44,7 @@ extension OAuthClientCredentialsFlowClient {
     }
 }
 `
-		case 'authorizationCode':
+		case 'authorizationCode': {
 			const authorizationUrl = flow.authorizationUrl
 			if (!authorizationUrl) {
 				return ''
@@ -64,6 +64,7 @@ extension OAuthAuthorizationCodeFlowClient {
     }
 }
 `
+		}
 		case 'implicit':
 			return '// TODO: Generate the implicit flow client\n'
 		default:

@@ -26,15 +26,15 @@ export function objectToString(
 {
     var values = [String]()
 ${each(properties, property => {
-		const propertyValue = `${value}.${property.name}`
-		if (property.required) {
-			return `    values.append("${property.serializedName}${keyValueSeparator}" + ${schemaToString(property, propertyValue)})`
-		}
-		return ts`
+	const propertyValue = `${value}.${property.name}`
+	if (property.required) {
+		return `    values.append("${property.serializedName}${keyValueSeparator}" + ${schemaToString(property, propertyValue)})`
+	}
+	return ts`
     if let value = ${propertyValue} {
         values.append("${property.serializedName}${keyValueSeparator}" + ${schemaToString(property, 'value')})
     }`
-	}, '\n')}
+}, '\n')}
     return values
         .map { localVarObjectElement in localVarObjectElement.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!}
         .joined(separator: ${stringLiteral(ctx.generatorContext, separator)})

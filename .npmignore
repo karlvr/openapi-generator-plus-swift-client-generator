@@ -1,6 +1,6 @@
 test
 src
-.eslintrc.js
+eslint.config.mjs
 .nvmrc
 .vscode
 CHANGELOG.md

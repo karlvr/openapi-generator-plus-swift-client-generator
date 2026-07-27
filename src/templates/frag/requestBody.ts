@@ -10,10 +10,10 @@ function formUrlEncodedBody(content: CodegenContent, name: string, ctx: SwiftCon
 	return ts`
 var localVarFormParams = [NameValuePair]()
 ${each(allProperties(content.schema as CodegenObjectSchema), property => requestParameter(property, {
-		dest: 'localVarFormParams',
-		value: `${name}.${property.name}`,
-		encoding: content.encoding ? idx.get(content.encoding.properties, property.name) : undefined,
-	}, ctx), '\n')}
+	dest: 'localVarFormParams',
+	value: `${name}.${property.name}`,
+	encoding: content.encoding ? idx.get(content.encoding.properties, property.name) : undefined,
+}, ctx), '\n')}
 localVarRequest.httpBody = localVarFormParams.toString(separator: "&").data(using: .utf8)!`
 }
 
@@ -24,39 +24,39 @@ function multipartBody(content: CodegenContent, name: string, ctx: SwiftContext)
 	return ts`
 var localVarFormData = FormData()
 ${each(encodings, encoding => {
-		const property = encoding.property
-		if (!isArray(property)) {
-			return multipartProperty(encoding, {
-				propertyVar: `${name}.${property.name}`,
-				bodyPartsVar: 'localVarFormData',
-				schemaUsage: property,
-			}, ctx)
-		}
-
-		const component = property.schema.component
-		if (!component) {
-			throw new Error(`Multipart array property has no component schema: ${property.name}`)
-		}
-		const element = multipartProperty(encoding, {
-			propertyVar: '$0',
+	const property = encoding.property
+	if (!isArray(property)) {
+		return multipartProperty(encoding, {
+			propertyVar: `${name}.${property.name}`,
 			bodyPartsVar: 'localVarFormData',
-			schemaUsage: component,
+			schemaUsage: property,
 		}, ctx)
+	}
 
-		if (!property.required || property.nullable) {
-			const unwrapNullable = property.nullable ? `${property.required ? '' : '?'}.value` : ''
-			return ts`
+	const component = property.schema.component
+	if (!component) {
+		throw new Error(`Multipart array property has no component schema: ${property.name}`)
+	}
+	const element = multipartProperty(encoding, {
+		propertyVar: '$0',
+		bodyPartsVar: 'localVarFormData',
+		schemaUsage: component,
+	}, ctx)
+
+	if (!property.required || property.nullable) {
+		const unwrapNullable = property.nullable ? `${property.required ? '' : '?'}.value` : ''
+		return ts`
 if let ${property.name} = ${name}.${property.name}${unwrapNullable} {
     ${property.name}.forEach {
         ${element}
     }
 }`
-		}
-		return ts`
+	}
+	return ts`
 ${name}.${property.name}.forEach {
     ${element}
 }`
-	}, '\n')}
+}, '\n')}
 localVarRequest.httpBody = localVarFormData.data
 localVarHeaderParameter.set("Content-Type", localVarFormData.contentType)`
 }
