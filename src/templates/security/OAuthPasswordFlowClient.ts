@@ -1,0 +1,61 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function oauthPasswordFlowClient(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+/// A client for the OAuth 2.0 Password Flow
+public final class OAuthPasswordFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
+    
+    public let tokenURL: URL
+    
+    public init(
+        clientId: String,
+        clientSecret: String,
+        token: OAuthAccessToken? = nil,
+        refreshURL: URL? = nil,
+        revocationURL: URL? = nil,
+        tokenURL: URL,
+        configuration: OAuthConfiguration = OAuthConfiguration()
+    ) {
+        self.tokenURL = tokenURL
+        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, revocationURL: revocationURL, configuration: configuration)
+    }
+    
+    /// Authenticate the security client using username and password credentials, requesting the given scopes.
+    public func authenticate(username: String, password: String, scopes: [String]?, additionalParams params: [String: String]? = nil) async throws {
+        var form: [String: String] = [
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "client_id": clientId,
+            "client_secret": clientSecret
+        ]
+        if let scopes = scopes {
+            form["scope"] = scopes.joined(separator: " ")
+        }
+        if let params = params {
+            form.merge(params, uniquingKeysWith: { (_, new) in new })
+        }
+        let request = createOAuthRequest(url: tokenURL, params: form)
+        
+        let requestDate = Date()
+        let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
+        switch result.response.statusCode {
+        case 200:
+            var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)
+            resultData.createdAt = requestDate
+            try await tokenManager.setAccessToken(resultData)
+        default:
+            throw APIError.authenticationFailed(result.response, data: result.data)
+        }
+    }
+}
+`
+}

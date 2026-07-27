@@ -1,0 +1,43 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function nameValuePair(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+struct NameValuePair: Swift.Sendable {
+    var name: Swift.String
+    var value: Swift.String?
+
+    func toURLQueryItem() -> Foundation.URLQueryItem {
+        return Foundation.URLQueryItem(name: name, value: value)
+    }
+}
+
+extension Swift.Array where Element == NameValuePair {
+
+    mutating func append(queryItems: [Foundation.URLQueryItem]) {
+        self.append(contentsOf: queryItems.map { NameValuePair(name: $0.name, value: $0.value) })
+    }
+
+    mutating func set(_ name: Swift.String, _ value: Swift.String?) {
+        self.removeAll { $0.name == name }
+        self.append(NameValuePair(name: name, value: value))
+    }
+
+    func toURLQueryItems() -> [Foundation.URLQueryItem] {
+        return self.map { $0.toURLQueryItem() }
+    }
+
+    func toString(separator: Swift.String) -> Swift.String {
+        return self.map { "\\($0.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)=\\($0.value?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }.joined(separator: separator)
+    }
+
+}
+`
+}

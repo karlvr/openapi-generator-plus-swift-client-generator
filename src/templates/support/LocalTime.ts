@@ -1,0 +1,91 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function localTime(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable, Swift.Sendable {
+
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(?:(\\\\d*):)?(?:(\\\\d*):)(\\\\d*\\\\.?\\\\d*)$", options: [])
+
+    enum DecoderError: Swift.Error {
+        case invalidMatch(value: String)
+    }
+
+    public var hour: Int?
+    public var minute: Int
+    public var seconds: Double
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let dateString = try container.decode(String.self)
+        if let initialized = Self(dateString) {
+            self = initialized
+        } else {
+            throw DecoderError.invalidMatch(value: dateString)
+        }
+    }
+
+    public init?(_ description: String) {
+        guard let matches = LocalTime.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+            return nil
+        }
+        do {
+            hour = try? matches.intAt(1, in: description)
+            minute = try matches.intAt(2, in: description)
+            seconds = try matches.doubleAt(3, in: description)
+        } catch {
+            return nil
+        }
+    }
+
+    var second: Int {
+        Int(seconds)
+    }
+
+    var nanoSecond: Int {
+        Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
+    }
+
+    public var dateComponents: DateComponents {
+        return DateComponents(calendar: Calendar(identifier: .gregorian), hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    }
+
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
+
+    public var description: String {
+        var timeStringComponents = [String]()
+
+        if let hour = hour {
+            timeStringComponents.append(String(format: "%02d", hour))
+        }
+        timeStringComponents.append(String(format: "%02d", minute))
+        timeStringComponents.append(String(format: "%02.3f", seconds))
+
+        return timeStringComponents.joined(separator: ":")
+    }
+
+    public static func < (lhs: LocalTime, rhs: LocalTime) -> Bool {
+        if lhs.hour != rhs.hour {
+            return (lhs.hour ?? 0) < (rhs.hour ?? 0)
+        } else if lhs.minute != rhs.minute {
+            return lhs.minute < rhs.minute
+        } else {
+            return lhs.seconds < rhs.seconds
+        }
+    }
+}`
+}

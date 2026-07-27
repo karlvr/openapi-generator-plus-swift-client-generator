@@ -1,0 +1,37 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { RootContext } from './types'
+
+/** The Swift Package Manager manifest for the generated package. */
+export function packageSwift(root: RootContext): string {
+	const name = root.package.name
+
+	return ts`
+// swift-tools-version:5.3
+
+import PackageDescription
+
+let package = Package(
+    name: "${name}",
+    platforms: [
+        .iOS(.v14),
+        .macOS(.v11),
+        .tvOS(.v14),
+        .watchOS(.v7),
+    ],
+    products: [
+        // Products define the executables and libraries produced by a package, and make them visible to other packages.
+        .library(
+            name: "${name}",
+            targets: ["${name}"]
+        ),
+    ],
+    targets: [
+        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
+        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
+        .target(
+            name: "${name}"
+        )
+    ]
+)
+`
+}

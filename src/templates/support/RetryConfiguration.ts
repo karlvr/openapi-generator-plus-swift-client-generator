@@ -1,0 +1,37 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function retryConfiguration(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+/// A configuration for retrying requests
+public struct RetryConfiguration: Swift.Sendable {
+    /// The maximum number of attempts to make
+    let maxAttempts: Int
+
+    /// The minimum delay between attempts
+    let delay: TimeInterval
+
+    /// The factor by which to scale the delay between attempts (exponential backoff)
+    let scaleFactor: Double
+
+    /// Initialize a new RetryConfiguration
+    /// 
+    /// - Parameters:
+    ///   - maxAttempts: The maximum number of attempts to make
+    ///   - delay: The minimum delay between attempts
+    ///   - scaleFactor: The factor by which to scale the delay between attempts (exponential backoff)
+    public init(maxAttempts: Int = 4, delay: TimeInterval = 2.0, scaleFactor: Double = 2.0) {
+        self.maxAttempts = maxAttempts
+        self.delay = delay
+        self.scaleFactor = scaleFactor
+    }
+}
+`
+}

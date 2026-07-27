@@ -1,13 +1,13 @@
 import { CodegenSchemaType, CodegenGeneratorContext, CodegenGenerator, CodegenConfig, CodegenDocument, CodegenAllOfStrategy, CodegenAnyOfStrategy, CodegenOneOfStrategy, CodegenLogLevel, isCodegenInterfaceSchema, isCodegenObjectSchema, CodegenSchemaPurpose, CodegenGeneratorType, isCodegenEnumSchema, isCodegenWrapperSchema, isCodegenOneOfSchema, isCodegenHierarchySchema, CodegenNativeType } from '@openapi-generator-plus/types'
 import { CodegenOptionsSwift } from './types'
 import path from 'path'
-import Handlebars from 'handlebars'
-import { loadTemplates, emit, registerStandardHelpers } from '@openapi-generator-plus/handlebars-templates'
+import { emit } from '@openapi-generator-plus/template-utils'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions, EnumMemberStyle } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator, configBoolean, configObject, configString, configStringArray, debugStringify } from '@openapi-generator-plus/generator-common'
-import { promises as fs } from 'fs'
+import { RootContext, SwiftContext, api, enumTemplate, interfaceTemplate, oneOf, packageSwift, pojo, securityTemplates, supportTemplates, wrapper } from './templates'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
+export { RootContext, SwiftContext } from './templates'
 
 function escapeString(value: string | number | boolean) {
 	if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
@@ -22,54 +22,36 @@ function escapeString(value: string | number | boolean) {
 	return value
 }
 
-function computeCustomTemplatesPath(configPath: string | undefined, customTemplatesPath: string) {
-	if (configPath) {
-		return path.resolve(path.dirname(configPath), customTemplatesPath) 
-	} else {
-		return customTemplatesPath
-	}
-}
-
 function toSafeTypeForComposing(nativeType: string): string {
 	return nativeType
 }
 
 export interface SwiftGeneratorContext extends CodegenGeneratorContext {
-	loadAdditionalTemplates?: (hbs: typeof Handlebars) => Promise<void>
-	additionalWatchPaths?: () => string[]
-	additionalExportTemplates?: (outputPath: string, doc: CodegenDocument, hbs: typeof Handlebars, rootContext: Record<string, unknown>) => Promise<void>
+	/** Emit any additional files that a child generator contributes. */
+	exportFiles?: (outputPath: string, doc: CodegenDocument, ctx: SwiftContext) => Promise<void>
 	additionalCleanPathPatterns?: () => string[]
 }
 
 export function chainSwiftGeneratorContext(base: SwiftGeneratorContext, add: Partial<SwiftGeneratorContext>): SwiftGeneratorContext {
 	const result: SwiftGeneratorContext = {
 		...base,
-		loadAdditionalTemplates: async function(hbs) {
-			/* Load the additional first, so that earlier contexts in the chain have priority */
-			if (add.loadAdditionalTemplates) {
-				await add.loadAdditionalTemplates(hbs)
+		exportFiles: async function(outputPath, doc, ctx) {
+			if (base.exportFiles) {
+				await base.exportFiles(outputPath, doc, ctx)
 			}
-			if (base.loadAdditionalTemplates) {
-				await base.loadAdditionalTemplates(hbs)
+			if (add.exportFiles) {
+				await add.exportFiles(outputPath, doc, ctx)
 			}
 		},
-		additionalWatchPaths: function() {
+		additionalCleanPathPatterns: function() {
 			const result: string[] = []
-			if (base.additionalWatchPaths) {
-				result.push(...base.additionalWatchPaths())
+			if (base.additionalCleanPathPatterns) {
+				result.push(...base.additionalCleanPathPatterns())
 			}
-			if (add.additionalWatchPaths) {
-				result.push(...add.additionalWatchPaths())
+			if (add.additionalCleanPathPatterns) {
+				result.push(...add.additionalCleanPathPatterns())
 			}
 			return result
-		},
-		additionalExportTemplates: async function(outputPath, doc, hbs, rootContext) {
-			if (base.additionalExportTemplates) {
-				await base.additionalExportTemplates(outputPath, doc, hbs, rootContext)
-			}
-			if (add.additionalExportTemplates) {
-				await add.additionalExportTemplates(outputPath, doc, hbs, rootContext)
-			}
 		},
 	}
 	return result
@@ -99,14 +81,16 @@ export function options(config: CodegenConfig, context: SwiftGeneratorContext): 
 	const defaultRelativeSourceOutputPath = `Sources/${packageName}`
 	
 	const relativeSourceOutputPath = configString(config, 'relativeSourceOutputPath', defaultRelativeSourceOutputPath)
-	const customTemplates = configString(config, 'customTemplates', undefined)
+
+	if (config.customTemplates !== undefined) {
+		context.log(CodegenLogLevel.WARN, 'The customTemplates config option is no longer supported: templates are TypeScript code and are customized via the generator\'s typed template APIs')
+	}
 
 	const logging = configObject(config, 'logging', {})
 
 	const options: CodegenOptionsSwift = {
 		...javaLikeOptions(config, createJavaLikeContext(context)),
 		relativeSourceOutputPath,
-		customTemplatesPath: customTemplates ? computeCustomTemplatesPath(config.configPath, customTemplates) : null,
 		hideGenerationTimestamp: configBoolean(config, 'hideGenerationTimestamp', false),
 		additionalRetryStatusCodes: configStringArray(config, 'additionalRetryStatusCodes', []),
 		additionalTokenFailureStatusCodes: configStringArray(config, 'additionalTokenFailureStatusCodes', []),
@@ -371,17 +355,8 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		nativeComposedSchemaRequiresObjectLikeOrWrapper: () => false,
 		interfaceCanBeNested: () => false,
 
-		watchPaths: () => {
-			const result = [path.resolve(__dirname, '..', 'templates')]
-			if (context.additionalWatchPaths) {
-				result.push(...context.additionalWatchPaths())
-			}
-			if (generatorOptions.customTemplatesPath) {
-				result.push(generatorOptions.customTemplatesPath)
-			}
-			return result
-		},
-		
+		watchPaths: () => undefined,
+
 		generatorType: () => CodegenGeneratorType.CLIENT,
 
 		cleanPathPatterns: () => {
@@ -407,74 +382,50 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 		},
 
 		exportTemplates: async(outputPath, doc) => {
-			const hbs = Handlebars.create()
+			const root = context.generator().templateRootContext() as RootContext
+			const ctx: SwiftContext = { generatorContext: context, root }
 
-			registerStandardHelpers(hbs, context)
-
-			await loadTemplates(path.resolve(__dirname, '..', 'templates'), hbs)
-			if (context.loadAdditionalTemplates) {
-				await context.loadAdditionalTemplates(hbs)
-			}
-
-			if (generatorOptions.customTemplatesPath) {
-				await loadTemplates(generatorOptions.customTemplatesPath, hbs)
-			}
-
-			const rootContext = context.generator().templateRootContext()
-			
 			const relativeSourceOutputPath = generatorOptions.relativeSourceOutputPath
+			const modelPath = (schema: { name: string }) => path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`)
 
 			for (const group of doc.groups) {
-				const operations = group.operations
-				if (!operations.length) {
+				if (!group.operations.length) {
 					continue
 				}
-	
-				await emit('api', path.join(outputPath, relativeSourceOutputPath, 'APIs', `${context.generator().toClassName(group.name)}Api.swift`), 
-					{ ...rootContext, ...group, operations, servers: doc.servers }, true, hbs)
+
+				await emit(api(group, doc.servers, ctx), path.join(outputPath, relativeSourceOutputPath, 'APIs', `${context.generator().toClassName(group.name)}Api.swift`), true)
 			}
 
 			for (const schema of context.utils.values(doc.schemas)) {
 				if (isCodegenObjectSchema(schema)) {
-					await emit('pojo', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, pojo: schema }, true, hbs)
+					await emit(pojo(schema, ctx), modelPath(schema), true)
 				} else if (isCodegenEnumSchema(schema)) {
-					await emit('enum', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, enum: schema }, true, hbs)
+					await emit(enumTemplate(schema, ctx), modelPath(schema), true)
 				} else if (isCodegenInterfaceSchema(schema)) {
-					await emit('interface', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, interface: schema }, true, hbs)
+					await emit(interfaceTemplate(schema, ctx), modelPath(schema), true)
 				} else if (isCodegenHierarchySchema(schema)) {
-					await emit('hierarchy', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, hierarchy: schema }, true, hbs)
+					await emit(oneOf(schema, ctx), modelPath(schema), true)
 				} else if (isCodegenWrapperSchema(schema)) {
-					await emit('wrapper', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, schema }, true, hbs)
+					await emit(wrapper(schema, ctx), modelPath(schema), true)
 				} else if (isCodegenOneOfSchema(schema)) {
-					await emit('oneOf', path.join(outputPath, relativeSourceOutputPath, 'Models', `${context.generator().toClassName(schema.name)}.swift`), 
-						{ ...rootContext, oneOf: schema }, true, hbs)
+					await emit(oneOf(schema, ctx), modelPath(schema), true)
 				}
 			}
 
 			/* Support */
-			for (const file of await fs.readdir(path.resolve(__dirname, '..', 'templates', 'support'))) {
-				const fileBase = path.basename(file, path.extname(file))
-				await emit(`support/${fileBase}`, path.join(outputPath, relativeSourceOutputPath, 'Support', fileBase),
-					{ ...rootContext }, true, hbs)
+			for (const [fileName, template] of Object.entries(supportTemplates)) {
+				await emit(template(ctx), path.join(outputPath, relativeSourceOutputPath, 'Support', fileName), true)
 			}
 
 			/* Security */
-			for (const file of await fs.readdir(path.resolve(__dirname, '..', 'templates', 'security'))) {
-				const fileBase = path.basename(file, path.extname(file))
-				await emit(`security/${fileBase}`, path.join(outputPath, relativeSourceOutputPath, 'Security', fileBase),
-					{ ...rootContext, securitySchemes: doc.securitySchemes }, true, hbs)
+			for (const [fileName, template] of Object.entries(securityTemplates)) {
+				await emit(template(ctx, doc.securitySchemes), path.join(outputPath, relativeSourceOutputPath, 'Security', fileName), true)
 			}
 
-			await emit('Package', path.join(outputPath, 'Package.swift'),
-				{ ...rootContext }, true, hbs)
-	
-			if (context.additionalExportTemplates) {
-				await context.additionalExportTemplates(outputPath, doc, hbs, rootContext)
+			await emit(packageSwift(root), path.join(outputPath, 'Package.swift'), true)
+
+			if (context.exportFiles) {
+				await context.exportFiles(outputPath, doc, ctx)
 			}
 		},
 

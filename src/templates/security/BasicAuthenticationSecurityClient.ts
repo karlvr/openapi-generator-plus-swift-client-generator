@@ -1,0 +1,41 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function basicAuthenticationSecurityClient(root: RootContext): string {
+	return ts`
+
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+/// A \`SecurityClient\` responsible for handling Basic authentication credentials.
+public final class BasicAuthenticationSecurityClient: SecurityClient, Swift.Sendable {
+    
+    private let username: String
+    private let password: String
+    
+    /// Initializes a \`BasicAuthenticationSecurityClient\` instance with provided credentials.
+    ///
+    /// - Parameters:
+    ///   - username: A string representing the username for authentication.
+    ///   - password: A string representing the password for authentication.
+    public init(username: String, password: String) {
+        self.username = username
+        self.password = password
+    }
+    
+    public func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        
+    }
+    
+    public func authorize(request: inout URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        let token = "\\(username):\\(password)".data(using: .utf8)!.base64EncodedString()
+        request.setValue("Basic \\(token)", forHTTPHeaderField: "Authorization")
+    }
+
+}
+`
+}

@@ -1,0 +1,61 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function configuration(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+public typealias ConfigurationFinalizeRequestBlock = @Sendable (_ request: inout Foundation.URLRequest) -> Void
+public typealias OnErrorBlock = @Sendable (_ error: APIError) -> Void
+
+public struct Configuration: Swift.Sendable {
+
+    /// The handler for all security requests.
+    public var securityClient: SecurityClient?
+
+    /// Override the default base path.
+    public var basePath: Swift.String?
+
+    public var cachePolicy: Foundation.URLRequest.CachePolicy?
+
+    public var timeoutInterval: Foundation.TimeInterval
+
+    public var responseQueue: Dispatch.DispatchQueue?
+
+    public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
+
+    public var retryConfiguration: RetryConfiguration?
+    
+    /// A block that is called whenever an APIError is thrown. 
+    /// This can be used to log errors, or to trigger a global reauthentication flow on authentication errors.
+    public var onError: OnErrorBlock?
+
+    public var loggingEnabled: Bool
+
+    public init(
+        basePath: Swift.String? = nil,
+        cachePolicy: Foundation.URLRequest.CachePolicy? = nil,
+        timeoutInterval: Foundation.TimeInterval = 30,
+        responseQueue: Dispatch.DispatchQueue? = nil,
+        securityClient: SecurityClient? = nil,
+        onError: OnErrorBlock? = nil,
+        loggingEnabled: Bool = false,
+        finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
+    ) {
+        self.basePath = basePath
+        self.cachePolicy = cachePolicy
+        self.timeoutInterval = timeoutInterval
+        self.responseQueue = responseQueue
+        self.securityClient = securityClient
+        self.onError = onError
+        self.loggingEnabled = loggingEnabled
+        self.finalizeRequestBlock = finalizeRequestBlock
+    }
+}
+`
+}

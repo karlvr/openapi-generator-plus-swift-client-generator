@@ -1,0 +1,88 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function localDate(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+public struct LocalDate: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable, Swift.Sendable {
+
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(-?[0-9]{4})-([0-9]{2})-([0-9]{2})$", options: [])
+
+    enum DecoderError: Swift.Error {
+        case invalidMatch(value: String)
+    }
+
+    public var year: Int
+    public var month: Int
+    public var day: Int
+
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let dateString = try container.decode(String.self)
+        if let initialized = Self(dateString) {
+            self = initialized
+        } else {
+            throw DecoderError.invalidMatch(value: dateString)
+        }
+    }
+    
+    public init(year: Int, month: Int, day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
+
+    public init?(_ description: String) {
+        guard let matches = LocalDate.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+            return nil
+        }
+        do {
+            self.year = try matches.intAt(1, in: description)
+            self.month = try matches.intAt(2, in: description)
+            self.day = try matches.intAt(3, in: description)
+        } catch {
+            return nil
+        }
+    }
+
+    public var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(calendar: Calendar(identifier: .gregorian), year: year, month: month, day: day)
+    }
+
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
+    }
+
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
+
+    public var description: String {
+        var timeStringComponents = [String]()
+
+        timeStringComponents.append(String(format: "%04d", year))
+        timeStringComponents.append(String(format: "%02d", month))
+        timeStringComponents.append(String(format: "%02d", day))
+
+        return timeStringComponents.joined(separator: "-")
+    }
+
+    public static func < (lhs: LocalDate, rhs: LocalDate) -> Bool {
+        if lhs.year != rhs.year {
+            return lhs.year < rhs.year
+        } else if lhs.month != rhs.month {
+            return lhs.month < rhs.month
+        } else {
+            return lhs.day < rhs.day
+        }
+    }
+}
+`
+}

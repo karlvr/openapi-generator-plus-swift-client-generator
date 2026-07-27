@@ -1,2 +1,7 @@
 allowBuilds:
   unrs-resolver: true
+overrides:
+  '@openapi-generator-plus/generator-common': link:../openapi-generator-plus-generators/packages/generator-common
+  '@openapi-generator-plus/indexed-type': link:../openapi-generator-plus/packages/indexed-type
+  '@openapi-generator-plus/java-like-generator-helper': link:../openapi-generator-plus-generators/packages/java-like
+  '@openapi-generator-plus/template-utils': link:../openapi-generator-plus-generators/packages/template-utils

@@ -1,0 +1,182 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function offsetDateTime(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConvertible, Swift.Comparable, Swift.Sendable {
+    private static let regex = try! Foundation.NSRegularExpression(pattern: "^(-?[0-9]{4})-([0-9]{2})-([0-9]{2})T(?:(\\\\d*):)?(?:(\\\\d*):)(\\\\d*\\\\.?\\\\d*)(?:((Z)|(([+-][0-9]{2}):?([0-9]{2})?)))?$", options: [])
+
+    enum DecoderError: Error {
+        case invalidMatch(value: String)
+    }
+
+    public var year: Int
+    public var month: Int
+    public var day: Int
+    public var hour: Int
+    public var minute: Int
+    public var seconds: Double
+    public var timezone: Foundation.TimeZone?
+
+    public init(from decoder: Swift.Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let dateString = try container.decode(String.self)
+        if let initialized = Self(dateString) {
+            self = initialized
+        } else {
+            throw DecoderError.invalidMatch(value: dateString)
+        }
+    }
+
+    public init?(_ description: String) {
+        guard let matches = OffsetDateTime.regex.matches(in: description, options: [], range: Foundation.NSRange(description.startIndex..<description.endIndex, in: description)).first else {
+            return nil
+        }
+
+        do {
+            year = try matches.intAt(1, in: description)
+            month = try matches.intAt(2, in: description)
+            day = try matches.intAt(3, in: description)
+            hour = try matches.intAt(4, in: description)
+            minute = try matches.intAt(5, in: description)
+            seconds = try matches.doubleAt(6, in: description)
+
+            if let timezoneString = try? matches.stringAt(7, in: description) {
+                if timezoneString == "Z" {
+                    timezone = Foundation.TimeZone(secondsFromGMT: 0)
+                } else {
+                    timezone = timeZone(from: timezoneString)
+                }
+            } else {
+                timezone = nil
+            }
+        } catch {
+            return nil
+        }
+    }
+
+    var second: Int {
+        Int(seconds)
+    }
+
+    var nanoSecond: Int {
+        Int(seconds.truncatingRemainder(dividingBy: 1) * Double(NSEC_PER_SEC))
+    }
+
+    public var dateComponents: Foundation.DateComponents {
+        return Foundation.DateComponents(calendar: Calendar(identifier: .gregorian), timeZone: timezone, year: year, month: month, day: day, hour: hour, minute: minute, second: second, nanosecond: nanoSecond)
+    }
+
+    public var date: Foundation.Date {
+        return self.dateComponents.date!
+    }
+
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
+
+    public var description: String {
+        var dateStringComponents = [String]()
+
+        dateStringComponents.append(String(format: "%04d", year))
+        dateStringComponents.append(String(format: "%02d", month))
+        dateStringComponents.append(String(format: "%02d", day))
+
+        let dateString = dateStringComponents.joined(separator: "-")
+
+        var timeStringComponents = [String]()
+
+        timeStringComponents.append(String(format: "%02d", hour))
+        timeStringComponents.append(String(format: "%02d", minute))
+        timeStringComponents.append(String(format: "%02.3f", seconds))
+
+        var timeString = timeStringComponents.joined(separator: ":")
+
+        if let timezone = timezone {
+            timeString += timezone.apiTimeZoneString
+        } else {
+            timeString += "Z"
+        }
+
+        return "\\(dateString)T\\(timeString)"
+    }
+
+    /// Converts an ISO 8601-style timezone string (e.g., \`"+10:00"\`, \`"-0015"\`, or \`"+12"\`) into a \`TimeZone\` object.
+    ///
+    /// This function supports various timezone formats with or without a colon, and with or without explicit minutes.
+    /// - Examples of valid inputs:
+    ///   - \`"+10:00"\`: 10 hours ahead of GMT.
+    ///   - \`"-0015"\`: 15 minutes behind GMT.
+    ///   - \`"+12"\`: 12 hours ahead of GMT, without specifying minutes.
+    ///
+    /// - Parameter timezoneString: A string representing the timezone offset.
+    ///   The string must begin with either \`+\` or \`-\`, followed by hours and optional minutes. A colon (\`:\`) between hours and minutes is allowed, but optional.
+    ///
+    /// - Returns: A \`TimeZone\` object with the corresponding \`secondsFromGMT\`, or \`nil\` if the input is invalid.
+    ///
+    /// - Note: This function assumes that input is in valid ISO 8601 format. If the input cannot be parsed, it returns \`nil\`.
+    ///
+    /// - Warning: Invalid inputs, such as missing the \`+\` or \`-\` sign or malformed numbers, will return \`nil\`.
+    ///
+    /// \`\`\`
+    /// if let timezone = timeZone(from: "+10:00") {
+    ///     print(timezone.secondsFromGMT())  // Outputs: 36000
+    /// }
+    ///
+    /// if let timezone = timeZone(from: "-0015") {
+    ///     print(timezone.secondsFromGMT())  // Outputs: -900
+    /// }
+    /// \`\`\`
+    private func timeZone(from timezoneString: String) -> Foundation.TimeZone? {
+        var mutableTimezoneString = timezoneString
+        guard let ordinal = mutableTimezoneString.first else { return nil }
+        mutableTimezoneString.removeFirst()
+        
+        // Remove the colon if it exists and ensure a valid integer
+        let sanitisedTimezoneString = mutableTimezoneString.replacingOccurrences(of: ":", with: "")
+        guard let timezoneInt = Int(sanitisedTimezoneString) else { return nil }
+        
+        // Extract hours and minutes
+        let hourComponent: Int
+        let minuteComponent: Int
+        
+        if timezoneInt > 99 {
+            hourComponent = timezoneInt / 100
+            minuteComponent = timezoneInt % 100
+        } else {
+            hourComponent = timezoneInt
+            minuteComponent = 0
+        }
+        
+        // Convert to seconds and apply the sign
+        let secondsFromGMT = ((hourComponent * 60) + minuteComponent) * 60
+        let signedSeconds = ordinal == "-" ? -secondsFromGMT : secondsFromGMT
+        
+        // Return the TimeZone object
+        return Foundation.TimeZone(secondsFromGMT: signedSeconds)
+    }
+
+    public static func < (lhs: OffsetDateTime, rhs: OffsetDateTime) -> Bool {
+        if let lhsDate = lhs.dateComponents.date, let rhsDate = rhs.dateComponents.date {
+            return lhsDate < rhsDate
+        } else {
+            if lhs.year != rhs.year {
+                return lhs.year < rhs.year
+            } else if lhs.month != rhs.month {
+                return lhs.month < rhs.month
+            } else {
+                return lhs.day < rhs.day
+            }
+        }
+    }
+}
+`
+}

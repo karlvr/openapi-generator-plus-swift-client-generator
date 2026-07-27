@@ -1,8 +1,0 @@
-{{!--
-@param keyed {bool}
---}}
-{{#if required}}
-try container.encode({{{name}}}{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{else}}
-try container.encodeIfPresent({{{name}}}{{#if keyed}}, forKey: .{{{name}}}{{/if}})
-{{/if}}

@@ -1,0 +1,40 @@
+import { ts } from '@openapi-generator-plus/template-utils'
+import { generatedBy } from '../frag/generatedBy'
+import { RootContext } from '../types'
+
+export function oauthAuthorizationCodeFlowClient(root: RootContext): string {
+	return ts`
+//  
+//  ${generatedBy(root)}
+//
+
+import Foundation
+
+/// A client for the OAuth 2.0 Authorization Code Flow
+public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
+    
+    private let tokenURL: URL
+    private let authorizationURL: URL
+    
+    public init(
+        clientId: String,
+        clientSecret: String,
+        token: OAuthAccessToken? = nil,
+        refreshURL: URL? = nil,
+        revocationURL: URL? = nil,
+        tokenURL: URL,
+        authorizationURL: URL,
+        configuration: OAuthConfiguration = OAuthConfiguration()
+    ) {
+        self.tokenURL = tokenURL
+        self.authorizationURL = authorizationURL
+        super.init(clientId: clientId, clientSecret: clientSecret, token: token, refreshURL: refreshURL, revocationURL: revocationURL, configuration: configuration)
+    }
+
+    // TODO: Implement the authorization code client
+    // Provide a function to create a URL for the authorize request, including requested scopes, that the developer can use to open a web view
+    // Provide an authenticate function that takes an authorization code to obtain an access token
+    // Provide an authenticate function that takes a URL, extracts an authorization code from it and uses that to obtain an access token
+    
+}`
+}
