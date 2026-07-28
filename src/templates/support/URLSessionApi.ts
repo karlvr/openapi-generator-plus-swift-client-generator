@@ -15,7 +15,7 @@ extension Foundation.URLSession {
 
     private static let apiSession = Foundation.URLSession(configuration: .default)
 
-    @available(*, renamed: "handleApiRequest(_:)")
+    @available(*, renamed: "handleApiRequest(_:retryConfiguration:)")
     static func handleApiRequest(_ request: Foundation.URLRequest, retryConfiguration: RetryConfiguration?, completion: @escaping @Sendable (_ response: Foundation.HTTPURLResponse?, _ data: Data?, _ error: Error?) -> Void) {
         Task {
             do {
@@ -27,7 +27,7 @@ extension Foundation.URLSession {
         }
     }
     
-    static func handleApiRequest(_ request: Foundation.URLRequest, attemptsTried: Int = 0, retryConfiguration: RetryConfiguration?) async throws -> URLSessionResponse {
+    static func handleApiRequest(_ request: Foundation.URLRequest, attemptsTried: Int = 0, retryConfiguration: RetryConfiguration?) async throws -> APIResponse {
         let data: Data
         let response: URLResponse
         do {
@@ -42,7 +42,7 @@ extension Foundation.URLSession {
 
         let nanosecondsPerSecond: Double = 1_000_000_000
 
-        let result = URLSessionResponse(response: httpResponse, data: data)
+        let result = APIResponse(response: httpResponse, data: data)
         guard let retryConfiguration = retryConfiguration else {
             return result
         }
@@ -59,10 +59,5 @@ extension Foundation.URLSession {
                 return result
         }
     }
-}
-
-struct URLSessionResponse {
-    let response: HTTPURLResponse
-    let data: Data
 }`
 }

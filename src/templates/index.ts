@@ -2,6 +2,8 @@ import { CodegenSecurityScheme } from '@openapi-generator-plus/types'
 import { SwiftContext } from './types'
 
 import { apiError } from './support/APIError'
+import { apiRequest } from './support/APIRequest'
+import { apiResponse } from './support/APIResponse'
 import { characterSetApi } from './support/CharacterSetApi'
 import { configuration } from './support/Configuration'
 import { dispatchQueueApi } from './support/DispatchQueueApi'
@@ -32,10 +34,12 @@ import { oauthClientCredentialsFlowClient } from './security/OAuthClientCredenti
 import { oauthPasswordFlowClient } from './security/OAuthPasswordFlowClient'
 import { securityClient } from './security/SecurityClient'
 import { securityClientController } from './security/SecurityClientController'
+import { securityRequirements } from './security/SecurityRequirements'
 import { securityScheme } from './security/SecurityScheme'
 
 export { RootContext, SwiftContext } from './types'
 export { api } from './api'
+export { requestBuilder } from './requestBuilder'
 export { packageSwift } from './Package'
 export { pojo } from './pojo'
 export { enumTemplate } from './enum'
@@ -47,6 +51,8 @@ export { generatedBy } from './frag/generatedBy'
 /** The support source files, keyed by the file name they're written to. */
 export const supportTemplates: Record<string, (ctx: SwiftContext) => string> = {
 	'APIError.swift': ctx => apiError(ctx.root),
+	'APIRequest.swift': ctx => apiRequest(ctx.root),
+	'APIResponse.swift': ctx => apiResponse(ctx.root),
 	'CharacterSet+Api.swift': ctx => characterSetApi(ctx.root),
 	'Configuration.swift': ctx => configuration(ctx.root),
 	'DispatchQueue+Api.swift': ctx => dispatchQueueApi(ctx.root),
@@ -80,5 +86,6 @@ export const securityTemplates: Record<string, (ctx: SwiftContext, securitySchem
 	'OAuthPasswordFlowClient.swift': ctx => oauthPasswordFlowClient(ctx.root),
 	'SecurityClient.swift': ctx => securityClient(ctx.root),
 	'SecurityClientController.swift': ctx => securityClientController(ctx.root),
+	'SecurityRequirements.swift': ctx => securityRequirements(ctx.root),
 	'SecurityScheme.swift': (ctx, securitySchemes) => securityScheme(securitySchemes, ctx),
 }

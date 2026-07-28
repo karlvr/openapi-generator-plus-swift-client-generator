@@ -4,7 +4,7 @@ import path from 'path'
 import { emit } from '@openapi-generator-plus/template-utils'
 import { javaLikeGenerator, ConstantStyle, JavaLikeContext, options as javaLikeOptions, EnumMemberStyle } from '@openapi-generator-plus/java-like-generator-helper'
 import { commonGenerator, configBoolean, configObject, configString, configStringArray, debugStringify } from '@openapi-generator-plus/generator-common'
-import { RootContext, SwiftContext, api, enumTemplate, interfaceTemplate, oneOf, packageSwift, pojo, securityTemplates, supportTemplates, wrapper } from './templates'
+import { RootContext, SwiftContext, api, enumTemplate, interfaceTemplate, oneOf, packageSwift, pojo, requestBuilder, securityTemplates, supportTemplates, wrapper } from './templates'
 
 export { CodegenOptionsSwift as CodegenOptionsTypeScript } from './types'
 export { RootContext, SwiftContext } from './templates'
@@ -368,6 +368,7 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 			const result = [
 				path.join(relativeSourceOutputPath, 'Models', '*.swift'),
 				path.join(relativeSourceOutputPath, 'APIs', '*Api.swift'),
+				path.join(relativeSourceOutputPath, 'APIs', '*RequestBuilder.swift'),
 				path.join(relativeSourceOutputPath, 'Support', '*.swift'),
 			]
 			if (context.additionalCleanPathPatterns) {
@@ -396,7 +397,9 @@ export default function createGenerator(config: CodegenConfig, context: SwiftGen
 					continue
 				}
 
-				await emit(api(group, doc.servers, ctx), path.join(outputPath, relativeSourceOutputPath, 'APIs', `${context.generator().toClassName(group.name)}Api.swift`), true)
+				const apiPath = (suffix: string) => path.join(outputPath, relativeSourceOutputPath, 'APIs', `${context.generator().toClassName(group.name)}${suffix}.swift`)
+				await emit(api(group, ctx), apiPath('Api'), true)
+				await emit(requestBuilder(group, doc.servers, ctx), apiPath('ApiRequestBuilder'), true)
 			}
 
 			for (const schema of context.utils.values(doc.schemas)) {
