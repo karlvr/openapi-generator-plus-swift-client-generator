@@ -46,6 +46,16 @@ export function requestBuilderType(group: CodegenOperationGroup): string {
 	return `${apiType(group)}RequestBuilder`
 }
 
+/** The name of the struct holding an operation's parameters, as it's referred to inside its API struct. */
+export function paramsTypeName(operation: CodegenOperation, ctx: SwiftContext): string {
+	return className(ctx.generatorContext.generator(), `${operation.name}_params`)
+}
+
+/** The name of the struct holding an operation's parameters, qualified by the API struct it's nested in. */
+export function paramsType(operation: CodegenOperation, group: CodegenOperationGroup, ctx: SwiftContext): string {
+	return `${apiType(group)}.${paramsTypeName(operation, ctx)}`
+}
+
 /** The name of the enum holding an operation's result, as it's referred to inside its API struct. */
 export function resultTypeName(operation: CodegenOperation, ctx: SwiftContext): string {
 	return `${className(ctx.generatorContext.generator(), operation.name)}Result`

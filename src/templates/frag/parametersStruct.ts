@@ -1,12 +1,11 @@
-import { CodegenOperation, CodegenOperationGroup } from '@openapi-generator-plus/types'
-import { className, each, ts, undefinedValueLiteral } from '@openapi-generator-plus/template-utils'
+import { CodegenOperation } from '@openapi-generator-plus/types'
+import { each, ts, undefinedValueLiteral } from '@openapi-generator-plus/template-utils'
 import { SwiftContext } from '../types'
 import { propertyDocumentation } from './propertyDocumentation'
-import { values } from './helpers'
+import { paramsTypeName, values } from './helpers'
 
-/** A concrete struct implementing an operation's parameters protocol. */
-export function parametersStruct(operation: CodegenOperation, group: CodegenOperationGroup, ctx: SwiftContext): string {
-	const generator = ctx.generatorContext.generator()
+/** The struct holding an operation's parameters. */
+export function parametersStruct(operation: CodegenOperation, ctx: SwiftContext): string {
 	const parameters = values(operation.parameters)
 	const initParameters = parameters
 		.map(parameter => parameter.required
@@ -15,7 +14,7 @@ export function parametersStruct(operation: CodegenOperation, group: CodegenOper
 		.join(', ')
 
 	return ts`
-public struct ${className(generator, `${operation.name}_request`)}: ${className(generator, `${group.name}_${operation.name}_requestable`)}, Swift.Equatable, Swift.Hashable, Swift.Sendable {
+public struct ${paramsTypeName(operation, ctx)}: Swift.Equatable, Swift.Hashable, Swift.Sendable {
     ${each(parameters, parameter => ts`
 ${propertyDocumentation(parameter)}
 public var ${parameter.name}: ${parameter.nativeType}`, '\n')}

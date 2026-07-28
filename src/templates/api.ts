@@ -3,12 +3,11 @@ import { each, ts } from '@openapi-generator-plus/template-utils'
 import { SwiftContext } from './types'
 import { generatedBy } from './frag/generatedBy'
 import { operation } from './frag/operation'
-import { parametersProtocol } from './frag/parametersProtocol'
-import { apiType, requestBuilderType, usesParametersStruct } from './frag/helpers'
+import { apiType, requestBuilderType } from './frag/helpers'
 
 /** The API struct for an operation group, with a method per operation. */
 export function api(group: CodegenOperationGroup, ctx: SwiftContext): string {
-	const body = ts`
+	return ts`
 //
 // ${apiType(group)}.swift
 //
@@ -27,16 +26,7 @@ public struct ${apiType(group)}: Swift.Sendable {
         self.requestBuilder = ${requestBuilderType(group)}(configuration: configuration)
     }
 
-    ${each(group.operations, op => operation(op, group, ctx), '\n')}
+    ${each(group.operations, op => operation(op, ctx), '\n')}
 }
-
 `
-
-	/* The parameters protocols live outside the API struct, so that a caller can conform their own types to them. */
-	const protocols = group.operations
-		.filter(usesParametersStruct)
-		.map(op => `${parametersProtocol(op, group, ctx)}\n\n`)
-		.join('')
-
-	return body + protocols
 }

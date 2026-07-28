@@ -1,11 +1,11 @@
 import { CodegenOperation, CodegenOperationGroup } from '@openapi-generator-plus/types'
-import { className, maybe, ts, when } from '@openapi-generator-plus/template-utils'
+import { maybe, ts, when } from '@openapi-generator-plus/template-utils'
 import { SwiftContext } from '../types'
 import { buildRequest } from './buildRequest'
 import { operationDocumentation } from './operationDocumentation'
 import { parseResponse, parseResponseName } from './parseResponse'
 import { securityRequirementsDeclaration, securityRequirementsReference } from './securityRequirements'
-import { parameterCount, resultType, usesParametersStruct, values } from './helpers'
+import { parameterCount, paramsType, resultType, usesParametersStruct, values } from './helpers'
 
 const DEPRECATED_FUNCTION = '@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")'
 
@@ -44,16 +44,15 @@ export function operationRequestBuilder(operation: CodegenOperation, group: Code
 	const pathParams = values(operation.pathParams)
 	const request = operation.requestBody?.nativeType ? operation.requestBody : null
 
-	const requestableType = className(ctx.generatorContext.generator(), `${group.name}_${operation.name}_requestable`)
 	const requestBodyParameter = request ? `${request.name}: ${request.nativeType}` : ''
 
 	/* The parameters of the method that takes all of the operation's parameters. Neither the
 	   parameters nor the request body have default values, so that this method can't be called with
 	   the same argument labels as the path parameters only method. */
 	const allParameters = usesParametersStruct(operation)
-		? [`_ __request: ${requestableType}`, ...(request ? [requestBodyParameter] : [])].join(', ')
+		? [`_ __params: ${paramsType(operation, group, ctx)}`, ...(request ? [requestBodyParameter] : [])].join(', ')
 		: [...parameters.map(parameter => `${parameter.name}: ${parameter.nativeType}`), ...(request ? [requestBodyParameter] : [])].join(', ')
-	const allParametersValue = usesParametersStruct(operation) ? (name: string) => `__request.${name}` : (name: string) => name
+	const allParametersValue = usesParametersStruct(operation) ? (name: string) => `__params.${name}` : (name: string) => name
 
 	const pathParameters = pathParams.map(parameter => `${parameter.name}: ${parameter.nativeType}`).join(', ')
 
