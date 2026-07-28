@@ -5,3 +5,4 @@ overrides:
   '@openapi-generator-plus/indexed-type': link:../openapi-generator-plus/packages/indexed-type
   '@openapi-generator-plus/java-like-generator-helper': link:../openapi-generator-plus-generators/packages/java-like
   '@openapi-generator-plus/template-utils': link:../openapi-generator-plus-generators/packages/template-utils
+  '@openapi-generator-plus/testing': link:../openapi-generator-plus/packages/testing
