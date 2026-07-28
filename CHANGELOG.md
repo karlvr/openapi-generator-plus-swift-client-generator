@@ -1,5 +1,79 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 2.0.0
+
+### Major Changes
+
+- cc93878: Encode and switch on a discriminator's raw string value.
+
+  A discriminated `oneOf` or hierarchy previously typed its discriminator against
+  the discriminator property's enum. When each member declares its own inline
+  discriminator enum there is no single Swift type the switch can use, and the
+  generated code did not compile.
+
+  This changes the generated API: the `unknown` case of these enums carries a
+  `String` instead of the discriminator's enum type, and the cases compare
+  against the values as they appear on the wire.
+
+- b05f39a: Replace the Handlebars templates with TypeScript templates.
+
+  Templates are now TypeScript code built on the
+  `@openapi-generator-plus/template-utils` package (the `ts` tagged template with
+  its SKIP/when/maybe/each/join helpers), giving template development type-safety
+  against the codegen document model, ordinary code navigation and refactoring,
+  and testability. Generated output is byte-identical to the previous Handlebars
+  output (trailing whitespace on a line is no longer emitted), verified across the
+  full test-spec corpus during the migration.
+
+  Breaking changes:
+
+  - The `customTemplates` config option is removed. Templates are TypeScript
+    code; a child generator customizes the output through the typed template
+    functions exported from this package. Setting `customTemplates` now logs a
+    warning and has no effect.
+  - The Handlebars-based extension hooks are removed from `SwiftGeneratorContext`:
+    `loadAdditionalTemplates`, `additionalWatchPaths` and
+    `additionalExportTemplates`. A child generator emits extra files via the new
+    `exportFiles` hook instead.
+  - The `handlebars` and `@openapi-generator-plus/handlebars-templates`
+    dependencies are dropped.
+
+  Fixes:
+
+  - A top-level wrapper schema now generates a source file. Previously the
+    generator asked for a `wrapper` template that didn't exist and failed with
+    "Unknown template: wrapper"; only the nested form of the template was
+    present.
+  - A wrapper's optional property now defaults to its initial value's literal
+    rather than to the stringified `CodegenValue` object.
+
+### Minor Changes
+
+- fa2de9b: Generate schemas typed `null` as a new `JSONNull` type.
+
+  The JSON Schema null type, which OpenAPI 3.1 allows, previously failed with
+  "Unsupported schema type: NULL".
+
+  `JSONNull` has exactly one value, matching the schema: the only value that can
+  be constructed encodes as `null`, and decoding fails if the value isn't `null`.
+  `JSONValue` would have compiled, but it accepts any JSON value, so it would
+  neither describe the contract to the caller nor reject a response that breaks
+  it.
+
+### Patch Changes
+
+- 7e218d0: Declare a property with the optional type when the core makes it optional after
+  deriving its native type.
+
+  An `anyOf` absorbed under the object strategy makes the properties it absorbs
+  optional. In Swift optionality is part of the type, so the absorbing object
+  declared a non-optional property that it then initialised, decoded and encoded
+  as if it were optional, which does not compile.
+
+  The core now derives a property's native type from the usage it ends up with,
+  so this is fixed by using `@openapi-generator-plus/core` 2.31.2 or later, which
+  this package's test suite now uses.
+
 ## 1.8.0
 
 ### Minor Changes
