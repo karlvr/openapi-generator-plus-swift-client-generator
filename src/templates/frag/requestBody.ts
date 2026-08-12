@@ -71,6 +71,8 @@ export function requestBody(request: CodegenRequestBody, ctx: SwiftContext): str
 			case 'application/x-www-form-urlencoded':
 				return formUrlEncodedBody(content, name, ctx)
 			case 'application/json':
+			case 'application/json-patch+json':
+				return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
 			case 'text/json':
 				return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
 		}
