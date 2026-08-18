@@ -67,13 +67,15 @@ export function requestBody(request: CodegenRequestBody, ctx: SwiftContext): str
 	const name = request.name
 
 	function contentBody(): string {
-		switch (true) {
-			case content.mediaType.mimeType === 'application/x-www-form-urlencoded':
+		switch (content.mediaType.mimeType) {
+			case 'application/x-www-form-urlencoded':
 				return formUrlEncodedBody(content, name, ctx)
-			case content.mediaType.mimeType === 'application/json':
-			case content.mediaType.mimeType === 'text/json':
-			case content.mediaType.mimeType.endsWith('+json'):
+			case 'application/json':
+			case 'text/json':
 				return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
+		}
+		if (content.mediaType.mimeType.endsWith('+json')) {
+			return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
 		}
 		if (/multipart\/.*/i.test(content.mediaType.mimeType)) {
 			return multipartBody(content, name, ctx)
