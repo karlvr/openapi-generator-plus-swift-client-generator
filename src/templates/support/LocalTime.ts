@@ -73,7 +73,7 @@ public struct LocalTime: Swift.Codable, Swift.Hashable, Swift.LosslessStringConv
             timeStringComponents.append(String(format: "%02d", hour))
         }
         timeStringComponents.append(String(format: "%02d", minute))
-        timeStringComponents.append(String(format: "%02.3f", seconds))
+        timeStringComponents.append(String(format: "%06.3f", seconds))
 
         return timeStringComponents.joined(separator: ":")
     }

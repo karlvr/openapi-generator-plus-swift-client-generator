@@ -96,7 +96,7 @@ public struct OffsetDateTime: Swift.Codable, Swift.Hashable, Swift.LosslessStrin
 
         timeStringComponents.append(String(format: "%02d", hour))
         timeStringComponents.append(String(format: "%02d", minute))
-        timeStringComponents.append(String(format: "%02.3f", seconds))
+        timeStringComponents.append(String(format: "%06.3f", seconds))
 
         var timeString = timeStringComponents.joined(separator: ":")
 
