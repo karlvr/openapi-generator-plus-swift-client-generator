@@ -74,6 +74,9 @@ export function requestBody(request: CodegenRequestBody, ctx: SwiftContext): str
 			case 'text/json':
 				return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
 		}
+		if (content.mediaType.mimeType.endsWith('+json')) {
+			return `localVarRequest.httpBody = try JSONEncoder().encode(${identifier(ctx.generatorContext.generator(), name)})`
+		}
 		if (/multipart\/.*/i.test(content.mediaType.mimeType)) {
 			return multipartBody(content, name, ctx)
 		}
