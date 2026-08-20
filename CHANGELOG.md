@@ -1,5 +1,12 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 3.0.1
+
+### Patch Changes
+
+- be8f602: Fix seconds zero padding in date time serialisation.
+- a336a51: Encode requests with any +json mime-type as JSON.
+
 ## 3.0.0
 
 ### Major Changes
