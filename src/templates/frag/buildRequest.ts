@@ -16,6 +16,20 @@ export interface BuildRequestOptions {
 }
 
 /**
+ * The value of the `Accept` header for an operation: the media types that the client parses from its
+ * responses, or `null` when no response has content.
+ */
+function acceptHeader(operation: CodegenOperation): string | null {
+	const mediaTypes = new Set<string>()
+	for (const response of values(operation.responses)) {
+		if (response.defaultContent) {
+			mediaTypes.add(response.defaultContent.mediaType.mediaType)
+		}
+	}
+	return mediaTypes.size > 0 ? [...mediaTypes].join(', ') : null
+}
+
+/**
  * The statements that build the `URLRequest` for an operation, ending with `localVarRequest`
  * holding the request.
  *
@@ -29,6 +43,7 @@ export function buildRequest(operation: CodegenOperation, group: CodegenOperatio
 	const generator = ctx.generatorContext.generator()
 	const { pathOnly, value } = options
 	const request = !pathOnly && operation.requestBody?.nativeType ? operation.requestBody : null
+	const accept = acceptHeader(operation)
 
 	/* The headers, cookies and body are only applied when we're applying all of the parameters.
 	   Rendered separately so the block collapses to nothing when the operation has none of them. */
@@ -58,6 +73,7 @@ let localVarPath = "${group.path}${operation.path}"
 
 var localVarHeaderParameter = [NameValuePair]()
 localVarHeaderParameter.removeAll()
+${when(accept, () => `localVarHeaderParameter.set("Accept", ${stringLiteral(ctx.generatorContext, accept!)})`)}
 
 var localVarUrlComponents = URLComponents(string: "\\(self.basePath)\\(localVarPath)")!
 var localVarQueryParameter = [NameValuePair]()
