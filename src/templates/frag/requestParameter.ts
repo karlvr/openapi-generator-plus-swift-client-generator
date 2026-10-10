@@ -40,25 +40,26 @@ function arrayParameter(usage: NamedSchemaUsage, options: RequestParameterOption
 	const append = (comment: string, separator: string) => ts`
 /* ${comment} */
 ${dest}.append(NameValuePair(name: "${usage.serializedName}", value: ${arrayToString(usage, value, separator, ctx)}))`
-
-	switch (encoding?.style) {
-		case 'form':
-			if (encoding.explode) {
-				const component = usage.schema.component
-				if (!component) {
-					throw new Error(`Array parameter has no component schema: ${usage.serializedName}`)
-				}
-				return ts`
-/* array form exploded */
+	const exploded = (comment: string) => {
+		const component = usage.schema.component
+		if (!component) {
+			throw new Error(`Array parameter has no component schema: ${usage.serializedName}`)
+		}
+		return ts`
+/* ${comment} */
 ${value}.forEach { localVarArrayElement in
     ${dest}.append(NameValuePair(name: "${usage.serializedName}", value: ${schemaToString(component, 'localVarArrayElement')}))
 }`
-			}
-			return append('array form', ',')
+	}
+
+	/* An exploded delimited style writes one pair for each element, the same as the exploded form style, as OpenAPI 3.1 defines it */
+	switch (encoding?.style) {
+		case 'form':
+			return encoding.explode ? exploded('array form exploded') : append('array form', ',')
 		case 'spaceDelimited':
-			return append('array space delimited', ' ')
+			return encoding.explode ? exploded('array space delimited exploded') : append('array space delimited', ' ')
 		case 'pipeDelimited':
-			return append('array pipe delimited', '|')
+			return encoding.explode ? exploded('array pipe delimited exploded') : append('array pipe delimited', '|')
 		case 'simple':
 			return append('array simple', ',')
 		default:
