@@ -54,6 +54,75 @@ public struct APIResponse: Swift.Sendable {
     }
 }
 
+extension APIResponse {
+
+    /// The value of the header \`name\`, read by \`parse\`, or \`nil\` when the response doesn't carry it.
+    ///
+    /// - Throws: \`APIError.invalidResponse\` with a \`ResponseHeaderError\` when \`parse\` can't read the value.
+    func header<T>(_ name: Swift.String, _ parse: (Swift.String) -> T?) throws -> T? {
+        guard let text = response.value(forHTTPHeaderField: name) else {
+            return nil
+        }
+        return try value(of: name, text, parse)
+    }
+
+    /// The value of the header \`name\`, read by \`parse\`.
+    ///
+    /// - Throws: \`APIError.invalidResponse\` with a \`ResponseHeaderError\` when the response doesn't carry the
+    ///   header, or when \`parse\` can't read the value.
+    func requiredHeader<T>(_ name: Swift.String, _ parse: (Swift.String) -> T?) throws -> T {
+        guard let value = try header(name, parse) else {
+            throw APIError.invalidResponse(ResponseHeaderError.missing(name), response: response, data: data)
+        }
+        return value
+    }
+
+    /// The elements of the list header \`name\`, each read by \`parse\`, or \`nil\` when the response doesn't carry it.
+    ///
+    /// The elements are separated by commas, which may have whitespace around them. A response that carries
+    /// the header on more than one line gives the elements of every line.
+    ///
+    /// - Throws: \`APIError.invalidResponse\` with a \`ResponseHeaderError\` when \`parse\` can't read an element.
+    func headerList<T>(_ name: Swift.String, _ parse: (Swift.String) -> T?) throws -> [T]? {
+        guard let text = response.value(forHTTPHeaderField: name) else {
+            return nil
+        }
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            return []
+        }
+        return try trimmed.split(separator: ",", omittingEmptySubsequences: false).map {
+            try value(of: name, $0.trimmingCharacters(in: .whitespaces), parse)
+        }
+    }
+
+    /// The elements of the list header \`name\`, each read by \`parse\`.
+    ///
+    /// - Throws: \`APIError.invalidResponse\` with a \`ResponseHeaderError\` when the response doesn't carry the
+    ///   header, or when \`parse\` can't read an element.
+    func requiredHeaderList<T>(_ name: Swift.String, _ parse: (Swift.String) -> T?) throws -> [T] {
+        guard let values = try headerList(name, parse) else {
+            throw APIError.invalidResponse(ResponseHeaderError.missing(name), response: response, data: data)
+        }
+        return values
+    }
+
+    private func value<T>(of name: Swift.String, _ text: Swift.String, _ parse: (Swift.String) -> T?) throws -> T {
+        guard let value = parse(text) else {
+            throw APIError.invalidResponse(ResponseHeaderError.unreadable(name, value: text), response: response, data: data)
+        }
+        return value
+    }
+}
+
+/// The error in \`APIError.invalidResponse\` when a response header that the API declares can't be read.
+public enum ResponseHeaderError: Swift.Error, Swift.Sendable {
+    /// The response doesn't carry a header that the API requires.
+    case missing(_ name: Swift.String)
+    /// The response carries a header whose value doesn't parse as the type that the API gives it.
+    case unreadable(_ name: Swift.String, value: Swift.String)
+}
+
 /// The error in \`APIError.invalidResponse\` when a response doesn't declare the media type that the operation expects.
 public struct UnexpectedContentTypeError: Swift.Error, Swift.Sendable {
     /// The media type that the operation declares.

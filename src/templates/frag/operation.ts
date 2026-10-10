@@ -4,17 +4,19 @@ import { SwiftContext } from '../types'
 import { operationDocumentation } from './operationDocumentation'
 import { parametersStruct } from './parametersStruct'
 import { indentLines, paramsTypeName, resultTypeName, usesParametersStruct, values } from './helpers'
+import { resultCaseValueType, responseStruct } from './responseStruct'
 
 const DEPRECATED_FUNCTION = '@available(*, deprecated, message: "This function is deprecated. Please refer to the provider of the API specification for further instructions.")'
 
 /** The `case` of the operation's result enum for a response. */
-function resultCase(response: CodegenResponse): string {
+function resultCase(response: CodegenResponse, operation: CodegenOperation, ctx: SwiftContext): string {
+	const valueType = resultCaseValueType(response, operation, ctx)
 	return ts`
 ${maybe(response.description, description => ts`
 /**
  * ${indentLines(description, ' * ')}
  */`)}
-case _${String(response.code)}${response.defaultContent?.nativeType ? `(_ value: ${response.defaultContent.nativeType})` : ''}`
+case _${String(response.code)}${valueType ? `(_ value: ${valueType})` : ''}`
 }
 
 /**
@@ -60,8 +62,10 @@ export function operation(operation: CodegenOperation, ctx: SwiftContext): strin
 
 	return ts`
 public enum ${resultType}: Swift.Sendable {
-    ${each(responses, response => when(response.code !== 401, () => resultCase(response)), '\n')}
+    ${each(responses, response => when(response.code !== 401, () => resultCase(response, operation, ctx)), '\n')}
 }
+
+${each(responses, response => when(response.code !== 401, () => responseStruct(response, operation, ctx)), '\n')}
 
 ${when(usesParametersStruct(operation), () => ts`
 ${parametersStruct(operation, ctx)}
