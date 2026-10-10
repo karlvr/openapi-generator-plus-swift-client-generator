@@ -13,9 +13,15 @@ import Foundation
 /// A file that can be sent to an API, such as as part of FormData
 public struct File: Swift.Codable, Swift.Hashable, Swift.Sendable {
 
-    var data: Data
-    var filename: String?
-    
+    /// The content of the file.
+    public var data: Data
+    /// The name of the file, which a multipart part declares when there is one.
+    public var filename: String?
+
+    public init(data: Data, filename: String? = nil) {
+        self.data = data
+        self.filename = filename
+    }
 }
 `
 }
