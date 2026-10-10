@@ -54,7 +54,7 @@ if let ${request!.name} = ${request!.name} {
 
 	return ts`
 let localVarPath = "${group.path}${operation.path}"
-    ${each(values(operation.pathParams), parameter => `.replacingOccurrences(of: "{${parameter.serializedName}}", with: String(${value(identifier(generator, parameter.name))}).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)`, '\n')}
+    ${each(values(operation.pathParams), parameter => `.replacingOccurrences(of: "{${parameter.serializedName}}", with: String(${value(identifier(generator, parameter.name))}).addingPercentEncoding(withAllowedCharacters: .urlPathSegmentAllowed)!)`, '\n')}
 
 var localVarHeaderParameter = [NameValuePair]()
 localVarHeaderParameter.removeAll()

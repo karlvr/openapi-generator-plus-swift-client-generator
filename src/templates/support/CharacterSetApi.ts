@@ -23,5 +23,14 @@ extension Foundation.CharacterSet {
     /// Use it to encode a value for a query or a form body. Every other character, such as a "+" that a
     /// server reads as a space, or the separator of a joined value, is percent encoded.
     static let urlUnreserved = Foundation.CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
+
+    /// The characters that one segment of a URL path carries without encoding.
+    ///
+    /// Use it to encode a path parameter. A "/" is encoded, so that the value stays inside its segment.
+    static let urlPathSegmentAllowed: Foundation.CharacterSet = {
+        var set = Foundation.CharacterSet.urlPathAllowed
+        set.remove("/")
+        return set
+    }()
 }`
 }
