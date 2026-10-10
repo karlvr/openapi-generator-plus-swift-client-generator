@@ -1,5 +1,116 @@
 # @openapi-generator-plus/swift-client-generator
 
+## 4.0.0
+
+### Major Changes
+
+- 9de6eaa: Keep discriminator properties, and fix a member's value to its type
+
+  This supports the core keeping a discriminator property in the schema that declares it, which
+  previously failed to compile.
+
+  - A member of a discriminator declares the discriminator property as a computed property with its
+    own value, for example `public var petType: String { "Cat" }`. It always writes the property when
+    it's encoded, including when it's sent outside of its union, and its value can't disagree with
+    its type. The property is no longer in the member's initialiser.
+  - A schema that declares a discriminator property keeps it as a stored property, so a caller can
+    send it when the schema is used on its own.
+  - A member of discriminators that disagree on its value keeps a stored property, as no one value
+    fits.
+  - A protocol declares a discriminator property as read-only.
+  - A union reads and writes a boolean discriminator as a boolean rather than as a string, and writes
+    the discriminator property once.
+
+- 74c1225: Give a caller the headers that the API declares on a response.
+
+  A response that declares headers now has a struct of its own, nested in the API struct and named
+  after the operation and the status code, such as `GetUser200`. The struct carries the `body` and a
+  property for each header, and the result case carries the struct:
+
+  ```swift
+  switch try await api.getUser(id: id) {
+  case let ._200(response):
+      print(response.body.name, response.xRateLimit ?? 0)
+  }
+  ```
+
+  A response that declares no headers carries its body alone, as before.
+
+  The client reads each header as the type that the API gives it. A list header may have whitespace
+  around its commas. A required header that is absent, or a value that does not parse, throws
+  `APIError.invalidResponse` with a `ResponseHeaderError`.
+
+- aa25e11: Refuse a response body that doesn't declare the media type that the operation expects.
+
+  A response that has no `Content-Type`, or another media type, now throws `APIError.invalidResponse`
+  with an `UnexpectedContentTypeError`, rather than a body that the client parsed by guessing. A
+  server that leaves out the header must now send it.
+
+### Minor Changes
+
+- 4b76e58: Keep the members of an object schema that describes no properties.
+
+  An object schema without properties permits any properties, but its struct had no stored properties, so decoding it discarded every member of the object. The struct now has an `additionalProperties` dictionary of `JSONValue` that holds them, and encodes them again.
+
+- 33d3d55: Give `File` a public initialiser and public properties, so that a caller can send a file in a
+  multipart request body:
+
+  ```swift
+  let file = File(data: data, filename: "photo.jpg")
+  ```
+
+- af6c756: Send requests through a replaceable `APITransport`.
+
+  `Configuration` and `OAuthConfiguration` have a new `transport` property. It defaults to
+  `URLSessionAPITransport.default`, which sends requests with a `URLSession` as before. Provide your
+  own transport to use a `URLSession` of your own, or to answer requests without a network, for
+  example from fixtures in tests:
+
+  ```swift
+  struct FixtureTransport: APITransport {
+      func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+          // Return a canned body and an HTTPURLResponse for the request.
+      }
+  }
+
+  let configuration = Configuration(transport: FixtureTransport())
+  ```
+
+### Patch Changes
+
+- 40073ff: Percent encode a "/" in a path parameter, so that the value stays inside its path segment.
+- c7243b7: Send an `Accept` header with the media types that the client parses from the operation's
+  responses, rather than the `*/*` that `URLSession` sends.
+- 1ac13b3: Write a null array or object parameter as an empty value, as a null scalar already is, so that a
+  server can tell it apart from an absent one. An object in the exploded `form` style or the
+  `deepObject` style names each of its properties, so a null one is still left out.
+- 99b790a: Require the releases of `generator-common` and `java-like-generator-helper` that ask for core 2.33.0.
+
+  Core 2.33.0 is the first release that models `additionalProperties: true` and `additionalProperties: {}` as a map of `JSONValue`, rather than a map of strings that cannot hold a nested value.
+
+- c8ea0ca: Write a null multipart part: a text part as an empty string, and a JSON part as `null`. A binary part
+  has no null form, so a null one is still left out.
+- 10d90ef: Read a null property in a response as `.null`, rather than as an absent property.
+
+  A nullable property is a `Nullable<T>?`, so `nil` means absent and `.null` means null. The client
+  decoded both as `nil`. Code that reads the property's `value` sees no change.
+
+- c12531c: Restate the inherited `@unchecked Sendable` conformance on the OAuth flow clients. This removes a
+  compiler warning in Swift 6.4 for each of `OAuthAuthorizationCodeFlowClient`,
+  `OAuthClientCredentialsFlowClient` and `OAuthPasswordFlowClient`.
+- 26feb1b: Write a UTC date-time with "Z", as RFC 3339 and the server do, rather than "+00:00".
+
+  A date-time that the client read as "Z" now goes back to the server as "Z". A "+00:00" in a query
+  or a form body also arrived as " 00:00", because the "+" stood for a space.
+
+- 2fb51ab: Write an array in the `pipeDelimited` or `spaceDelimited` style that explodes as one pair for each
+  element, as OpenAPI 3.1 defines it, rather than joining it.
+- af08cfc: Percent encode a query or a form value once, and encode every character that is not unreserved.
+
+  A joined value, such as an array in the `form` style or an object, was encoded twice, so `a b`
+  arrived as `a%20b`. A "+" in a query value was not encoded, so it arrived as a space. A header
+  value that held an array is no longer percent encoded.
+
 ## 3.0.1
 
 ### Patch Changes
