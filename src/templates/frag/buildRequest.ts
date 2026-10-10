@@ -68,7 +68,7 @@ if let localVarExistingQueryItems = localVarUrlComponents.queryItems {
 ${when(!pathOnly && parameterCount(operation.queryParams), () => ts`
 ${each(values(operation.queryParams), parameter => requestParameter(parameter, { dest: 'localVarQueryParameter', value: value(identifier(generator, parameter.name)), encoding: parameter.encoding }, ctx), '\n')}
 `)}
-localVarUrlComponents.queryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toURLQueryItems() : nil
+localVarUrlComponents.percentEncodedQueryItems = localVarQueryParameter.count > 0 ? localVarQueryParameter.toPercentEncodedURLQueryItems() : nil
 
 var localVarRequest = URLRequest(url: localVarUrlComponents.url!, cachePolicy: self.cachePolicy, timeoutInterval: self.timeoutInterval)
 localVarRequest.httpMethod = ${stringLiteral(ctx.generatorContext, operation.httpMethod)}

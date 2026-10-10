@@ -17,5 +17,11 @@ extension Foundation.CharacterSet {
         var set = Foundation.CharacterSet.alphanumerics
         return set
     }()
+
+    /// The characters that RFC 3986 calls unreserved, which a query or a form value carries without encoding.
+    ///
+    /// Use it to encode a value for a query or a form body. Every other character, such as a "+" that a
+    /// server reads as a space, or the separator of a joined value, is percent encoded.
+    static let urlUnreserved = Foundation.CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
 }`
 }

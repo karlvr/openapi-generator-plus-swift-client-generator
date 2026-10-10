@@ -47,9 +47,10 @@ public final class APIKeySecurityClient: SecurityClient, Swift.Sendable {
         case .query:
             let url = request.url!
             var components = URLComponents(string: url.absoluteString)
-            var queryItems = components?.queryItems ?? []
-            queryItems.append(URLQueryItem(name: paramName, value: apiKey))
-            components?.queryItems = queryItems
+            /* The query is already percent encoded, so the key joins it encoded, and the rest stays as it is */
+            var queryItems = components?.percentEncodedQueryItems ?? []
+            queryItems.append(NameValuePair(name: paramName, value: apiKey).toPercentEncodedURLQueryItem())
+            components?.percentEncodedQueryItems = queryItems
             request.url = components?.url
         case .cookie:
             let cookieProperties: [HTTPCookiePropertyKey: Any] = [

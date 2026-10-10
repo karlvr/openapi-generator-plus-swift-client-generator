@@ -6,7 +6,8 @@ import { indentLines } from './helpers'
 
 /**
  * An immediately-invoked closure that joins the properties of the object in
- * `value` into a single URL-encoded string.
+ * `value` into a single string. The string is not percent encoded, because the
+ * query, the form body or the header that it goes into encodes it once.
  *
  * The result is spliced into the middle of a line, so every line after the
  * first — including the empty line the result ends with — is indented by
@@ -35,9 +36,7 @@ ${each(properties, property => {
         values.append("${property.serializedName}${keyValueSeparator}" + ${schemaToString(property, 'value')})
     }`
 }, '\n')}
-    return values
-        .map { localVarObjectElement in localVarObjectElement.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!}
-        .joined(separator: ${stringLiteral(ctx.generatorContext, separator)})
+    return values.joined(separator: ${stringLiteral(ctx.generatorContext, separator)})
 }()
 `
 	return indentLines(result, indent)
