@@ -102,6 +102,19 @@ ${explodedObject(usage, options, property => `${usage.serializedName}[${property
 }
 
 /**
+ * Whether a null value of an array or an object parameter goes on the wire as an empty value.
+ *
+ * Text has no null, so an empty value stands for it. An object in a style that names each of its
+ * properties, rather than the parameter, has no place for the empty value, so it's left out.
+ */
+function writesNullAsEmpty(usage: NamedSchemaUsage, encoding: CodegenParameterEncoding | null | undefined): boolean {
+	if (!isObject(usage)) {
+		return true
+	}
+	return encoding?.style !== 'deepObject' && !(encoding?.style === 'form' && encoding.explode)
+}
+
+/**
  * The statements that add a parameter to a request: unwrapping optionality and
  * nullability first, then appending the value according to its encoding.
  */
@@ -115,6 +128,14 @@ if let value = ${options.value} { // required
 
 	const isCollection = isArray(usage) || isObject(usage)
 	if (isCollection && usage.nullable && !options.handledNullable) {
+		if (writesNullAsEmpty(usage, options.encoding)) {
+			return ts`
+if let value = ${options.value}.value { // nullable
+    ${requestParameter(usage, { ...options, value: 'value', handledNullable: true }, ctx)}
+} else {
+    ${options.dest}.append(NameValuePair(name: "${usage.serializedName}", value: ""))
+}`
+		}
 		return ts`
 if let value = ${options.value}.value { // nullable
     ${requestParameter(usage, { ...options, value: 'value', handledNullable: true }, ctx)}
