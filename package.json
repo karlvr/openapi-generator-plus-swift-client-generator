@@ -41,6 +41,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
     "@eslint/js": "^10.0.1",
+    "@openapi-generator-plus/client-conformance": "^0.1.0",
     "@openapi-generator-plus/testing": "^2.32.0",
     "@openapi-generator-plus/types": "^2.23.0",
     "@stylistic/eslint-plugin": "^5.10.0",
