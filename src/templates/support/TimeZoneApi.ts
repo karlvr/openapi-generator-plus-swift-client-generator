@@ -11,8 +11,12 @@ export function timeZoneApi(root: RootContext): string {
 import Foundation
 
 extension Foundation.TimeZone {
+    /// The offset of the time zone, as RFC 3339 writes it: "Z" for UTC, otherwise the sign, hours and minutes.
     var apiTimeZoneString: String {
         var seconds = secondsFromGMT()
+        if seconds == 0 {
+            return "Z"
+        }
         let prefix = seconds < 0 ? "-" : "+"
         seconds = abs(seconds)
         let hours = seconds / 3600
