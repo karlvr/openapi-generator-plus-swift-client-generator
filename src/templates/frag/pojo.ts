@@ -61,6 +61,10 @@ export function pojoContents(schema: CodegenObjectSchema, ctx: SwiftContext): st
 	const properties = values(schema.properties).filter(property => !narrowed.some(candidate => candidate.serializedName === property.serializedName))
 	const codingKeys = [...narrowed, ...properties]
 
+	if (!codingKeys.length && !schema.discriminator && !schema.implements?.length) {
+		return freeFormContents(schema, ctx)
+	}
+
 	return ts`
 ${schemaDocumentation(schema)}
 ${when(schema.deprecated, DEPRECATED_OBJECT)}
@@ -95,6 +99,37 @@ public func encode(to encoder: Swift.Encoder) throws {
     ${each(properties, property => encode(property, true), '\n')}
 }
 `)}
+    ${nestedSchemas(schema, ctx)}
+}`
+}
+
+/**
+ * The body of a Swift struct for an object schema that describes no properties.
+ *
+ * An object schema without properties permits any properties, so the struct keeps every member of
+ * the object, rather than discarding them all as a struct without stored properties would.
+ */
+function freeFormContents(schema: CodegenObjectSchema, ctx: SwiftContext): string {
+	return ts`
+${schemaDocumentation(schema)}
+${when(schema.deprecated, DEPRECATED_OBJECT)}
+public struct ${schema.name}: ${structConformances(schema)} {
+
+    /// The members of the object. The specification describes no properties for it, so it may hold any.
+    public var additionalProperties: [Swift.String: JSONValue]
+
+    public init(additionalProperties: [Swift.String: JSONValue] = [:]) {
+        self.additionalProperties = additionalProperties
+    }
+
+    public init(from decoder: Swift.Decoder) throws {
+        additionalProperties = try decoder.singleValueContainer().decode([Swift.String: JSONValue].self)
+    }
+
+    public func encode(to encoder: Swift.Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(additionalProperties)
+    }
     ${nestedSchemas(schema, ctx)}
 }`
 }
