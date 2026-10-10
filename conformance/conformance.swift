@@ -17,6 +17,7 @@ import TestModule
 let WHEN = OffsetDateTime("2020-01-02T03:04:05.678Z")!
 let DAY = LocalDate("2020-01-02")!
 let PATH_SEGMENT = "a b/c?d#e&f+g%h:i@j"
+let QUERY_VALUE = "a b+c&d=e%f#g"
 let TEXT_BODY = "plain \"text\" body"
 let BINARY_BODY = "binary content"
 let API_KEY_HEADER = "header-key"
@@ -182,6 +183,9 @@ await harness.call { try await query.queryCookies(sessionId: "abc", theme: "dark
 
 await harness.startCase("query-required-values")
 await harness.call { try await query.queryRequired(needed: "needed value", xNeeded: "needed header") }
+
+await harness.startCase("query-reserved-value")
+await harness.call { try await query.queryScalars(str: QUERY_VALUE) }
 
 await harness.startCase("query-path-segment")
 await harness.call { try await query.queryPathSegment(value: PATH_SEGMENT) }
