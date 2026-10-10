@@ -11,7 +11,7 @@ export function oauthAuthorizationCodeFlowClient(root: RootContext): string {
 import Foundation
 
 /// A client for the OAuth 2.0 Authorization Code Flow
-public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
+public final class OAuthAuthorizationCodeFlowClient: AbstractOAuthFlowClient, @unchecked Swift.Sendable {
     
     private let tokenURL: URL
     private let authorizationURL: URL

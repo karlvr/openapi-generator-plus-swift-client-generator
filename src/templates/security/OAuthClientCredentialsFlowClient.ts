@@ -11,7 +11,7 @@ export function oauthClientCredentialsFlowClient(root: RootContext): string {
 import Foundation
 
 /// A client for the OAuth 2.0 Client Credentials Flow
-public final class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient, Swift.Sendable {
+public final class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient, @unchecked Swift.Sendable {
     
     private let authenticator: Authenticator
     
