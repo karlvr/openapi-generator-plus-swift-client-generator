@@ -79,7 +79,7 @@ public final class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient, Sw
                 let request = createOAuthRequest(url: tokenURL, params: form)
                 
                 let requestDate = Date()
-                let result = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
+                let result = try await configuration.transport.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
                 switch result.response.statusCode {
                 case 200:
                     var resultData = try JSONDecoder().decode(OAuthAccessToken.self, from: result.data)

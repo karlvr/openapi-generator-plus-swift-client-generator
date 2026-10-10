@@ -67,3 +67,30 @@ parameters are its path parameters gets just the one method, as the two would be
 `APIRequest` also offers `finalizedURLRequest()`, which returns the `URLRequest` with its security
 requirements satisfied and the configuration's `finalizeRequestBlock` applied — the request exactly
 as it will be sent.
+
+## Custom transport
+
+The client sends every request through an `APITransport`, after it has authorized and finalized
+the request. Retries, 401 recovery and response parsing work the same with any transport.
+
+The default, `URLSessionAPITransport.default`, sends requests with a `URLSession` that uses the
+default configuration. To use a session of your own, for example to control caching or to register
+`URLProtocol` classes, wrap it in a `URLSessionAPITransport`:
+
+```swift
+let session = URLSession(configuration: .ephemeral)
+let configuration = Configuration(transport: URLSessionAPITransport(session: session))
+```
+
+To answer requests without a network, for example from fixtures in tests, implement
+`APITransport` yourself:
+
+```swift
+struct FixtureTransport: APITransport {
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        // Return a canned body and an HTTPURLResponse for the request.
+    }
+}
+```
+
+`OAuthConfiguration` has a `transport` too, for the requests that the OAuth flows make.

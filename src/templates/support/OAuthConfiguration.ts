@@ -13,6 +13,7 @@ import Foundation
 public struct OAuthConfiguration: Swift.Sendable {
     var preemptiveAccessTokenRefresh: TimeInterval?
     var retryConfiguration: RetryConfiguration?
+    var transport: APITransport
     var loggingEnabled: Bool
     var accessTokenDidChange: AccessTokenHandler?
     
@@ -20,11 +21,13 @@ public struct OAuthConfiguration: Swift.Sendable {
     /// - Parameters:
     ///   - preemptiveAccessTokenRefresh: Optional time interval defining how many seconds before expiration should an automatic refresh be attempted. By default no refresh is attempted until the API rejects the token.
     ///   - retryConfiguration: A configuration for retrying requests
+    ///   - transport: Sends the token requests. Defaults to \`URLSessionAPITransport.default\`.
     ///   - loggingEnabled: A flag to enable or disable logging
     ///   - accessTokenDidChange: A closure to be executed when the access token changes. Defaults to \`nil\`.
-    public init(preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, loggingEnabled: Bool = false, accessTokenDidChangeHandler accessTokenDidChange: AccessTokenHandler? = nil) {
+    public init(preemptiveAccessTokenRefresh: TimeInterval? = nil, retryConfiguration: RetryConfiguration? = nil, transport: APITransport = URLSessionAPITransport.default, loggingEnabled: Bool = false, accessTokenDidChangeHandler accessTokenDidChange: AccessTokenHandler? = nil) {
         self.preemptiveAccessTokenRefresh = preemptiveAccessTokenRefresh
         self.retryConfiguration = retryConfiguration
+        self.transport = transport
         self.accessTokenDidChange = accessTokenDidChange
         self.loggingEnabled = loggingEnabled
     }

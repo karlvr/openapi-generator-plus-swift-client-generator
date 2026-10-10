@@ -152,7 +152,7 @@ public struct APIRequest<Result: Swift.Sendable>: Swift.Sendable {
         let request = try await finalizedURLRequest()
         ${log({ level: 'debug', msg: 'Requesting \\(request)' })}
 
-        let response = try await URLSession.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
+        let response = try await configuration.transport.handleApiRequest(request, retryConfiguration: configuration.retryConfiguration)
 
         /* A 401 is only ours to recover from if the operation has security requirements; otherwise it's
            just another response, and it's for the operation's own response handling to deal with. */

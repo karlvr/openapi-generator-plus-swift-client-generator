@@ -30,6 +30,9 @@ public struct Configuration: Swift.Sendable {
     public var finalizeRequestBlock: ConfigurationFinalizeRequestBlock?
 
     public var retryConfiguration: RetryConfiguration?
+
+    /// Sends the requests. Defaults to \`URLSessionAPITransport.default\`.
+    public var transport: APITransport
     
     /// A block that is called whenever an APIError is thrown. 
     /// This can be used to log errors, or to trigger a global reauthentication flow on authentication errors.
@@ -45,6 +48,7 @@ public struct Configuration: Swift.Sendable {
         securityClient: SecurityClient? = nil,
         onError: OnErrorBlock? = nil,
         loggingEnabled: Bool = false,
+        transport: APITransport = URLSessionAPITransport.default,
         finalizeRequestBlock: ConfigurationFinalizeRequestBlock? = nil
     ) {
         self.basePath = basePath
@@ -54,6 +58,7 @@ public struct Configuration: Swift.Sendable {
         self.securityClient = securityClient
         self.onError = onError
         self.loggingEnabled = loggingEnabled
+        self.transport = transport
         self.finalizeRequestBlock = finalizeRequestBlock
     }
 }

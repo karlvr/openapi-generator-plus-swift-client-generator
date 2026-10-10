@@ -4,6 +4,7 @@ import { SwiftContext } from './types'
 import { apiError } from './support/APIError'
 import { apiRequest } from './support/APIRequest'
 import { apiResponse } from './support/APIResponse'
+import { apiTransport } from './support/APITransport'
 import { characterSetApi } from './support/CharacterSetApi'
 import { configuration } from './support/Configuration'
 import { dispatchQueueApi } from './support/DispatchQueueApi'
@@ -22,7 +23,6 @@ import { optionalApi } from './support/OptionalApi'
 import { retryConfiguration } from './support/RetryConfiguration'
 import { stringApi } from './support/StringApi'
 import { timeZoneApi } from './support/TimeZoneApi'
-import { urlSessionApi } from './support/URLSessionApi'
 
 import { abstractOAuthFlowClient } from './security/AbstractOAuthFlowClient'
 import { apiKeySecurityClient } from './security/APIKeySecurityClient'
@@ -53,6 +53,7 @@ export const supportTemplates: Record<string, (ctx: SwiftContext) => string> = {
 	'APIError.swift': ctx => apiError(ctx.root),
 	'APIRequest.swift': ctx => apiRequest(ctx.root),
 	'APIResponse.swift': ctx => apiResponse(ctx.root),
+	'APITransport.swift': ctx => apiTransport(ctx.root),
 	'CharacterSet+Api.swift': ctx => characterSetApi(ctx.root),
 	'Configuration.swift': ctx => configuration(ctx.root),
 	'DispatchQueue+Api.swift': ctx => dispatchQueueApi(ctx.root),
@@ -71,7 +72,6 @@ export const supportTemplates: Record<string, (ctx: SwiftContext) => string> = {
 	'RetryConfiguration.swift': ctx => retryConfiguration(ctx.root),
 	'String+Api.swift': ctx => stringApi(ctx.root),
 	'TimeZone+Api.swift': ctx => timeZoneApi(ctx.root),
-	'URLSession+Api.swift': ctx => urlSessionApi(ctx.root),
 }
 
 /** The security source files, keyed by the file name they're written to. */
