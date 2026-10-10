@@ -25,20 +25,29 @@ if let value = ${options.propertyVar} { // required
     ${multipartProperty(encoding, { ...options, propertyVar: 'value', handledRequired: true }, ctx)}
 }`
 	}
-	if (schemaUsage.nullable && !options.handledNullable) {
-		return ts`
-if let value = ${options.propertyVar}.value { // nullable
-    ${multipartProperty(encoding, { ...options, propertyVar: 'value', handledNullable: true }, ctx)}
-}`
-	}
-
 	/* The value is either the property itself, or a value property inside a container object. */
 	const valueProperty = encoding.valueProperty
 	const valueSchema = valueProperty ? valueProperty.schema : schemaUsage
-	const value = valueProperty ? `${options.propertyVar}.${identifier(ctx.generatorContext.generator(), valueProperty.name)}` : options.propertyVar
 
 	const name = stringLiteral(ctx.generatorContext, encoding.property.serializedName)
 	const contentType = stringLiteral(ctx.generatorContext, encoding.contentType)
+
+	if (schemaUsage.nullable && !options.handledNullable) {
+		/* A binary part has no null form, so a null one is left out. JSON has a null, and text has an empty string. */
+		const binary = isFile(valueSchema) || encoding.contentType === 'application/octet-stream'
+		const nullPart = encoding.contentType === 'application/json' ? '"null"' : '""'
+		return binary ? ts`
+if let value = ${options.propertyVar}.value { // nullable
+    ${multipartProperty(encoding, { ...options, propertyVar: 'value', handledNullable: true }, ctx)}
+}` : ts`
+if let value = ${options.propertyVar}.value { // nullable
+    ${multipartProperty(encoding, { ...options, propertyVar: 'value', handledNullable: true }, ctx)}
+} else {
+    ${options.bodyPartsVar}.append(${name}, ${nullPart}, ${contentType})
+}`
+	}
+
+	const value = valueProperty ? `${options.propertyVar}.${identifier(ctx.generatorContext.generator(), valueProperty.name)}` : options.propertyVar
 
 	if (isFile(valueSchema)) {
 		return `${options.bodyPartsVar}.append(${name}, ${value}, ${contentType})`
