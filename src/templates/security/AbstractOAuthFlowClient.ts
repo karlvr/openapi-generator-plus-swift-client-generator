@@ -39,6 +39,25 @@ public class AbstractOAuthFlowClient: SecurityClient, @unchecked Swift.Sendable 
         self.tokenManager = OAuthAccessTokenManager(clientId: clientId, clientSecret: clientSecret, token: token, refreshTokenURL: refreshURL, configuration: configuration)
     }
     
+    /// Refresh the access token now, using the refresh token.
+    public func refresh() async throws {
+        try await tokenManager.refreshToken()
+    }
+
+    /// The access token, refreshing it first if it is missing or has expired.
+    ///
+    /// Use this to authorize a request that doesn't go through the generated APIs.
+    public func validAccessToken() async throws -> String {
+        try await tokenManager.validAccessToken()
+    }
+
+    /// Discard the tokens without contacting the server, for example when the user signs out. The configuration's \`accessTokenDidChange\` handler is called with \`nil\`.
+    ///
+    /// To also invalidate the tokens on the server, call \`revokeRefreshToken()\` and \`revokeAccessToken()\` first.
+    public func signOut() async {
+        try? await tokenManager.setAccessToken(nil)
+    }
+
     /// Authenticate the security client using a refresh token.
     public func authenticate(refreshToken: String) async throws {
         try await tokenManager.setAccessToken(OAuthAccessToken(refreshToken: refreshToken))
