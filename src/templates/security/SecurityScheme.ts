@@ -10,7 +10,8 @@ import { SwiftContext } from '../types'
  */
 function flowExtension(scheme: CodegenSecurityScheme, flow: CodegenOAuthFlow, tokenUrl: string, ctx: SwiftContext): string {
 	const name = identifier(ctx.generatorContext.generator(), scheme.name)
-	const token = flow.refreshUrl ? `, token: token, refreshURL: URL(string: "${flow.refreshUrl}")` : ''
+	/* Pass the token whether or not the API names a refresh URL */
+	const token = `, token: token${flow.refreshUrl ? `, refreshURL: URL(string: "${flow.refreshUrl}")` : ''}`
 
 	switch (flow.type) {
 		case 'password':
