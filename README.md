@@ -94,3 +94,51 @@ struct FixtureTransport: APITransport {
 ```
 
 `OAuthConfiguration` has a `transport` too, for the requests that the OAuth flows make.
+
+## OAuth authorization code flow
+
+`OAuthAuthorizationCodeFlowClient` signs a user in with the OAuth 2.0 authorization code flow, using
+PKCE and `state`. When the API declares an `authorizationCode` flow, `SecurityScheme.swift` has a
+factory that fills in its endpoints, such as `OAuthAuthorizationCodeFlowClient.oauthClient(...)` for a
+scheme named `oauth`.
+
+```swift
+let client = OAuthAuthorizationCodeFlowClient(
+    clientId: "my-app",
+    token: storedToken,                       // restore the session, if there is one
+    tokenURL: URL(string: "https://auth.example.com/token")!,
+    authorizationURL: URL(string: "https://auth.example.com/authorize")!,
+    redirectURI: URL(string: "myapp://oauth/callback")!,
+    configuration: OAuthConfiguration(
+        preemptiveAccessTokenRefresh: 60,
+        accessTokenDidChangeHandler: { token in
+            // Persist the token, which is Codable, or delete it when it's nil
+        }
+    )
+)
+```
+
+Where AuthenticationServices is available, `authorize` presents the authorization page in an
+`ASWebAuthenticationSession` and redeems the redirect:
+
+```swift
+try await client.authorize(scopes: ["openid", "offline_access"], presentationAnchor: window)
+```
+
+Otherwise, start an authorization, open its URL however suits, and hand back the redirect:
+
+```swift
+let request = await client.startAuthorization(scopes: ["openid", "offline_access"])
+// Open request.url in a browser, then when the redirect arrives:
+if client.isRedirect(url) {
+    try await client.authenticate(redirectURL: url)
+}
+```
+
+To keep the request somewhere that survives the app being terminated, make it with
+`authorizationRequest(scopes:)`, persist it (it's `Codable`), and redeem it with
+`authenticate(redirectURL:request:)`.
+
+A public client, such as a mobile app, has no client secret, and an empty secret isn't sent. Set
+`issuer` to require the `iss` parameter of RFC 9207 in each redirect. The client refreshes at the
+token endpoint unless you give it a `refreshURL`. Call `signOut()` to discard the tokens.
