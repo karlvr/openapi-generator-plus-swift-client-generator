@@ -54,7 +54,7 @@ public class AbstractOAuthFlowClient: SecurityClient, @unchecked Swift.Sendable 
     /// Discard the tokens without contacting the server, for example when the user signs out. The configuration's \`accessTokenDidChange\` handler is called with \`nil\`.
     ///
     /// To also invalidate the tokens on the server, call \`revokeRefreshToken()\` and \`revokeAccessToken()\` first.
-    public func signOut() async {
+    public func clearAccessToken() async {
         try? await tokenManager.setAccessToken(nil)
     }
 

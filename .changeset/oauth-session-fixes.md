@@ -11,6 +11,6 @@ Keep an OAuth session alive across refreshes and relaunches
 - An empty client secret isn't sent when refreshing or revoking.
 - `OAuthAccessToken` is `Codable`, encodes when it was issued, carries the OpenID Connect `idToken`,
   and reads an `expires_in` sent as a string.
-- The flow clients have `refresh()`, `validAccessToken()` and `signOut()`.
+- The flow clients have `refresh()`, `validAccessToken()` and `clearAccessToken()`.
 - The `SecurityScheme` factories pass the `token` that they're given when the API doesn't declare a
   refresh URL. They dropped it before.

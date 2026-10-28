@@ -141,4 +141,4 @@ To keep the request somewhere that survives the app being terminated, make it wi
 
 A public client, such as a mobile app, has no client secret, and an empty secret isn't sent. Set
 `issuer` to require the `iss` parameter of RFC 9207 in each redirect. The client refreshes at the
-token endpoint unless you give it a `refreshURL`. Call `signOut()` to discard the tokens.
+token endpoint unless you give it a `refreshURL`. Call `clearAccessToken()` to discard the tokens.
