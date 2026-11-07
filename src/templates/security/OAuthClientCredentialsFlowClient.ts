@@ -40,6 +40,11 @@ public final class OAuthClientCredentialsFlowClient: AbstractOAuthFlowClient, @u
     }
     
     public override func reauthenticate(failedRequest: URLRequest, securityScheme: SecurityScheme, scopes: [String]?) async throws {
+        // Client credentials tokens usually come without a refresh token, so get a new one.
+        guard await refreshToken != nil else {
+            try await authenticate(scopes: scopes)
+            return
+        }
         do {
             try await super.reauthenticate(failedRequest: failedRequest, securityScheme: securityScheme, scopes: scopes)
         } catch {
