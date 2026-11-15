@@ -81,7 +81,12 @@ actor OAuthAccessTokenManager {
 
         preemptiveRefreshTask = Task { [weak self] in
             do {
-                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                /* Use the continuous clock where we can, as the uptime clock used by Task.sleep(nanoseconds:) pauses while the device sleeps */
+                if #available(iOS 16, macOS 13, tvOS 16, watchOS 9, *) {
+                    try await Task.sleep(until: .now + .seconds(delay), clock: .continuous)
+                } else {
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                }
             } catch {
                 return /* Cancelled, as the token has changed */
             }
