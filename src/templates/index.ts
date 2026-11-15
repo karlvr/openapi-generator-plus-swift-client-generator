@@ -30,6 +30,7 @@ import { basicAuthenticationSecurityClient } from './security/BasicAuthenticatio
 import { oauthAccessToken } from './security/OAuthAccessToken'
 import { oauthAccessTokenManager } from './security/OAuthAccessTokenManager'
 import { oauthAuthorizationCodeFlowClient } from './security/OAuthAuthorizationCodeFlowClient'
+import { oauthAuthorizationCodeFlowClientAuthenticationServices } from './security/OAuthAuthorizationCodeFlowClientAuthenticationServices'
 import { oauthClientCredentialsFlowClient } from './security/OAuthClientCredentialsFlowClient'
 import { oauthPasswordFlowClient } from './security/OAuthPasswordFlowClient'
 import { securityClient } from './security/SecurityClient'
@@ -82,6 +83,7 @@ export const securityTemplates: Record<string, (ctx: SwiftContext, securitySchem
 	'OAuthAccessToken.swift': ctx => oauthAccessToken(ctx.root),
 	'OAuthAccessTokenManager.swift': ctx => oauthAccessTokenManager(ctx.root),
 	'OAuthAuthorizationCodeFlowClient.swift': ctx => oauthAuthorizationCodeFlowClient(ctx.root),
+	'OAuthAuthorizationCodeFlowClient+AuthenticationServices.swift': ctx => oauthAuthorizationCodeFlowClientAuthenticationServices(ctx.root),
 	'OAuthClientCredentialsFlowClient.swift': ctx => oauthClientCredentialsFlowClient(ctx.root),
 	'OAuthPasswordFlowClient.swift': ctx => oauthPasswordFlowClient(ctx.root),
 	'SecurityClient.swift': ctx => securityClient(ctx.root),

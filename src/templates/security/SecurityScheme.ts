@@ -10,7 +10,8 @@ import { SwiftContext } from '../types'
  */
 function flowExtension(scheme: CodegenSecurityScheme, flow: CodegenOAuthFlow, tokenUrl: string, ctx: SwiftContext): string {
 	const name = identifier(ctx.generatorContext.generator(), scheme.name)
-	const token = flow.refreshUrl ? `, token: token, refreshURL: URL(string: "${flow.refreshUrl}")` : ''
+	/* Pass the token whether or not the API names a refresh URL */
+	const token = `, token: token${flow.refreshUrl ? `, refreshURL: URL(string: "${flow.refreshUrl}")` : ''}`
 
 	switch (flow.type) {
 		case 'password':
@@ -54,13 +55,15 @@ extension OAuthAuthorizationCodeFlowClient {
     /// Create an instance of \`OAuthAuthorizationCodeFlowClient\` with provided authentication credentials, using endpoint URLs from the API specification.
     /// - Parameters:
     ///   - clientId: The client ID associated with the API.
-    ///   - clientSecret: The client secret associated with the API.
-    ///   - token: An optional \`OAuthAccessToken\` to initialize the client with.
+    ///   - clientSecret: The client secret associated with the API. A public client, such as a mobile app, doesn't have one.
+    ///   - token: An optional \`OAuthAccessToken\` to initialize the client with, such as one restored from storage.
+    ///   - redirectURI: The URI that the authorization server redirects to with the authorization code, as registered with it.
     ///   - revocationURL: An optional URL for revoking the access token. If not provided, the client will not be able to revoke tokens.
+    ///   - issuer: The authorization server's issuer identifier, to check the \`iss\` parameter of a redirect against.
     ///   - configuration: An optional \`OAuthConfiguration\` to customize the client's behavior. Defaults to a new instance of \`OAuthConfiguration\`.
     /// - Returns: An instance of \`OAuthAuthorizationCodeFlowClient\` initialized with the provided parameters.
-    public static func ${name}Client(clientId: String, clientSecret: String, token: OAuthAccessToken?, revocationURL: URL? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthAuthorizationCodeFlowClient {
-        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret${token}, revocationURL: revocationURL, tokenURL: URL(string: "${tokenUrl}")!, authorizationURL: URL(string: "${authorizationUrl}")!, configuration: configuration)
+    public static func ${name}Client(clientId: String, clientSecret: String = "", token: OAuthAccessToken? = nil, redirectURI: URL, revocationURL: URL? = nil, issuer: String? = nil, configuration: OAuthConfiguration = OAuthConfiguration()) -> OAuthAuthorizationCodeFlowClient {
+        OAuthAuthorizationCodeFlowClient(clientId: clientId, clientSecret: clientSecret${token}, revocationURL: revocationURL, tokenURL: URL(string: "${tokenUrl}")!, authorizationURL: URL(string: "${authorizationUrl}")!, redirectURI: redirectURI, issuer: issuer, configuration: configuration)
     }
 }
 `

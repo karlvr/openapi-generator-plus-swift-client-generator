@@ -72,7 +72,7 @@ const RESERVED_WORDS = [
 	'RetryConfiguration', 'Configuration',
 	'SecurityClient', 'SecurityClientController', 'SecurityScheme', 'OAuthPasswordFlowClient', 'OAuthClientCredentialsFlowClient', 'OAuthAuthorizationCodeFlowClient', 
 	'OAuthAccessTokenManager', 'AccessTokenHandler', 'OAuthAccessToken', 'BasicAuthenticationSecurityClient', 'APIKeySecurityClient', 'AbstractOAuthFlowClient',
-	'OAuthConfiguration',
+	'OAuthConfiguration', 'OAuthAuthorizationRequest', 'OAuthAuthorizationCodeFlowError',
 ]
 
 export function options(config: CodegenConfig, context: SwiftGeneratorContext): CodegenOptionsSwift {
